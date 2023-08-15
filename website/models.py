@@ -16,6 +16,7 @@ class Employee(models.Model):
     email = models.EmailField()
     password = models.CharField(max_length=50)
     address = models.CharField(max_length=50)
+    supervisor = models.BooleanField()
 
 class Agent(models.Model):
     agent_id = models.ForeignKey(Employee, on_delete = models.CASCADE, to_field= 'employee_id', primary_key = True)
