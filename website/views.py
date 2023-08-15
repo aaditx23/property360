@@ -106,7 +106,7 @@ def about(request):
     global loggedin
     loggedin = False
     global userdata
-    userdata = ""
+    userdata = None
     return render(request, 'about.html')
 
 def property(request):
