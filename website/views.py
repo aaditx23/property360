@@ -120,3 +120,7 @@ def property(request):
 
 def something():
     pass
+
+
+def test():
+    pass
