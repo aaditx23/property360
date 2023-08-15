@@ -137,3 +137,8 @@ class Dependent(models.Model):
     
     name = models.CharField(max_length=50)
     relation = models.CharField(max_length=50)
+
+class Session(models.Model):
+    user = models.CharField(max_length = 12, primary_key=True)
+    login = models.CharField(max_length = 5)
+
