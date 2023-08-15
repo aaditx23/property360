@@ -117,3 +117,6 @@ def property(request):
         property_data = tuple(cursor.fetchall())
     print(property_data)
     return render(request, 'property.html', {'data': property_data})
+
+def something():
+    pass
