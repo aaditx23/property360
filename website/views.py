@@ -111,21 +111,10 @@ def about(request):
 
 def property(request):
     property_retrieve = "select property_id, name, location, price from website_property"
-    property_data =  (
-        ('prop_0001', 'Mondstadt', 'Windy Range', '20000'),
-    ('prop_0002', 'Liyue', 'Qingce Village', '30000'),
-    ('prop_0003', 'Inazuma', 'Thunder Shrine', '15000'),
-    ('prop_0004', 'Snezhnaya', 'Snowy Peak', '25000'),
-    ('prop_0005', 'Fontaine', 'Harbour View', '18000'),
-    ('prop_0006', 'Natlan', 'Desert Oasis', '22000'),
-    ('prop_0007', 'Sumeru', 'Ancient Temple', '28000'),
-    ('prop_0008', 'Khaenriah', 'Ruined Castle', '17000'),
-    ('prop_0009', 'Fontaine', 'Riverside Retreat', '32000'),
-    ('prop_0010', 'Liyue', 'Cuijue Slope', '21000')
-    )
-    # with connection.cursor() as cursor:
-    #     cursor.execute(property_retrieve)
-    #     property_data = tuple(cursor.fetchall())
+    property_data =  None
+    with connection.cursor() as cursor:
+        cursor.execute(property_retrieve)
+        property_data = tuple(cursor.fetchall())
     print(property_data)
     return render(request, 'property.html', {'data': property_data})
 
