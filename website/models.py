@@ -9,8 +9,7 @@ class User(models.Model):
 
 
 class Employee(models.Model):
-    employee_id = models.CharField(max_length=9, primary_key=True)
-
+    employee_id = models.CharField(max_length=10, primary_key=True)
     name = models.CharField(max_length=50)
     phone = models.CharField(max_length=50)
     email = models.EmailField()
@@ -21,7 +20,7 @@ class Employee(models.Model):
 class Agent(models.Model):
     agent_id = models.ForeignKey(Employee, on_delete = models.CASCADE, to_field= 'employee_id', primary_key = True)
 
-    supervisor_id = models.ForeignKey('self', on_delete=models.CASCADE, to_field='agent_id') 
+    supervisor_id = models.CharField(max_length=50)
 
 
 
