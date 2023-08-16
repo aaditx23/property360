@@ -89,8 +89,12 @@ def user(request):
                 uid = createAgent((entries+1))
             setLogin(uid)
             cursor.execute(insert, (uid, name, email, psswd, addrss))
-    data.update({'user_id': sessionInfo()[0]})
-    return render(request, 'user.html', data)
+        data.update({'user_id': sessionInfo()[0]})
+        return render(request, 'user.html', data)
+    if sessionInfo()[1]=="True":
+        return render(request, 'user.html', sessionInfo()[1])
+    else:
+        return render(request, 'user.html')
 
 def home(request, args=None):
     user = None
