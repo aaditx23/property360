@@ -51,7 +51,7 @@ def logout(request):
 
 def user(request):
     usertype = "user"
-    if request.method=="POST":
+    if request.method=="POST":                  #if signup form filled
         name = request.POST['name']
         email = request.POST['email']
         password1 = request.POST['pswd1']
@@ -91,10 +91,12 @@ def user(request):
             cursor.execute(insert, (uid, name, email, psswd, addrss))
         data.update({'user_id': sessionInfo()[0]})
         return render(request, 'user.html', data)
-    if sessionInfo()[1]=="True":
-        return render(request, 'user.html', sessionInfo()[1])
     else:
-        return render(request, 'user.html')
+        if sessionInfo()[1]=="True":                        #if signup form not filled, but user logged in
+            #retrieve data from database here and pass through dictionary
+            return render(request, 'user.html', {'user_id':sessionInfo()[0]})
+        else:                                               #if signup for not filled, also user not logged in
+            return render(request, 'user.html')
 
 def home(request, args=None):
     user = None
