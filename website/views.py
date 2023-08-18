@@ -130,8 +130,16 @@ def home(request, args=None):
 
 def agents(request):
     info = sessionInfo()
+    login_info=info[1]
+    agent_retrieve="select agent_id_id, supervisor_id from website_agent"
+    agent_data=None
+    with connection.cursor() as cursor:
+        cursor.execute(agent_retrieve)
+        agent_data = tuple(cursor.fetchall())
+    print(agent_data)
+    #return render(request, 'agents.html', {'data': agent_data})
     if info[1]=="True":
-        return render(request, 'agents.html',{'user_id':info[0]})
+        return render(request, 'agents.html',{'user_id':info[0],'data': agent_data})
     else:
         return render(request, 'agents.html')
 
