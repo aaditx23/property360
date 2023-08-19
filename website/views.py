@@ -94,7 +94,13 @@ def user(request):
     else:
         if sessionInfo()[1]=="True":                        #if signup form not filled, but user logged in
             #retrieve data from database here and pass through dictionary
-            return render(request, 'user.html', {'user_id':sessionInfo()[0]})
+            getdata = 'select * from website_user where user_id=%s'
+            data = None
+            with connection.cursor() as cursor:
+                cursor.execute(getdata,[sessionInfo()[0]])
+                data = tuple(cursor.fetchall())
+            img = data[0][-1]
+            return render(request, 'user.html', {'user_id':sessionInfo()[0], 'saved_image':img})
         else:                                               #if signup for not filled, also user not logged in
             return render(request, 'user.html')
 
@@ -161,3 +167,20 @@ def property(request):
         property_data = tuple(cursor.fetchall())
     print(property_data)
     return render(request, 'property.html', {'data': property_data})
+
+def property_img(request):
+    info = sessionInfo()
+    login_info = info[1]
+    if request.method=='POST':
+        image = request.FILES['property_img']
+        print(image," image")
+        with open('media/' + image.name, 'wb') as f:
+            for chunk in image.chunks():
+                f.write(chunk)
+        insert = 'update website_user set property_img=%s where user_id=%s'
+        with connection.cursor() as cursor:
+            cursor.execute(insert, (image.name,info[0]))
+    if info[1]=="True":
+        return render(request, 'user.html',{'user_id': info[0],'saved_image':image.name})
+    else:
+        return render(request, 'user.html')

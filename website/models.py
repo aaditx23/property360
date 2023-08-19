@@ -6,6 +6,7 @@ class User(models.Model):
     email = models.CharField(max_length=50)
     password = models.CharField(max_length=50)
     address = models.CharField(max_length=50)
+    property_img = models.CharField(max_length=50)
 
 
 class Employee(models.Model):

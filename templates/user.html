@@ -7,6 +7,23 @@
     <b>User Name:</b> {{user_name}} <br>
     <b>Email:</b> {{user_email}} <br>
     <b>Address</b> {{user_address}} <br>
+    <b>Inster Image</b> <br>
 </p>
+<div class="card" style="width: 18rem;">
+    <img src="/media/{{saved_image}}" class="card-img-top" alt="...">
+      <h5 class="card-title">Your property</h5>
+</div>
+    <form action='/property_img'  method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <div class="mb-3">
+            {% comment %} <label for="property_img" class="form-label">Upload Property Image</label> {% endcomment %}
+            <div class="col-sm-3">
+                <input type="file" class="form-control" id="property_img" name="property_img">
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+      
 
 {% endblock %}
