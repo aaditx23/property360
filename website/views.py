@@ -98,20 +98,16 @@ def user(request):
         if info[1]=="True":                        #if signup form not filled, but user logged in
             #retrieve data from database here and pass through dictionary
             getdata = 'select * from website_user where user_id=%s'
-            getimg = 'select property_img from website_property where user_id_id=%s'
             temp = None
-            tempimg=None
             with connection.cursor() as cursor:
                 cursor.execute(getdata,[info[0]])
                 temp = tuple(cursor.fetchall())[0]
-                cursor.execute(getimg,[info[0]])
-                tempimg=cursor.fetchall()[0][0]
             data ={
                 'user_id':info[0],
                 'username':temp[1],
                 'email':temp[2],
                 'address':temp[4],
-                'saved_image':tempimg
+                'saved_image':temp[5]
             }
             return render(request, 'user.html', data)
         else:                                               #if signup for not filled, also user not logged in
@@ -173,7 +169,7 @@ def about(request):
 def property(request):
     info = sessionInfo()
     login_info = info[1]
-    property_retrieve = "select property_id, name, location, price, property_img from website_property"
+    property_retrieve = "select property_id, name, location, price from website_property"
     property_data =  None
     with connection.cursor() as cursor:
         cursor.execute(property_retrieve)
@@ -190,7 +186,7 @@ def property_img(request):
         with open('media/' + image.name, 'wb') as f:
             for chunk in image.chunks():
                 f.write(chunk)
-        insert = 'update website_property set property_img=%s where user_id=%s'
+        insert = 'update website_user set property_img=%s where user_id=%s'
         with connection.cursor() as cursor:
             cursor.execute(insert, (image.name,info[0]))
     if info[1]=="True":
@@ -199,16 +195,18 @@ def property_img(request):
     else:
         return redirect('user')
 
-    
-def support(request):
-    info = sessionInfo()
-    login_info = info[1]
-    support_retrieve = "select name, type, phone, hiring_price from website_support s, website_employee e where e.employee_id = s.support_id"
-    support_data =  None
-    with connection.cursor() as cursor:
-        cursor.execute(support_retrieve)
-        support_data = tuple(cursor.fetchall())
-    if info[1]=="True":
-        return render(request, 'support.html', {'data': support_data,'user_id':info[0]})
-    else:
-        return render(request, 'support.html', {'data': support_data})
+
+
+# --------------------
+# use this template when you need to implement different views for different types of users
+# --------------------
+# usertype = "user"
+# info = sessionInfo()
+# if request.method=="POST":
+#     if '@property360.agent.com' in email:
+#         usertype = "agent"
+#     elif '@property360.support.com' in email:
+#         usertype = "support"
+
+    # return redirect
+    # render render(request, 'website_name.html')
