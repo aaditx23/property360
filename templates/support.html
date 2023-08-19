@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+<div>
+    <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">NAME</th>
+            <th scope="col">JOB</th>
+            <th scope="col">CONTACT</th>
+            <th scope="col">HOURLY PRICE</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in data %}
+          <tr>
+            <th scope="row"></th>
+            <td>{{item.1}}</td>
+            <td>{{item.2}}</td>
+            <td>{{item.3}}</td>
+            <td>{{item.4}}</td>
+          </tr>
+          {% endfor %}
+          
+        </tbody>
+      </table>
+</div>
+
+
+  {% endblock %}
