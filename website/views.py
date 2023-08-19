@@ -195,7 +195,6 @@ def property_img(request):
     else:
         return redirect('user')
 
-        return render(request, 'property.html', {'data': property_data})
     
 def support(request):
     info = sessionInfo()
