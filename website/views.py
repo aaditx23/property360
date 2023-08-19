@@ -156,3 +156,16 @@ def property(request):
         return render(request, 'property.html', {'data': property_data,'user_id':info[0]})
     else:
         return render(request, 'property.html', {'data': property_data})
+    
+def support(request):
+    info = sessionInfo()
+    login_info = info[1]
+    support_retrieve = "select name, type, phone, hiring_price from website_support s, website_employee e where e.employee_id = s.support_id"
+    support_data =  None
+    with connection.cursor() as cursor:
+        cursor.execute(support_retrieve)
+        support_data = tuple(cursor.fetchall())
+    if info[1]=="True":
+        return render(request, 'support.html', {'data': support_data,'user_id':info[0]})
+    else:
+        return render(request, 'support.html', {'data': support_data})

@@ -9,6 +9,7 @@ urlpatterns = [
     path('agents', views.agents, name='agents'),
     path('home', views.home, name = 'home'),
     path('property', views.property, name = 'property'),
-    path('logout', views.logout, name='logout')
+    path('logout', views.logout, name='logout'),
+    path('support', views.support, name='support')
     
 ]
