@@ -11,7 +11,6 @@
 </p>
 <div class="card" style="width: 18rem;">
     <img src="/media/{{saved_image}}" class="card-img-top" alt="...">
-      <h5 class="card-title">Your property</h5>
 </div>
     <form action='/property_img'  method="post" enctype="multipart/form-data">
         {% csrf_token %}
@@ -22,8 +21,12 @@
                 <input type="file" class="form-control" id="property_img" name="property_img">
             </div>
         </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
+        <button type="submit" class="btn btn-primary" id="button_submit">Submit</button>
       </form>
-      
+      <script>
+        document.getElementById('button_submit').addEventListener('click', function() {
+            location.reload(); // Refresh the page
+        });
+    </script>
 
 {% endblock %}

@@ -1,5 +1,6 @@
-from django.shortcuts import render
+from django.shortcuts import render,redirect
 from django.http import HttpResponse
+from django.http import JsonResponse
 from django.contrib import messages
 from website.models import User
 from django.db import connection
@@ -51,6 +52,7 @@ def logout(request):
 
 def user(request):
     usertype = "user"
+    info = sessionInfo()
     if request.method=="POST":                  #if signup form filled
         name = request.POST['name']
         email = request.POST['email']
@@ -61,7 +63,7 @@ def user(request):
             psswd = password1
         else:
             messages.error(request, "Please retype the password properly")
-        if '@property360.com' in email:
+        if '@property360.agent.com' in email:
             usertype = "agent"
 
         addrss = request.POST['address']
@@ -90,21 +92,28 @@ def user(request):
             setLogin(uid)
             cursor.execute(insert, (uid, name, email, psswd, addrss))
         data.update({'user_id': sessionInfo()[0]})
+        messages.success(request, 'Signup Successful')
         return render(request, 'user.html', data)
     else:
-        if sessionInfo()[1]=="True":                        #if signup form not filled, but user logged in
+        if info[1]=="True":                        #if signup form not filled, but user logged in
             #retrieve data from database here and pass through dictionary
             getdata = 'select * from website_user where user_id=%s'
-            data = None
+            temp = None
             with connection.cursor() as cursor:
-                cursor.execute(getdata,[sessionInfo()[0]])
-                data = tuple(cursor.fetchall())
-            img = data[0][-1]
-            return render(request, 'user.html', {'user_id':sessionInfo()[0], 'saved_image':img})
+                cursor.execute(getdata,[info[0]])
+                temp = tuple(cursor.fetchall())[0]
+            data ={
+                'user_id':info[0],
+                'username':temp[1],
+                'email':temp[2],
+                'address':temp[4],
+                'saved_image':temp[5]
+            }
+            return render(request, 'user.html', data)
         else:                                               #if signup for not filled, also user not logged in
             return render(request, 'user.html')
 
-def home(request, args=None):
+def home(request):
     user = None
     password = None
     if request.method=="POST":
@@ -181,6 +190,7 @@ def property_img(request):
         with connection.cursor() as cursor:
             cursor.execute(insert, (image.name,info[0]))
     if info[1]=="True":
-        return render(request, 'user.html',{'user_id': info[0],'saved_image':image.name})
+        messages.success(request, 'Image uploaded successfully.')
+        return redirect('user')
     else:
-        return render(request, 'user.html')
+        return redirect('user')
