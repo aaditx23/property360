@@ -1,5 +1,6 @@
-from django.shortcuts import render
+from django.shortcuts import render,redirect
 from django.http import HttpResponse
+from django.http import JsonResponse
 from django.contrib import messages
 from website.models import User
 from django.db import connection
@@ -51,6 +52,7 @@ def logout(request):
 
 def user(request):
     usertype = "user"
+    info = sessionInfo()
     if request.method=="POST":                  #if signup form filled
         name = request.POST['name']
         email = request.POST['email']
@@ -61,7 +63,7 @@ def user(request):
             psswd = password1
         else:
             messages.error(request, "Please retype the password properly")
-        if '@property360.com' in email:
+        if '@property360.agent.com' in email:
             usertype = "agent"
 
         addrss = request.POST['address']
@@ -90,15 +92,28 @@ def user(request):
             setLogin(uid)
             cursor.execute(insert, (uid, name, email, psswd, addrss))
         data.update({'user_id': sessionInfo()[0]})
+        messages.success(request, 'Signup Successful')
         return render(request, 'user.html', data)
     else:
-        if sessionInfo()[1]=="True":                        #if signup form not filled, but user logged in
+        if info[1]=="True":                        #if signup form not filled, but user logged in
             #retrieve data from database here and pass through dictionary
-            return render(request, 'user.html', {'user_id':sessionInfo()[0]})
+            getdata = 'select * from website_user where user_id=%s'
+            temp = None
+            with connection.cursor() as cursor:
+                cursor.execute(getdata,[info[0]])
+                temp = tuple(cursor.fetchall())[0]
+            data ={
+                'user_id':info[0],
+                'username':temp[1],
+                'email':temp[2],
+                'address':temp[4],
+                'saved_image':temp[5]
+            }
+            return render(request, 'user.html', data)
         else:                                               #if signup for not filled, also user not logged in
             return render(request, 'user.html')
 
-def home(request, args=None):
+def home(request):
     user = None
     password = None
     if request.method=="POST":
@@ -130,8 +145,16 @@ def home(request, args=None):
 
 def agents(request):
     info = sessionInfo()
+    login_info=info[1]
+    agent_retrieve="select agent_id_id, supervisor_id from website_agent"
+    agent_data=None
+    with connection.cursor() as cursor:
+        cursor.execute(agent_retrieve)
+        agent_data = tuple(cursor.fetchall())
+    print(agent_data)
+    #return render(request, 'agents.html', {'data': agent_data})
     if info[1]=="True":
-        return render(request, 'agents.html',{'user_id':info[0]})
+        return render(request, 'agents.html',{'user_id':info[0],'data': agent_data})
     else:
         return render(request, 'agents.html')
 
@@ -152,9 +175,26 @@ def property(request):
         cursor.execute(property_retrieve)
         property_data = tuple(cursor.fetchall())
     print(property_data)
+    return render(request, 'property.html', {'data': property_data})
+
+def property_img(request):
+    info = sessionInfo()
+    login_info = info[1]
+    if request.method=='POST':
+        image = request.FILES['property_img']
+        print(image," image")
+        with open('media/' + image.name, 'wb') as f:
+            for chunk in image.chunks():
+                f.write(chunk)
+        insert = 'update website_user set property_img=%s where user_id=%s'
+        with connection.cursor() as cursor:
+            cursor.execute(insert, (image.name,info[0]))
     if info[1]=="True":
-        return render(request, 'property.html', {'data': property_data,'user_id':info[0]})
+        messages.success(request, 'Image uploaded successfully.')
+        return redirect('user')
     else:
+        return redirect('user')
+
         return render(request, 'property.html', {'data': property_data})
     
 def support(request):
