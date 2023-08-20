@@ -18,6 +18,7 @@ def createAgent(n):
     else:
         return "agent_"+str(n)
 
+
 def createProp(n):
     if len(str(n))<4:
         return ("prop_"+("0"*(4-len(str(n)))) + str(n))
@@ -107,7 +108,7 @@ def user(request):
                 'username':temp[1],
                 'email':temp[2],
                 'address':temp[4],
-                'saved_image':temp[5]
+                # 'saved_image':temp[5]
             }
             return render(request, 'user.html', data)
         else:                                               #if signup for not filled, also user not logged in
@@ -169,13 +170,14 @@ def about(request):
 def property(request):
     info = sessionInfo()
     login_info = info[1]
-    property_retrieve = "select property_id, name, location, price from website_property"
+    user = info[0]
+    property_retrieve = "select property_id, name, location, size, type, price, status from website_property"
     property_data =  None
     with connection.cursor() as cursor:
         cursor.execute(property_retrieve)
         property_data = tuple(cursor.fetchall())
     print(property_data)
-    return render(request, 'property.html', {'data': property_data})
+    return render(request, 'property.html', {'data': property_data, 'user_id':user})
 
 def property_img(request):
     info = sessionInfo()
@@ -195,7 +197,6 @@ def property_img(request):
     else:
         return redirect('user')
 
-    
 def support(request):
     info = sessionInfo()
     login_info = info[1]
@@ -208,3 +209,47 @@ def support(request):
         return render(request, 'support.html', {'data': support_data,'user_id':info[0]})
     else:
         return render(request, 'support.html', {'data': support_data})
+
+
+def property_registration(request):
+    info = sessionInfo()
+    login_info = info[1]
+    user = info[0]
+
+    if request.method == 'POST':
+        name = request.POST['property_name']
+        # property_id = request.POST['pid']
+        location = request.POST['location']
+        size = request.POST['size']
+        price = request.POST['price']
+        status = request.POST['status']
+        type = request.POST['type']
+        
+        all_properties = 'select property_id from website_property'
+        with connection.cursor() as cursor:
+            cursor.execute(all_properties)
+            property_tuple = tuple(cursor.fetchall())
+            entries = len(property_tuple)
+            property_id = createProp((entries+1))
+
+        
+        property_insert = "INSERT INTO website_property(property_id, status, location, name, size, type, price, agent_id_id, user_id_id) values (%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+        
+        with connection.cursor() as cursor:
+            cursor.execute(property_insert, (property_id, status, location, name, size, type, price, 'no_agent', user))
+
+    return render(request, 'property_registration.html', {"user_id": user})
+
+# --------------------
+# use this template when you need to implement different views for different types of users
+# --------------------
+# usertype = "user"
+# info = sessionInfo()
+# if request.method=="POST":
+#     if '@property360.agent.com' in email:
+#         usertype = "agent"
+#     elif '@property360.support.com' in email:
+#         usertype = "support"
+
+    # return redirect
+    # render render(request, 'website_name.html')
