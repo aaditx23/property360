@@ -100,15 +100,21 @@ def user(request):
             #retrieve data from database here and pass through dictionary
             getdata = 'select * from website_user where user_id=%s'
             temp = None
+            getimage = 'select property_img,property_id from website_property where user_id_id=%s'
+            prop=''
             with connection.cursor() as cursor:
                 cursor.execute(getdata,[info[0]])
                 temp = tuple(cursor.fetchall())[0]
+                cursor.execute(getimage,[info[0]])
+                prop = cursor.fetchall()
+                print(prop)
             data ={
                 'user_id':info[0],
                 'username':temp[1],
                 'email':temp[2],
                 'address':temp[4],
-                # 'saved_image':temp[5]
+                'saved_image':prop[0],
+                'user_prop': prop
             }
             return render(request, 'user.html', data)
         else:                                               #if signup for not filled, also user not logged in
@@ -200,7 +206,7 @@ def property_img(request):
 def support(request):
     info = sessionInfo()
     login_info = info[1]
-    support_retrieve = "select name, type, phone, hiring_price, support_id_id from website_support s, website_employee e where e.employee_id = s.support_id_id"
+    support_retrieve = "select name, type, phone, hiring_price, support_id from website_support s, website_employee e where e.employee_id = s.support_id"
     support_data =  None
     with connection.cursor() as cursor:
         cursor.execute(support_retrieve)
@@ -211,34 +217,47 @@ def support(request):
     else:
         return render(request, 'support.html', {'data': support_data})
 
-
-# def property_registration(request):
-#     info = sessionInfo()
-#     login_info = info[1]
-#     user = info[0]
-
-#     if request.method == 'POST':
-#         name = request.POST['property_name']
-#         location = request.POST['location']
-#         size = request.POST['size']
-#         price = request.POST['price']
-#         status = request.POST['status']
-#         type = request.POST['type']
+def property_registration(request):
+    info = sessionInfo()
+    login_info = info[1]
+    user = info[0]
+    if info[1]=="True":
+        return render(request, 'property_registration.html', {'user_id':info[0]})
         
-#         all_properties = 'select property_id from website_property'
-#         with connection.cursor() as cursor:
-#             cursor.execute(all_properties)
-#             property_tuple = tuple(cursor.fetchall())
-#             entries = len(property_tuple)
-#             property_id = createProp((entries+1))
+    else:
+        return render(request, 'property_registration.html')
+
+
+def property_save(request):
+    info = sessionInfo()
+    login_info = info[1]
+    user = info[0]
+    if request.method == 'POST':
+        name = request.POST['property_name']
+        location = request.POST['location']
+        size = request.POST['size']
+        price = request.POST['price']
+        status = request.POST['status']
+        type = request.POST['type']
+        image = request.FILES['property_img']
+        print(image," image")
+        with open('media/' + image.name, 'wb') as f:
+            for chunk in image.chunks():
+                f.write(chunk)
+        all_properties = 'select property_id from website_property'
+        with connection.cursor() as cursor:
+            cursor.execute(all_properties)
+            property_tuple = tuple(cursor.fetchall())
+            entries = len(property_tuple)
+            property_id = createProp((entries+1))
 
         
-#         property_insert = "INSERT INTO website_property(property_id, status, location, name, size, type, price, agent_id_id, user_id_id) values (%s,%s,%s,%s,%s,%s,%s,%s,%s)"
-        
-#         with connection.cursor() as cursor:
-#             cursor.execute(property_insert, (property_id, status, location, name, size, type, price, 'no_agent', user))
-
-#     return render(request, 'property_registration.html', {"user_id": user})
+        property_insert = "INSERT INTO website_property(property_id, status, location, name, size, type, price, agent_id_id, user_id_id,property_img) values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+        print("RUNNING SAVE")
+        with connection.cursor() as cursor:
+            cursor.execute(property_insert, (property_id, status, location, name, size, type, price, 'not_hired', user,image))
+            messages.success(request, "Property Submitted")
+    return redirect('user')
 
 
 def property_list(request):
