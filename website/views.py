@@ -206,7 +206,6 @@ def property_img(request):
 def support(request):
     info = sessionInfo()
     login_info = info[1]
-    # support_retrieve = "select name, type, phone, hiring_price from website_support s, website_employee e where e.employee_id = s.support_id"
     support_retrieve = "select name, type, phone, hiring_price, support_id from website_support s, website_employee e where e.employee_id = s.support_id"
     support_data =  None
     with connection.cursor() as cursor:
@@ -295,7 +294,7 @@ def hire_support(request):
     with connection.cursor() as cursor:
         cursor.execute(insert_into_hires, (user,support))
 
-    return render('support.html')
+    return redirect('support')
     
 
 
