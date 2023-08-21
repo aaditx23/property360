@@ -2,10 +2,12 @@
 
 {% block body %}
 
+<h1 align="center">SUPPORT & MAINTENANCE</h1>
+
 <div>
     <table class="table">
         <thead>
-          <tr>
+          <tr align="center">
             <th scope="col">NAME</th>
             <th scope="col">JOB</th>
             <th scope="col">CONTACT</th>
@@ -14,12 +16,11 @@
         </thead>
         <tbody>
           {% for item in data %}
-          <tr>
-            <th scope="row"></th>
+          <tr align="center">
+            <td>{{item.0}}</td>
             <td>{{item.1}}</td>
             <td>{{item.2}}</td>
             <td>{{item.3}}</td>
-            <td>{{item.4}}</td>
           </tr>
           {% endfor %}
           
