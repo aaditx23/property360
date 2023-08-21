@@ -2,13 +2,14 @@
 
 {% block body %}
 
-<h1>Welccome to Property360!  </h1>
+<h3>User Information  </h3>
 <p>
     <b>User Name:</b> {{user_name}} <br>
     <b>Email:</b> {{user_email}} <br>
     <b>Address</b> {{user_address}} <br>
     <b>Inster Image</b> <br>
 </p>
+<h3>User Property Information  </h3>
 <div class="card" style="width: 18rem;">
     <img src="/media/{{saved_image}}" class="card-img-top" alt="...">
 </div>
@@ -23,6 +24,10 @@
         </div>
         <button type="submit" class="btn btn-primary" id="button_submit">Submit</button>
       </form>
-      
+      <script>
+        document.getElementById('button_submit').addEventListener('click', function() {
+            location.reload(); // Refresh the page
+        });
+    </script>
 
 {% endblock %}

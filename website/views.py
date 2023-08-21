@@ -142,6 +142,45 @@ def home(request):
             return render(request, 'home.html', {'user_id':info[0]})
         return render(request, 'home.html')
     
+def dashboard(request):
+    info = sessionInfo()
+    if info[1]=='True':
+        if 'agent' in info[0]:
+            get_agent= 'select employee_id, name, email, address, agent_img from website_employee, website_agent where agent_id_id=employee_id'
+            agent_temp=''
+            agent=info[0]
+            with connection .cursor() as cursor:
+                cursor.execute(get_agent, agent )
+                agent_temp=tuple(cursor.fetchall())
+            agent_data={
+                'agent_id': info[0],
+                'agentname':agent_temp[1],
+                'email':agent_temp[2],
+                'address':agent_temp[3],
+                'agent_img':agent_temp[4]
+
+            }
+            
+        elif 'user' in info[0]:
+            get_user = 'select user_id, username, email, address, user_img from website_user where user_id=%s'
+            user_temp = ''
+            user = info[0]
+            with connection.cursor() as cursor:
+                cursor.execute(get_user, user)
+                user_temp = tuple(cursor.fetchall())
+            user_data ={
+                'user_id':info[0],
+                'username':user_temp[1],
+                'email':user_temp[2],
+                'address':user_temp[4],
+                'user_img':user_temp[5]
+            }
+
+        #return render(request, 'user.html', {'user_id': info[1]})
+        return render(request, 'user.html', user_data, agent_data)
+    else:
+        return render(request, 'user.html')
+    
 
 def agents(request):
     info = sessionInfo()
@@ -194,3 +233,52 @@ def property_img(request):
         return redirect('user')
     else:
         return redirect('user')
+    
+
+def support(request):
+    info = sessionInfo()
+    login_info = info[1]
+    support_retrieve = "select name, type, phone, hiring_price from website_support s, website_employee e where e.employee_id = s.support_id"
+    support_data =  None
+    with connection.cursor() as cursor:
+        cursor.execute(support_retrieve)
+        support_data = tuple(cursor.fetchall())
+    if info[1]=="True":
+        return render(request, 'support.html', {'data': support_data,'user_id':info[0]})
+    else:
+        return render(request, 'support.html', {'data': support_data})
+    
+
+def agent_img(request):
+    info = sessionInfo()
+    login_info = info[1]
+    if request.method=='POST':
+        image = request.FILES['agent_img']
+        print(image," image")
+        with open('media/' + image.name, 'wb') as f:
+            for chunk in image.chunks():
+                f.write(chunk)
+        insert = 'update website_agent set agent_img=%s where agent_id=%s'
+        with connection.cursor() as cursor:
+            cursor.execute(insert, (image.name,info[0]))
+    if info[1]=="True":
+        messages.success(request, 'Image uploaded successfully.')
+        return redirect('user')
+    else:
+        return redirect('user')
+
+
+
+# --------------------
+# use this template when you need to implement different views for different types of users
+# --------------------
+# usertype = "user"
+# info = sessionInfo()
+# if request.method=="POST":
+#     if '@property360.agent.com' in email:
+#         usertype = "agent"
+#     elif '@property360.support.com' in email:
+#         usertype = "support"
+
+    # return redirect
+    # render render(request, 'website_name.html')
