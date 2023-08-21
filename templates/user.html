@@ -11,30 +11,23 @@
         <b>Inster Image</b> <br>
     </p>
     <h3>User Property Information  </h3>
-    <div class="card" style="width: 18rem;">
-        <img src="/media/{{saved_image}}" class="card-img-top" alt="...">
+    {% for prop in user_prop %}
+        <div class="card" style="width: 18rem;">
+            <h5>{{prop.1}}</h5>
+            <img src="/media/{{prop.0}}" class="card-img-top" alt="...">
+        </div>
+    {% endfor %}
+
+        
     </div>
-        <form action='/property_img'  method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            
-            <div class="mb-3">
-                {% comment %} <label for="property_img" class="form-label">Upload Property Image</label> {% endcomment %}
-                <div class="col-sm-3">
-                    <input type="file" class="form-control" id="property_img" name="property_img">
-                </div>
-            </div>
-            <button type="submit" class="btn btn-primary" id="button_submit">Submit</button>
-            
-        </form>
-    </div>
-    
-        <p></p>
+    <form action='/property_registration'>
         <div class='container'>
-            <a href = "/property_registration">
+            <a 3ref = "/property_registration">
                 <button type="submit" class="btn btn-primary" id="property_registration" >Register Property</button>
             <a>
 
         </div>
+    </form>
     </div>
 </div>
 {% endblock %}
