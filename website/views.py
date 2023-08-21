@@ -200,7 +200,8 @@ def property_img(request):
 def support(request):
     info = sessionInfo()
     login_info = info[1]
-    support_retrieve = "select name, type, phone, hiring_price from website_support s, website_employee e where e.employee_id = s.support_id"
+    # support_retrieve = "select name, type, phone, hiring_price from website_support s, website_employee e where e.employee_id = s.support_id"
+    support_retrieve = "select name, type, phone, hiring_price, support_id_id from website_support s, website_employee e where e.employee_id = s.support_id_id"
     support_data =  None
     with connection.cursor() as cursor:
         cursor.execute(support_retrieve)
@@ -247,17 +248,38 @@ def property_list(request):
     user = info[0]
     property_retrieve = "select image, property_id, name, size, type, price, agent_id_id, status from website_property where user_id_id = %s"    
     property_data =  None
+    
     with connection.cursor() as cursor:
         cursor.execute(property_retrieve, user)
         property_data = tuple(cursor.fetchall())
 
-    if info[1]=="True":
-        return render(request, 'user.html', {'data': property_data,'user_id':user})
-    else:
-        return render(request, 'user.html', {'data': property_data})
+    return redirect('support')
+    # if info[1]=="True":
+    #     return render(request, 'user.html', {'data': property_data,'user_id':user})
+    # else:
+    #     return render(request, 'user.html', {'data': property_data})
 
 
  
+
+ 
+
+def hire_support(request):
+    info = sessionInfo()
+    login_info = info[1]
+    user = info[0]
+
+    support = request.POST['support_id']
+    print(user,support)
+    
+    insert_into_hires = "insert into website_hires (user_id_id, support_id_id) values (%s,%s)"
+    with connection.cursor() as cursor:
+        cursor.execute(insert_into_hires, (user,support))
+
+    return render('support.html')
+    
+    
+
 # --------------------
 # use this template when you need to implement different views for different types of users
 # --------------------

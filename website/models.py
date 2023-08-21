@@ -81,7 +81,7 @@ class Bids_In(models.Model):
 class Support(models.Model):
     support_id= models.ForeignKey(Employee, on_delete = models.CASCADE, to_field = 'employee_id',primary_key=True)
     type=models.CharField(max_length=20)
-    hiring_price=models.CharField(max_length=10)
+    hiring_price=models.CharField(max_length=10, default = 1000)
 
 class Maintains(models.Model):
     property_id = models.ForeignKey(Property, on_delete = models.CASCADE, to_field = 'property_id')
@@ -108,6 +108,8 @@ class Organizes(models.Model):
 
 
 class Agents_Clients(models.Model):
+    
+
     agent_id = models.ForeignKey(Agent, on_delete = models.CASCADE, to_field = 'agent_id')
     client=models.CharField(max_length=20)
 
@@ -116,11 +118,12 @@ class Agents_Clients(models.Model):
 
 
 class Hires(models.Model):
-    user_id=models.ForeignKey(User, on_delete = models.CASCADE, to_field = 'user_id', primary_key=True)
-    support_id=models.ForeignKey(Support, on_delete = models.CASCADE, to_field = 'support_id')
-
+    support_id=models.ForeignKey(Employee, on_delete = models.CASCADE, to_field = 'employee_id', primary_key = True)
+    user_id=models.ForeignKey(User, on_delete = models.CASCADE, to_field = 'user_id')
+       
     class Meta:
-        unique_together=("user_id","support_id")
+        unique_together=("support_id","user_id")
+
 
 
 class Seller(models.Model):

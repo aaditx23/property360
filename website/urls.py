@@ -12,6 +12,7 @@ urlpatterns = [
     path('logout', views.logout, name='logout'),
     path('property_img', views.property_img, name = 'property_img'),
     path('support', views.support, name='support'),
-    path('property_registration', views.property_registration, name='property_registration')
+    path('property_registration', views.property_registration, name='property_registration'),
+    path('hire_support', views.hire_support, name='hire_support')
     
 ]
