@@ -12,6 +12,7 @@
             <th scope="col">JOB</th>
             <th scope="col">CONTACT</th>
             <th scope="col">HOURLY PRICE</th>
+            <th scope="col">HIRE</th>
           </tr>
         </thead>
         <tbody>
@@ -21,6 +22,16 @@
             <td>{{item.1}}</td>
             <td>{{item.2}}</td>
             <td>{{item.3}}</td>
+            {% comment %} <td>{{item.4}}</td> {% endcomment %}
+            
+            
+            <td>
+              <form action="/hire_support" method="post">
+                {% csrf_token %}
+                <input type="hidden" name = 'support_id' value= {{item.4}}>
+                <button type="submit" class="btn btn-outline-success" >Add</button>
+              </form>
+            </td>
           </tr>
           {% endfor %}
           
