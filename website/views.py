@@ -207,6 +207,7 @@ def support(request):
         support_data = tuple(cursor.fetchall())
     if info[1]=="True":
         return render(request, 'support.html', {'data': support_data,'user_id':info[0]})
+        
     else:
         return render(request, 'support.html', {'data': support_data})
 
@@ -218,7 +219,6 @@ def property_registration(request):
 
     if request.method == 'POST':
         name = request.POST['property_name']
-        # property_id = request.POST['pid']
         location = request.POST['location']
         size = request.POST['size']
         price = request.POST['price']
@@ -240,6 +240,24 @@ def property_registration(request):
 
     return render(request, 'property_registration.html', {"user_id": user})
 
+
+def property_list(request):
+    info = sessionInfo()
+    login_info = info[1]
+    user = info[0]
+    property_retrieve = "select image, property_id, name, size, type, price, agent_id_id, status from website_property where user_id_id = %s"    
+    property_data =  None
+    with connection.cursor() as cursor:
+        cursor.execute(property_retrieve, user)
+        property_data = tuple(cursor.fetchall())
+
+    if info[1]=="True":
+        return render(request, 'user.html', {'data': property_data,'user_id':user})
+    else:
+        return render(request, 'user.html', {'data': property_data})
+
+
+ 
 # --------------------
 # use this template when you need to implement different views for different types of users
 # --------------------
