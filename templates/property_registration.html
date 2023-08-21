@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block body %}
-<div class = 'container'>
+<div class = 'container my-3'>
 
   <form action = "/property_registration" method ="post">
     {%csrf_token%}
@@ -38,6 +38,21 @@
       <label for="Status" class="form-label">Status:</label>
       <input type="text" class="form-control" id="status" name = "status" required>
     </div>
+
+    <form action='/property_img'  method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      
+      <div class="mb-3">
+          {% comment %} <label for="property_img" class="form-label">Upload Property Image</label> {% endcomment %}
+          <div class="col-sm-3">
+            <label>
+              <input type="file" class="form-control" id="property_img" name="property_img">
+              <button type="submit" class="btn btn-primary" id="button_submit">Submit</button>
+            </label>
+          </div>
+      </div>
+      
+  </form>
   
     {% comment %} <div class="mb-3">
         <input type="radio" id="status" name = "status" value = "for sale">

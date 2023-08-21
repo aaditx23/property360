@@ -212,33 +212,33 @@ def support(request):
         return render(request, 'support.html', {'data': support_data})
 
 
-def property_registration(request):
-    info = sessionInfo()
-    login_info = info[1]
-    user = info[0]
+# def property_registration(request):
+#     info = sessionInfo()
+#     login_info = info[1]
+#     user = info[0]
 
-    if request.method == 'POST':
-        name = request.POST['property_name']
-        location = request.POST['location']
-        size = request.POST['size']
-        price = request.POST['price']
-        status = request.POST['status']
-        type = request.POST['type']
+#     if request.method == 'POST':
+#         name = request.POST['property_name']
+#         location = request.POST['location']
+#         size = request.POST['size']
+#         price = request.POST['price']
+#         status = request.POST['status']
+#         type = request.POST['type']
         
-        all_properties = 'select property_id from website_property'
-        with connection.cursor() as cursor:
-            cursor.execute(all_properties)
-            property_tuple = tuple(cursor.fetchall())
-            entries = len(property_tuple)
-            property_id = createProp((entries+1))
+#         all_properties = 'select property_id from website_property'
+#         with connection.cursor() as cursor:
+#             cursor.execute(all_properties)
+#             property_tuple = tuple(cursor.fetchall())
+#             entries = len(property_tuple)
+#             property_id = createProp((entries+1))
 
         
-        property_insert = "INSERT INTO website_property(property_id, status, location, name, size, type, price, agent_id_id, user_id_id) values (%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+#         property_insert = "INSERT INTO website_property(property_id, status, location, name, size, type, price, agent_id_id, user_id_id) values (%s,%s,%s,%s,%s,%s,%s,%s,%s)"
         
-        with connection.cursor() as cursor:
-            cursor.execute(property_insert, (property_id, status, location, name, size, type, price, 'no_agent', user))
+#         with connection.cursor() as cursor:
+#             cursor.execute(property_insert, (property_id, status, location, name, size, type, price, 'no_agent', user))
 
-    return render(request, 'property_registration.html', {"user_id": user})
+#     return render(request, 'property_registration.html', {"user_id": user})
 
 
 def property_list(request):
@@ -250,7 +250,7 @@ def property_list(request):
     
     with connection.cursor() as cursor:
         cursor.execute(property_retrieve, user)
-        property_data = tuple(cursor.fetchall())
+        property_data = tuple(cursor.fetchall())[0]
 
     return redirect('support')
     # if info[1]=="True":
@@ -258,12 +258,41 @@ def property_list(request):
     # else:
     #     return render(request, 'user.html', {'data': property_data})
 
+def dashboard(request):
+    info = sessionInfo()
+    if info[1]=='True':
+        if 'agent' in info[0]:
+            get_agent= 'select * from website_employee, website_agent where agent_id_id=employee_id'
+            agent_temp=''
+            with connection .cursor() as cursor:
+                cursor.execute(get_agent)
+                agent_temp=tuple(cursor.fetchall())[0]
+            pass
+        elif 'user' in info[0]:
+            get_user = 'select user_id, username, email, address, user_img from website_user where user_id=%s'
+            user_temp = ''
+            user = info[0]
+            with connection.cursor() as cursor:
+                cursor.execute(get_user, user)
+                user_temp = tuple(cursor.fetchall())[0]
+            user_data ={
+                'user_id':info[0],
+                'username':user_temp[1],
+                'email':user_temp[2],
+                'address':user_temp[4],
+                'user_img':user_temp[5]
+            }
 
- 
+        #return render(request, 'user.html', {'user_id': info[1]})
+        return render(request, 'user.html', user_data)
+    else:
+        return render(request, 'user.html')
+        
 
  
 
 def hire_support(request):
+    
     info = sessionInfo()
     login_info = info[1]
     user = info[0]
@@ -277,7 +306,57 @@ def hire_support(request):
 
     return redirect('support')
     
+def user_edit_profile(request):
+    print("hello")
+    info = sessionInfo()
+    login_info = info[1]
+    user = info[0]
     
+    if request.method == 'POST':
+        
+        retrieve_user_info = "select username, address, email, password from website_user where user_id = %s"
+        user_data = None
+        with connection.cursor() as cursor:
+            cursor.execute(retrieve_user_info, [user])
+            user_data = tuple(cursor.fetchall())[0]
+            print(user_data)
+        old_dict = {
+            'username' : user_data[0],
+            'address' : user_data[1],
+            'email' : str(user_data[2]),
+            'password' : user_data[3]
+        }
+
+        new_dict = {
+        'username' : request.POST['username'],
+        'address' : request.POST['address'],
+        'email' : str(request.POST['email']),
+        'password' : request.POST['password']
+        }
+
+        
+        dict={}
+        for keys in new_dict.keys():
+            if len(new_dict[keys]) != 0:
+                dict[keys] = new_dict[keys]
+            else:
+                dict[keys] = old_dict[keys]
+        print(dict,old_dict,new_dict)
+        
+        # image = request.FILES['user_img']
+        # with open('media/' + image.name, 'wb') as f:
+        #     for chunk in image.chunks():
+        #         f.write(chunk)
+        # insert_img = 'update website_user set user_img=%s where user_id=%s'
+        # update_user = 'update website_user set user_img=%s, email= %s,address = %s where user_id = %s '
+        update_user = 'update website_user set username = %s, email= %s,address = %s,password =%s where user_id = %s '
+        with connection.cursor() as cursor:
+            cursor.execute(update_user, (dict['username'],dict['email'], dict['address'],dict['password'], user))
+            messages.success(request, "Profile Updated")
+            # cursor.execute(update_user, (image.name ,email, address,password, info[0]))
+            # return redirect('user')
+
+    return render(request, 'user_edit_profile.html', {'user_id': user})
 
 # --------------------
 # use this template when you need to implement different views for different types of users
