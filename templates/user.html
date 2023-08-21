@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block body %}
+<section class="vh-100" style="background-color: #9de2ff;">
 
 <div class="container -fluid ">
     <div class= 'container py-3 h-100'>
@@ -98,7 +99,7 @@
             <img src="/media/{{prop.0}}" class="card-img-top" alt="...">
           </div>
     {% endfor %}
-
+{% endcomment %}
         
     </div>
     <form action='/property_registration'>
@@ -114,5 +115,5 @@
     
     
   </div>
-  
+</section>
   {% endblock %}
