@@ -213,7 +213,7 @@ def property(request):
 def support(request):
     info = sessionInfo()
     login_info = info[1]
-    support_retrieve = "select name, type, phone, hiring_price, support_id from website_support s, website_employee e where e.employee_id = s.support_id"
+    support_retrieve = "select name, type, phone, hiring_price, support_id_id from website_support s, website_employee e where e.employee_id = s.support_id_id"
     support_data =  None
     with connection.cursor() as cursor:
         cursor.execute(support_retrieve)
