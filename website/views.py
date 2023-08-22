@@ -2,7 +2,7 @@ from django.shortcuts import render,redirect
 from django.http import HttpResponse
 from django.http import JsonResponse
 from django.contrib import messages
-from website.models import User
+# from website.models import User
 from django.db import connection
 # Create your views here.
 
@@ -17,6 +17,7 @@ def createAgent(n):
         return ("agent_"+("0"*(4-len(str(n)))) + str(n))
     else:
         return "agent_"+str(n)
+
 
 def createProp(n):
     if len(str(n))<4:
@@ -146,20 +147,23 @@ def dashboard(request):
     info = sessionInfo()
     if info[1]=='True':
         if 'agent' in info[0]:
-            get_agent= 'select employee_id, name, email, address, agent_img from website_employee, website_agent where agent_id_id=employee_id'
+            get_agent= 'select employee_id, name, phone, email, address, supervisor_id, agent_img from website_employee, website_agent where agent_id_id=employee_id'
             agent_temp=''
             agent=info[0]
             with connection .cursor() as cursor:
-                cursor.execute(get_agent, agent )
+                cursor.execute(get_agent, [agent] )
                 agent_temp=tuple(cursor.fetchall())
             agent_data={
                 'agent_id': info[0],
                 'agentname':agent_temp[1],
-                'email':agent_temp[2],
-                'address':agent_temp[3],
-                'agent_img':agent_temp[4]
+                'phone':agent_temp[2],
+                'email':agent_temp[3],
+                'address':agent_temp[4],
+                'supervisor_id': agent_temp[5],
+                'agent_img':agent_temp[6]
 
             }
+            #return render(request, 'user.html',  agent_data)
             
         elif 'user' in info[0]:
             get_user = 'select user_id, username, email, address, user_img from website_user where user_id=%s'
@@ -177,7 +181,8 @@ def dashboard(request):
             }
 
         #return render(request, 'user.html', {'user_id': info[1]})
-        return render(request, 'user.html', user_data, agent_data)
+        #return render(request, 'user.html', user_data)
+        return render(request, 'user.html', agent_data)
     else:
         return render(request, 'user.html')
     
@@ -208,13 +213,14 @@ def about(request):
 def property(request):
     info = sessionInfo()
     login_info = info[1]
-    property_retrieve = "select property_id, name, location, price from website_property"
+    user = info[0]
+    property_retrieve = "select property_id, name, location, size, type, price, status from website_property"
     property_data =  None
     with connection.cursor() as cursor:
         cursor.execute(property_retrieve)
         property_data = tuple(cursor.fetchall())
     print(property_data)
-    return render(request, 'property.html', {'data': property_data})
+    return render(request, 'property.html', {'data': property_data, 'user_id':user})
 
 def property_img(request):
     info = sessionInfo()
@@ -238,7 +244,7 @@ def property_img(request):
 def support(request):
     info = sessionInfo()
     login_info = info[1]
-    support_retrieve = "select name, type, phone, hiring_price from website_support s, website_employee e where e.employee_id = s.support_id"
+    support_retrieve = "select name, type, phone, hiring_price from website_support s, website_employee e where e.employee_id = s.support_id_id"
     support_data =  None
     with connection.cursor() as cursor:
         cursor.execute(support_retrieve)
@@ -267,6 +273,99 @@ def agent_img(request):
     else:
         return redirect('user')
 
+def support(request):
+    info = sessionInfo()
+    login_info = info[1]
+    support_retrieve = "select name, type, phone, hiring_price, support_id from website_support s, website_employee e where e.employee_id = s.support_id"
+    support_data =  None
+    with connection.cursor() as cursor:
+        cursor.execute(support_retrieve)
+        support_data = tuple(cursor.fetchall())
+    if info[1]=="True":
+        return render(request, 'support.html', {'data': support_data,'user_id':info[0]})
+        
+    else:
+        return render(request, 'support.html', {'data': support_data})
+
+def property_registration(request):
+    info = sessionInfo()
+    login_info = info[1]
+    user = info[0]
+    if info[1]=="True":
+        return render(request, 'property_registration.html', {'user_id':info[0]})
+        
+    else:
+        return render(request, 'property_registration.html')
+
+
+def property_save(request):
+    info = sessionInfo()
+    login_info = info[1]
+    user = info[0]
+    if request.method == 'POST':
+        name = request.POST['property_name']
+        location = request.POST['location']
+        size = request.POST['size']
+        price = request.POST['price']
+        status = request.POST['status']
+        type = request.POST['type']
+        image = request.FILES['property_img']
+        print(image," image")
+        with open('media/' + image.name, 'wb') as f:
+            for chunk in image.chunks():
+                f.write(chunk)
+        all_properties = 'select property_id from website_property'
+        with connection.cursor() as cursor:
+            cursor.execute(all_properties)
+            property_tuple = tuple(cursor.fetchall())
+            entries = len(property_tuple)
+            property_id = createProp((entries+1))
+
+        
+        property_insert = "INSERT INTO website_property(property_id, status, location, name, size, type, price, agent_id_id, user_id_id,property_img) values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+        print("RUNNING SAVE")
+        with connection.cursor() as cursor:
+            cursor.execute(property_insert, (property_id, status, location, name, size, type, price, 'not_hired', user, image))
+            messages.success(request, "Property Submitted")
+    return redirect('user')
+
+
+def property_list(request):
+    info = sessionInfo()
+    login_info = info[1]
+    user = info[0]
+    property_retrieve = "select image, property_id, name, size, type, price, agent_id_id, status from website_property where user_id_id = %s"    
+    property_data =  None
+    
+    with connection.cursor() as cursor:
+        cursor.execute(property_retrieve, user)
+        property_data = tuple(cursor.fetchall())
+
+    return redirect('support')
+    # if info[1]=="True":
+    #     return render(request, 'user.html', {'data': property_data,'user_id':user})
+    # else:
+    #     return render(request, 'user.html', {'data': property_data})
+
+
+ 
+
+ 
+
+def hire_support(request):
+    info = sessionInfo()
+    login_info = info[1]
+    user = info[0]
+
+    support = request.POST['support_id']
+    print(user,support)
+    
+    insert_into_hires = "insert into website_hires (user_id_id, support_id_id) values (%s,%s)"
+    with connection.cursor() as cursor:
+        cursor.execute(insert_into_hires, (user,support))
+
+    return redirect('support')
+    
 
 
 # --------------------

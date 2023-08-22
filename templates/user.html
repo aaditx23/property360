@@ -6,7 +6,9 @@
 <p>
     <b>User Name:</b> {{agentname}} <br>
     <b>Email:</b> {{email}} <br>
-    <b>Address</b> {{address}} <br>
+    <b>Address:</b> {{address}} <br>
+    <b>Phone:</b> {{phone}} <br>
+    <b>Supervisor_id:</b> {{supervisor_id}} <br>
     <b>Inster Image</b> <br>
 </p>
 <h3>User Property Information  </h3>
@@ -16,18 +18,14 @@
     <form action='/property_img'  method="post" enctype="multipart/form-data">
         {% csrf_token %}
         
-        <div class="mb-3">
-            {% comment %} <label for="property_img" class="form-label">Upload Property Image</label> {% endcomment %}
-            <div class="col-sm-3">
-                <input type="file" class="form-control" id="property_img" name="property_img">
-            </div>
+    </div>
+    <form action='/property_registration'>
+        <div class='container'>
+            <a 3ref = "/property_registration">
+                <button type="submit" class="btn btn-primary" id="property_registration" >Register Property</button>
+            <a>
+
         </div>
         <button type="submit" class="btn btn-primary" id="button_submit">Submit</button>
       </form>
-      <script>
-        document.getElementById('button_submit').addEventListener('click', function() {
-            location.reload(); // Refresh the page
-        });
-    </script>
-
 {% endblock %}

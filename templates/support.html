@@ -2,24 +2,35 @@
 
 {% block body %}
 
+<h1 align="center">SUPPORT & MAINTENANCE</h1>
+
 <div>
     <table class="table">
         <thead>
-          <tr>
+          <tr align="center">
             <th scope="col">NAME</th>
             <th scope="col">JOB</th>
             <th scope="col">CONTACT</th>
             <th scope="col">HOURLY PRICE</th>
+            <th scope="col">HIRE</th>
           </tr>
         </thead>
         <tbody>
           {% for item in data %}
-          <tr>
-            <th scope="row"></th>
+          <tr align="center">
+            <td>{{item.0}}</td>
             <td>{{item.1}}</td>
             <td>{{item.2}}</td>
             <td>{{item.3}}</td>
-            <td>{{item.4}}</td>
+            
+            
+            <td>
+              <form action="/hire_support" method="post">
+                {% csrf_token %}
+                <input type="hidden" name = 'support_id' value= {{item.4}}>
+                <button type="submit" class="btn btn-outline-success" >Add</button>
+              </form>
+            </td>
           </tr>
           {% endfor %}
           

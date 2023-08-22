@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<div class = 'container'>
+
+  <form action = "/property_save" method ="post" enctype="multipart/form-data">
+    {%csrf_token%}
+    <div class="mb-3">
+      <label for="property_name" class="form-label">Property Name:</label>
+      <input type="text" class="form-control" id="property_name" name="property_name" required>
+    </div>
+    {% comment %} <div class="mb-3">
+      <label for="pid" class="form-label">Property ID:</label>
+      <input type="text" class="form-control" id="pid" name ="pid" required>
+    </div> {% endcomment %}
+  
+    <div class="mb-3">
+      <label for="location" class="form-label">Location:</label>
+      <input type="text" class="form-control" id="location" name = "location" required>
+    </div>
+  
+    <div class="mb-3">
+      <label for="size" class="form-label">Size:</label>
+      <input type="text" class="form-control" id="size" name= "size" required>
+    </div>
+  
+    <div class="mb-3">
+      <label for="type" class="form-label">Type:</label>
+      <input type="text" class="form-control" id="type" name = "type" required>
+    </div>
+  
+    <div class="mb-3">
+      <label for="price" class="form-label">Price:</label>
+      <input type="text" class="form-control" id="price" name = "price" required>
+    </div>
+    
+    <div class="mb-3">
+      <label for="Status" class="form-label">Status:</label>
+      <input type="text" class="form-control" id="status" name = "status" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="property_img" class="form-label">Upload Property Image</label>
+      <div class="col-sm-3">
+          <input type="file" class="form-control" id="property_img" name="property_img">
+      </div>
+      <button type="submit" class="btn btn-primary">Save</button>
+      
+      {% comment %} <button type="submit" class="btn btn-primary" id="button_submit">Submit</button> {% endcomment %}
+      
+  </form> 
+ 
+    
+    {% comment %} <div class="mb-3">
+        <input type="radio" id="status" name = "status" value = "for sale">
+        <label for="status" >For Sale</label>
+        <input type="radio" id="status" name = "status" value = "not for sale">
+        <label for="status" >Not For Sale</label>
+    </div> {% endcomment %}
+ 
+</div>
+
+{% endblock %}

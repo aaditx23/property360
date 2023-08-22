@@ -21,11 +21,13 @@ class Agent(models.Model):
     agent_id = models.ForeignKey(Employee, on_delete = models.CASCADE, to_field= 'employee_id', primary_key = True)
 
     supervisor_id = models.CharField(max_length=50)
-    agent_img = models.CharField(max_length=50, default='null')
+    agent_img = models.CharField(max_length=50, default=None)
 
 
 
 #zabir
+
+
 class Property(models.Model):
     property_id = models.CharField(max_length = 20, primary_key = True)
 
@@ -38,7 +40,7 @@ class Property(models.Model):
     size = models.CharField(max_length=10)
     type = models.CharField(max_length =20)
     price = models.CharField(max_length=15)
-    property_img = models.CharField(max_length=50)
+    property_img = models.CharField(max_length=50, default=None)
 
 class Auction(models.Model):
     auction_id = models.CharField(max_length = 20, primary_key = True)
@@ -82,7 +84,7 @@ class Bids_In(models.Model):
 class Support(models.Model):
     support_id= models.ForeignKey(Employee, on_delete = models.CASCADE, to_field = 'employee_id',primary_key=True)
     type=models.CharField(max_length=20)
-    hiring_price=models.CharField(max_length=10,default=1000)
+    hiring_price=models.CharField(max_length=10, default = 1000)
 
 class Maintains(models.Model):
     property_id = models.ForeignKey(Property, on_delete = models.CASCADE, to_field = 'property_id')
@@ -109,6 +111,8 @@ class Organizes(models.Model):
 
 
 class Agents_Clients(models.Model):
+    
+
     agent_id = models.ForeignKey(Agent, on_delete = models.CASCADE, to_field = 'agent_id')
     client=models.CharField(max_length=20)
 
@@ -117,11 +121,12 @@ class Agents_Clients(models.Model):
 
 
 class Hires(models.Model):
-    user_id=models.ForeignKey(User, on_delete = models.CASCADE, to_field = 'user_id', primary_key=True)
-    support_id=models.ForeignKey(Support, on_delete = models.CASCADE, to_field = 'support_id')
+    user_id=models.ForeignKey(User, on_delete = models.CASCADE, to_field = 'user_id', db_index=True)
+    support_id=models.ForeignKey(Employee, on_delete = models.CASCADE, to_field = 'employee_id', primary_key=True)
 
     class Meta:
-        unique_together=("user_id","support_id")
+        unique_together=("support_id","user_id")
+
 
 
 class Seller(models.Model):

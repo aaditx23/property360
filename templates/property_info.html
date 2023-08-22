@@ -2,21 +2,44 @@
 
 {% block body %}
 
-<form>
-    <div class="mb-3">
-      <label for="name" class="form-label">Property Name</label>
-      <input type="text" class="form-control" id="name" name="name" aria-describedby="emailHelp">
-      <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
-    </div>
-    <div class="mb-3">
-      <label for="exampleInputPassword1" class="form-label">Password</label>
-      <input type="password" class="form-control" id="exampleInputPassword1">
-    </div>
-    <div class="mb-3 form-check">
-      <input type="checkbox" class="form-check-input" id="exampleCheck1">
-      <label class="form-check-label" for="exampleCheck1">Check me out</label>
-    </div>
-    <button type="submit" class="btn btn-primary">Submit</button>
-  </form>
+<form action = "/property_info" method ="post">
+  {%csrf_token%}
+  <div class="mb-3">
+    <label for="property_name" class="form-label">Property Name:</label>
+    <input type="text" class="form-control" id="property_name" name="property_name" required>
+  </div>
+  <div class="mb-3">
+    <label for="pid" class="form-label">User ID:</label>
+    <input type="text" class="form-control" id="pid" name ="pid" required>
+  </div>
+
+  <div class="mb-3">
+    <label for="location" class="form-label">Location:</label>
+    <input type="text" class="form-control" id="location" name = "location" required>
+  </div>
+
+  <div class="mb-3">
+    <label for="size" class="form-label">Size:</label>
+    <input type="text" class="form-control" id="size" name= "size" required>
+  </div>
+
+  <div class="mb-3">
+    <label for="type" class="form-label">Type:</label>
+    <input type="text" class="form-control" id="type" name = "type" required>
+  </div>
+
+  <div class="mb-3">
+    <label for="price" class="form-label">Price:</label>
+    <input type="text" class="form-control" id="price" name = "price" required>
+  </div>
+
+  <div class="mb-3">
+      <input type="radio" id="status" name = "st">
+      <label for="status" >For Sale</label>
+      <input type="radio" id="status" name = "st">
+      <label for="status" >Not For Sale</label>
+  </div>
+  <button type="submit" class="btn btn-primary">Register Property</button>
+</form>
 
 {% endblock %}

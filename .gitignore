@@ -1,0 +1,3 @@
+/website/migrations/*
+/website/__pycache__/*
+/property/__pycache__/*
