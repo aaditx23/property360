@@ -1,3 +1,4 @@
 /website/migrations/*
 /website/__pycache__/*
 /property/__pycache__/*
+/media/*
