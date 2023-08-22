@@ -265,7 +265,7 @@ def property_save(request):
             property_id = createProp((entries+1))
 
         
-        property_insert = "INSERT INTO website_property(property_id, status, location, name, size, type, price, agent_id_id, user_id_id, image) values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+        property_insert = "INSERT INTO website_property(property_id, status, location, name, size, type, price, agent_id_id, user_id_id, property_img) values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
         with connection.cursor() as cursor:
             cursor.execute(property_insert, (property_id, status, location, name, size, type, price, prop_agent, user,image.name))
             messages.success(request, "Property Submitted")
