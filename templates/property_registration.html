@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block body %}
-<div class = 'container'>
+<div class = 'container my-3'>
 
   <form action = "/property_save" method ="post" enctype="multipart/form-data">
     {%csrf_token%}
@@ -9,10 +9,6 @@
       <label for="property_name" class="form-label">Property Name:</label>
       <input type="text" class="form-control" id="property_name" name="property_name" required>
     </div>
-    {% comment %} <div class="mb-3">
-      <label for="pid" class="form-label">Property ID:</label>
-      <input type="text" class="form-control" id="pid" name ="pid" required>
-    </div> {% endcomment %}
   
     <div class="mb-3">
       <label for="location" class="form-label">Location:</label>
@@ -35,6 +31,15 @@
     </div>
     
     <div class="mb-3">
+      <label for='hired_agent' class="form-label">Select Agent</label>
+      <select class="form-select" aria-label="Agent" name = 'hired_agent' id='hired_agent' required>
+        {% for agent in agents %}
+        <option value={{agent.0}}>{{agent.1}}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="mb-3">
       <label for="Status" class="form-label">Status:</label>
       <input type="text" class="form-control" id="status" name = "status" required>
     </div>
@@ -44,7 +49,9 @@
       <div class="col-sm-3">
           <input type="file" class="form-control" id="property_img" name="property_img">
       </div>
+      <div class='container my-3'>
       <button type="submit" class="btn btn-primary">Save</button>
+      </div>
       
       {% comment %} <button type="submit" class="btn btn-primary" id="button_submit">Submit</button> {% endcomment %}
       

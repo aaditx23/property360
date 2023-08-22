@@ -1,33 +1,95 @@
 {% extends "base.html" %}
 
 {% block body %}
+<section style="background-color: #9de2ff;">
 
-<div class="container">
-    <h3>User Information  </h3>
-    <p>
-        <b>User Name:</b> {{user_name}} <br>
-        <b>Email:</b> {{user_email}} <br>
-        <b>Address</b> {{user_address}} <br>
-        <b>Inster Image</b> <br>
-    </p>
-    <h3>User Property Information  </h3>
-    {% for prop in user_prop %}
-        <div class="card" style="width: 18rem;">
-            <h5>{{prop.1}}</h5>
-            <img src="/media/{{prop.0}}" class="card-img-top" alt="...">
+  <div class="container-fluid">
+    <div class= 'container py-3 h-100'>
+      <div  align = "justify" >
+        <div class="col-lg-4" >
+          <div class="card mb-4">
+            <div class="card-body text-center">
+              <img src="/media/{{user_img}}" alt="user image"
+              class="rounded-circle img-fluid" style="width: 150px;">
+              <h5 class="my-3">{{username}}</h5>
+              <p class="text-muted mb-1">{{email}}</p>
+              <p class="text-muted mb-4">{{address}}</p>
+              <div class="d-flex justify-content-center mb-2">
+                  <form action="/user_edit_profile">
+                    <button type="submit" class="btn btn-outline-primary me-1 flex-grow-1">edit profile</button>
+                  </form>
+              </div>
+            </div>
+          </div>
         </div>
-    {% endfor %}
-
-        
+      </div>
     </div>
-    <form action='/property_registration'>
-        <div class='container'>
-            <a 3ref = "/property_registration">
-                <button type="submit" class="btn btn-primary" id="property_registration" >Register Property</button>
-            <a>
+  </div>
 
+  {% if prop %}
+  {% for p in prop %}
+  <div class="container py-3 h-100">
+      <div class="row ">
+        <div class="col col-md-12">
+          <div class="card" style="border-radius: 15px;">
+            <div class="card-body p-4">
+              <div class="d-flex text-black">
+                <div class="flex-shrink-0">
+                  <img src="/media/{{p.9}}"
+                    alt="property_image" class="img-fluid"
+                    style="width: 180px; border-radius: 10px;">
+                </div>
+                <div class="flex-grow-1 ms-3">
+                  <h5 class="mb-1">{{p.3}}</h5>
+                  <p class="mb-2 pb-1" style="color: #2b2a2a;">{{p.2}}</p>
+                  <div class="d-flex justify-content-start rounded-3 p-2 mb-3"
+                    style="background-color: #efefef;">
+                    <div class="px-5">
+                      <p class="small text-muted mb-1">[Size]</p>
+                      <p class="mb-0">41{{p.4}}</p>
+                    </div>
+                    <div class="px-5">
+                      <p class="small text-muted mb-1">[type]</p>
+                      <p class="mb-0">{{p.5}}</p>
+                    </div>
+                    <div class="px-5">
+                      <p class="small text-muted mb-1">[Price]</p>
+                      <p class="mb-0">{{p.6}}</p>
+                    </div>
+                    <div class="px-5">
+                      <p class="small text-muted mb-1">[Agent]</p>
+                      <a href="">
+                          <p class="mb-0">{{p.8}}</p>
+                      </a>
+                    </div>
+                    <div class="px-5">
+                      <p class="small text-muted mb-1">[Status]</p>
+                      <p class="mb-0">{{p.1}}</p>
+                    </div>
+                  </div>
+                  <div class="d-flex pt-1">
+                    <button type="submit" class="btn btn-outline-primary me-1 flex-grow-1">Edit info</button>
+                    {% comment %} <button type="button" class="btn btn-primary flex-grow-1">Details</button> {% endcomment %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-    </form>
+      </div>
     </div>
-</div>
-{% endblock %}
+  {% endfor %}
+  {% endif %}
+
+
+
+
+    <div class='container'>
+      <form action='/property_registration'>
+        <div class="container py-3 h-10">
+          <button type="submit" class="btn btn-primary" id="property_registration" >Register Property</button>
+        </div>
+      </form>
+    </div>
+</section>
+  {% endblock %}
