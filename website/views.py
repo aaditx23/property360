@@ -290,7 +290,7 @@ def hire_support(request):
     support = request.POST['support_id']
     print(user,support)
     
-    insert_into_hires = "insert into website_hires (user_id_id, support_id_id) values (%s,%s)"
+    insert_into_hires = "insert into website_hires (user_id, support_id) values (%s,%s)"
     with connection.cursor() as cursor:
         cursor.execute(insert_into_hires, (user,support))
 
