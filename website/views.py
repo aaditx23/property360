@@ -396,17 +396,6 @@ def user_edit_profile(request):
             # return redirect('user')
 
     return render(request, 'user_edit_profile.html', {'user_id': user})
-def auction(request):
-    info = sessionInfo()
-    login_info = info[1]
-    user = info[0]
-    if info[1]=="True":
-        return render(request, 'auction.html', {'user_id':info[0]})
-    else:
-        return render(request, 'auction.html')
-
-def join_auction(request):
-    pass
 
 # --------------------
 # use this template when you need to implement different views for different types of users
