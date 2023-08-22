@@ -98,19 +98,26 @@ def user(request):
         data.update({'user_id': sessionInfo()[0]})
         messages.success(request, 'Signup Successful')
         return render(request, 'user.html', data)
+    return render(request, 'user.html')
+    
 
 def dashboard(request):
+    for i in range(10):
+        print(i,"000000000000000000000000000000000")
+    print("------DASHBOARD-------------------------------")
     info = sessionInfo()
+    print(info,"-------------------------------------")
     if info[1]=='True':
         if 'agent' in info[0]:
-            get_agent= 'select employee_id, name, email, address from website_employee, website_agent where agent_id_id=employee_id'
+            get_agent= 'select employee_id, name, email, address from website_employee, website_agent where agent_id_id=employee_id and employee_id=%s'
             agent_temp=''
             agent=info[0]
             with connection .cursor() as cursor:
-                cursor.execute(get_agent, [agent] )
+                cursor.execute(get_agent,[agent])
                 agent_temp=tuple(cursor.fetchall())[0]
+                print(agent_temp,"==========")
             agent_data={
-                'agent_id': info[0],
+                'user_id': info[0],
                 'agentname':agent_temp[1],
                 'email':agent_temp[2],
                 'address':agent_temp[3],
@@ -122,6 +129,7 @@ def dashboard(request):
             get_user = 'select user_id, username, email, address from website_user where user_id=%s'
             user_temp = ''
             user = info[0]
+            print(user)
             with connection.cursor() as cursor:
                 cursor.execute(get_user, [user])
                 user_temp = tuple(cursor.fetchall())[0]
@@ -135,9 +143,7 @@ def dashboard(request):
             return render(request, 'user.html', user_data)
 
         #return render(request, 'user.html', {'user_id': info[1]})
-        return render(request, 'user.html', user_data)
-    else:
-        return render(request, 'user.html')
+    return render(request, 'user.html')
 
 def home(request):
     user = None
@@ -297,36 +303,7 @@ def property_list(request):
     # else:
     #     return render(request, 'user.html', {'data': property_data})
 
-def dashboard(request):
-    info = sessionInfo()
-    if info[1]=='True':
-        if 'agent' in info[0]:
-            get_agent= 'select * from website_employee, website_agent where agent_id_id=employee_id'
-            agent_temp=''
-            with connection .cursor() as cursor:
-                cursor.execute(get_agent)
-                agent_temp=tuple(cursor.fetchall())[0]
-            pass
-        elif 'user' in info[0]:
-            get_user = 'select user_id, username, email, address, user_img from website_user where user_id=%s'
-            user_temp = ''
-            user = info[0]
-            with connection.cursor() as cursor:
-                cursor.execute(get_user, user)
-                user_temp = tuple(cursor.fetchall())[0]
-            user_data ={
-                'user_id':info[0],
-                'username':user_temp[1],
-                'email':user_temp[2],
-                'address':user_temp[4],
-                'user_img':user_temp[5]
-            }
 
-        #return render(request, 'user.html', {'user_id': info[1]})
-        return render(request, 'user.html', user_data)
-    else:
-        return render(request, 'user.html')
-        
 
  
 
@@ -396,6 +373,17 @@ def user_edit_profile(request):
             # return redirect('user')
 
     return render(request, 'user_edit_profile.html', {'user_id': user})
+def auction(request):
+    info = sessionInfo()
+    login_info = info[1]
+    user = info[0]
+    if info[1]=="True":
+        return render(request, 'auction.html', {'user_id':info[0]})
+    else:
+        return render(request, 'auction.html')
+
+def join_auction(request):
+    pass
 
 # --------------------
 # use this template when you need to implement different views for different types of users
