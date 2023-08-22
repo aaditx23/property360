@@ -2,7 +2,7 @@ from django.shortcuts import render,redirect
 from django.http import HttpResponse
 from django.http import JsonResponse
 from django.contrib import messages
-from website.models import User
+# from website.models import User
 from django.db import connection
 # Create your views here.
 
@@ -172,6 +172,8 @@ def home(request):
         return render(request, 'home.html')
     
 
+    
+
 def agents(request):
     info = sessionInfo()
     login_info=info[1]
@@ -252,7 +254,7 @@ def property_save(request):
         image = request.FILES['property_img']
         prop_agent = request.POST['hired_agent']
         print(prop_agent,'-----------23423423')
-        with open('media/property/' + image.name, 'wb') as f:
+        with open('media/' + image.name, 'wb') as f:
             for chunk in image.chunks():
                 f.write(chunk)
         all_properties = 'select property_id from website_property'
@@ -265,7 +267,7 @@ def property_save(request):
         
         property_insert = "INSERT INTO website_property(property_id, status, location, name, size, type, price, agent_id_id, user_id_id,property_img) values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
         with connection.cursor() as cursor:
-            cursor.execute(property_insert, (property_id, status, location, name, size, type, price, prop_agent, user,'property/'+image.name))
+            cursor.execute(property_insert, (property_id, status, location, name, size, type, price, prop_agent, user,image.name))
             messages.success(request, "Property Submitted")
     return redirect('dashboard')
 
@@ -300,7 +302,7 @@ def hire_support(request):
     support = request.POST['support_id']
     print(user,support)
     
-    insert_into_hires = "insert into website_hires (user_id_id, support_id_id) values (%s,%s)"
+    insert_into_hires = "insert into website_hires (user_id, support_id) values (%s,%s)"
     with connection.cursor() as cursor:
         cursor.execute(insert_into_hires, (user,support))
 
@@ -326,7 +328,7 @@ def user_edit_profile(request):
             'user_img': user_data[4]
         }
         image  = request.FILES['user_image']
-        with open('media/user' + image.name, 'wb') as f:
+        with open("media/" + image.name, 'wb') as f:
             for chunk in image.chunks():
                 f.write(chunk)
         new_dict = {
@@ -334,7 +336,7 @@ def user_edit_profile(request):
             'address' : request.POST['address'],
             'email' : request.POST['email'],
             'password' : request.POST['password'],
-            'user_pic':'user/'+image.name
+            'user_pic':image.name
         }
         dict={}
         for keys in new_dict.keys():
@@ -361,6 +363,24 @@ def auction(request):
 
 def join_auction(request):
     pass
+
+def agent_img(request):
+    info = sessionInfo()
+    login_info = info[1]
+    if request.method=='POST':
+        image = request.FILES['agent_img']
+        print(image," image")
+        with open('media/' + image.name, 'wb') as f:
+            for chunk in image.chunks():
+                f.write(chunk)
+        insert = 'update website_agent set agent_img=%s where agent_id=%s'
+        with connection.cursor() as cursor:
+            cursor.execute(insert, (image.name,info[0]))
+    if info[1]=="True":
+        messages.success(request, 'Image uploaded successfully.')
+        return redirect('user')
+    else:
+        return redirect('user')
 
 # --------------------
 # use this template when you need to implement different views for different types of users

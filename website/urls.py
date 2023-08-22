@@ -18,4 +18,7 @@ urlpatterns = [
     path('auction', views.auction, name = 'auction'),
     path('join_auction', views.join_auction, name='join_auction'),
     path('user_edit_profile', views.user_edit_profile, name= 'user_edit_profile'),
+    path('agent_img',views.agent_img, name='agent_img'),
+    path('user',views.dashboard, name='user'),
+    
 ]

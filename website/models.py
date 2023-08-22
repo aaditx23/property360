@@ -27,6 +27,8 @@ class Agent(models.Model):
 
 
 #zabir
+
+
 class Property(models.Model):
     property_id = models.CharField(max_length = 20, primary_key = True)
 
@@ -39,7 +41,7 @@ class Property(models.Model):
     size = models.CharField(max_length=10)
     type = models.CharField(max_length =20)
     price = models.CharField(max_length=15)
-    property_img = models.CharField(max_length=50)
+    property_img = models.CharField(max_length=50, default=None)
 
 class Auction(models.Model):
     auction_id = models.CharField(max_length = 20, primary_key = True)
@@ -81,7 +83,7 @@ class Bids_In(models.Model):
         unique_together = ('buyer_id', 'auction_id')
 
 class Support(models.Model):
-    support_id= models.ForeignKey(Employee, on_delete = models.CASCADE, to_field = 'employee_id',primary_key=True)
+    support_id= models.ForeignKey(Employee, on_delete = models.CASCADE, to_field = 'employee_id',default='support_01',primary_key=True)
     type=models.CharField(max_length=20)
     hiring_price=models.CharField(max_length=10, default = 1000)
 
@@ -121,7 +123,7 @@ class Agents_Clients(models.Model):
 
 class Hires(models.Model):
     user_id=models.ForeignKey(User, on_delete = models.CASCADE, to_field = 'user_id', db_index=True)
-    support_id=models.ForeignKey(Employee, on_delete = models.CASCADE, to_field = 'employee_id', primary_key=True)
+    support_id=models.ForeignKey(Employee, on_delete = models.CASCADE, to_field = 'employee_id')
 
     class Meta:
         unique_together=("support_id","user_id")
