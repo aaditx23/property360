@@ -171,48 +171,7 @@ def home(request):
             return render(request, 'home.html', {'user_id':info[0]})
         return render(request, 'home.html')
     
-def dashboard(request):
-    info = sessionInfo()
-    if info[1]=='True':
-        if 'agent' in info[0]:
-            get_agent= 'select employee_id, name, phone, email, address, supervisor_id, agent_img from website_employee, website_agent where agent_id_id=employee_id'
-            agent_temp=''
-            agent=info[0]
-            with connection .cursor() as cursor:
-                cursor.execute(get_agent, [agent] )
-                agent_temp=tuple(cursor.fetchall())
-            agent_data={
-                'agent_id': info[0],
-                'agentname':agent_temp[1],
-                'phone':agent_temp[2],
-                'email':agent_temp[3],
-                'address':agent_temp[4],
-                'supervisor_id': agent_temp[5],
-                'agent_img':agent_temp[6]
 
-            }
-            #return render(request, 'user.html',  agent_data)
-            
-        elif 'user' in info[0]:
-            get_user = 'select user_id, username, email, address, user_img from website_user where user_id=%s'
-            user_temp = ''
-            user = info[0]
-            with connection.cursor() as cursor:
-                cursor.execute(get_user, user)
-                user_temp = tuple(cursor.fetchall())
-            user_data ={
-                'user_id':info[0],
-                'username':user_temp[1],
-                'email':user_temp[2],
-                'address':user_temp[4],
-                'user_img':user_temp[5]
-            }
-
-        #return render(request, 'user.html', {'user_id': info[1]})
-        #return render(request, 'user.html', user_data)
-        return render(request, 'user.html', agent_data)
-    else:
-        return render(request, 'user.html')
     
 
 def agents(request):
@@ -295,7 +254,7 @@ def property_save(request):
         image = request.FILES['property_img']
         prop_agent = request.POST['hired_agent']
         print(prop_agent,'-----------23423423')
-        with open('media/property/' + image.name, 'wb') as f:
+        with open('media/' + image.name, 'wb') as f:
             for chunk in image.chunks():
                 f.write(chunk)
         all_properties = 'select property_id from website_property'
@@ -308,7 +267,7 @@ def property_save(request):
         
         property_insert = "INSERT INTO website_property(property_id, status, location, name, size, type, price, agent_id_id, user_id_id,property_img) values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
         with connection.cursor() as cursor:
-            cursor.execute(property_insert, (property_id, status, location, name, size, type, price, prop_agent, user,'property/'+image.name))
+            cursor.execute(property_insert, (property_id, status, location, name, size, type, price, prop_agent, user,image.name))
             messages.success(request, "Property Submitted")
     return redirect('dashboard')
 
@@ -369,7 +328,7 @@ def user_edit_profile(request):
             'user_img': user_data[4]
         }
         image  = request.FILES['user_image']
-        with open('media/user' + image.name, 'wb') as f:
+        with open("media/" + image.name, 'wb') as f:
             for chunk in image.chunks():
                 f.write(chunk)
         new_dict = {
@@ -377,7 +336,7 @@ def user_edit_profile(request):
             'address' : request.POST['address'],
             'email' : request.POST['email'],
             'password' : request.POST['password'],
-            'user_pic':'user/'+image.name
+            'user_pic':image.name
         }
         dict={}
         for keys in new_dict.keys():
@@ -404,6 +363,24 @@ def auction(request):
 
 def join_auction(request):
     pass
+
+def agent_img(request):
+    info = sessionInfo()
+    login_info = info[1]
+    if request.method=='POST':
+        image = request.FILES['agent_img']
+        print(image," image")
+        with open('media/' + image.name, 'wb') as f:
+            for chunk in image.chunks():
+                f.write(chunk)
+        insert = 'update website_agent set agent_img=%s where agent_id=%s'
+        with connection.cursor() as cursor:
+            cursor.execute(insert, (image.name,info[0]))
+    if info[1]=="True":
+        messages.success(request, 'Image uploaded successfully.')
+        return redirect('user')
+    else:
+        return redirect('user')
 
 # --------------------
 # use this template when you need to implement different views for different types of users
