@@ -75,7 +75,8 @@ def user(request):
         }
         find_agent = "select user_id from website_user where user_id like 'agent%'"
         find_user = "select user_id from website_user where user_id like 'user%'"
-        insert = 'insert into website_user (user_id, username, email, password, address) values (%s, %s, %s, %s, %s)'
+        insert_user = 'insert into website_user (user_id, username, email, password, address) values (%s, %s, %s, %s, %s)'
+        insert_emp = 'insert into website_employee (employee_id, name, email, password, address) values (%s %s %s %s %s) '
         with connection.cursor() as cursor:
             uid = ""
             if usertype=="user":
@@ -84,41 +85,59 @@ def user(request):
                 print(user_list)
                 entries = len(user_list)
                 uid = createUser((entries+1))
+                cursor.execute(insert_user, (uid, name, email, psswd, addrss))
             else:
                 cursor.execute(find_agent)
                 agent_list = tuple(cursor.fetchall())
                 print(agent_list)
                 entries = len(agent_list)
                 uid = createAgent((entries+1))
+                cursor.execute(insert_agent, (uid, name, email, psswd, addrss))
             setLogin(uid)
             cursor.execute(insert, (uid, name, email, psswd, addrss))
         data.update({'user_id': sessionInfo()[0]})
         messages.success(request, 'Signup Successful')
         return render(request, 'user.html', data)
-    else:
-        if info[1]=="True":                        #if signup form not filled, but user logged in
-            #retrieve data from database here and pass through dictionary
-            getdata = 'select * from website_user where user_id=%s'
-            temp = None
-            getimage = 'select property_img,property_id from website_property where user_id_id=%s'
-            prop=''
-            with connection.cursor() as cursor:
-                cursor.execute(getdata,[info[0]])
-                temp = tuple(cursor.fetchall())[0]
-                cursor.execute(getimage,[info[0]])
-                prop = cursor.fetchall()
-                print(prop)
-            data ={
-                'user_id':info[0],
-                'username':temp[1],
-                'email':temp[2],
-                'address':temp[4],
-                'saved_image':prop[0],
-                'user_prop': prop
+
+def dashboard(request):
+    info = sessionInfo()
+    if info[1]=='True':
+        if 'agent' in info[0]:
+            get_agent= 'select employee_id, name, email, address from website_employee, website_agent where agent_id_id=employee_id'
+            agent_temp=''
+            agent=info[0]
+            with connection .cursor() as cursor:
+                cursor.execute(get_agent, [agent] )
+                agent_temp=tuple(cursor.fetchall())[0]
+            agent_data={
+                'agent_id': info[0],
+                'agentname':agent_temp[1],
+                'email':agent_temp[2],
+                'address':agent_temp[3],
+                
             }
-            return render(request, 'user.html', data)
-        else:                                               #if signup for not filled, also user not logged in
-            return render(request, 'user.html')
+            return render(request, 'user.html', agent_data)
+            
+        elif 'user' in info[0]:
+            get_user = 'select user_id, username, email, address from website_user where user_id=%s'
+            user_temp = ''
+            user = info[0]
+            with connection.cursor() as cursor:
+                cursor.execute(get_user, [user])
+                user_temp = tuple(cursor.fetchall())[0]
+            user_data ={
+                'user_id':info[0],
+                'username':user_temp[1],
+                'email':user_temp[2],
+                'address':user_temp[3],
+                
+            }
+            return render(request, 'user.html', user_data)
+
+        #return render(request, 'user.html', {'user_id': info[1]})
+        return render(request, 'user.html', user_data)
+    else:
+        return render(request, 'user.html')
 
 def home(request):
     user = None
@@ -195,6 +214,7 @@ def property_img(request):
             for chunk in image.chunks():
                 f.write(chunk)
         insert = 'update website_user set property_img=%s where user_id=%s'
+        update = f"update webssite_user set"
         with connection.cursor() as cursor:
             cursor.execute(insert, (image.name,info[0]))
     if info[1]=="True":
@@ -296,7 +316,17 @@ def hire_support(request):
 
     return redirect('support')
     
+def auction(request):
+    info = sessionInfo()
+    login_info = info[1]
+    user = info[0]
+    if info[1]=="True":
+        return render(request, 'auction.html', {'user_id':info[0]})
+    else:
+        return render(request, 'auction.html')
 
+def join_auction(request):
+    pass
 
 # --------------------
 # use this template when you need to implement different views for different types of users

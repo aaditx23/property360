@@ -15,12 +15,13 @@ class Employee(models.Model):
     email = models.EmailField()
     password = models.CharField(max_length=50)
     address = models.CharField(max_length=50)
-    supervisor = models.BooleanField()
+    supervisor = models.BooleanField(default=0)
 
 class Agent(models.Model):
     agent_id = models.ForeignKey(Employee, on_delete = models.CASCADE, to_field= 'employee_id', primary_key = True)
 
     supervisor_id = models.CharField(max_length=50)
+    agent_img = models.CharField(max_length=50, default=None)
 
 
 
