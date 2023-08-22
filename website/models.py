@@ -79,7 +79,7 @@ class Bids_In(models.Model):
         unique_together = ('buyer_id', 'auction_id')
 
 class Support(models.Model):
-    support_id= models.ForeignKey(Employee, on_delete = models.CASCADE, to_field = 'employee_id',primary_key=True)
+    support_id= models.ForeignKey(Employee, on_delete = models.CASCADE, to_field = 'employee_id',default='support_01',primary_key=True)
     type=models.CharField(max_length=20)
     hiring_price=models.CharField(max_length=10, default = 1000)
 
