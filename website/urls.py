@@ -11,7 +11,6 @@ urlpatterns = [
     path('home', views.home, name = 'home'),
     path('property', views.property, name = 'property'),
     path('logout', views.logout, name='logout'),
-    path('property_img', views.property_img, name = 'property_img'),
     path('support', views.support, name='support'),
     path('property_registration', views.property_registration, name='property_registration'),
     path('property_save', views.property_save, name='property_save'),

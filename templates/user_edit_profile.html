@@ -4,7 +4,7 @@
 
 <div class = 'container my-3'>
 
-    <form action = "/user_edit_profile" method ="post" >
+    <form action = "/user_edit_profile" method ="post" enctype="multipart/form-data" >
       {%csrf_token%}
       <div class="mb-3">
         <label for="username" class="form-label">New User Name:</label>
@@ -45,6 +45,13 @@
           <input type="radio" id="status" name = "status" value = "not for sale">
           <label for="status" >Not For Sale</label>
       </div> {% endcomment %}
+
+      <div class="mb-3">
+        <label for="user_image" class="form-label">Upload Profile Picture</label>
+        <div class="col-sm-3">
+            <input type="file" class="form-control" id="user_image" name="user_image">
+        </div>
+      </div>
         <button type="submit" class="btn btn-primary">Save</button>
         
       

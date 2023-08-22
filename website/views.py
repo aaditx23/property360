@@ -102,11 +102,7 @@ def user(request):
     
 
 def dashboard(request):
-    for i in range(10):
-        print(i,"000000000000000000000000000000000")
-    print("------DASHBOARD-------------------------------")
     info = sessionInfo()
-    print(info,"-------------------------------------")
     if info[1]=='True':
         if 'agent' in info[0]:
             get_agent= 'select employee_id, name, email, address from website_employee, website_agent where agent_id_id=employee_id and employee_id=%s'
@@ -115,34 +111,35 @@ def dashboard(request):
             with connection .cursor() as cursor:
                 cursor.execute(get_agent,[agent])
                 agent_temp=tuple(cursor.fetchall())[0]
-                print(agent_temp,"==========")
             agent_data={
                 'user_id': info[0],
                 'agentname':agent_temp[1],
                 'email':agent_temp[2],
-                'address':agent_temp[3],
-                
+                'address':agent_temp[3],               
             }
             return render(request, 'user.html', agent_data)
             
         elif 'user' in info[0]:
-            get_user = 'select user_id, username, email, address from website_user where user_id=%s'
+            get_user = 'select user_id, username, email, address,user_img from website_user where user_id=%s'
+            get_prop = 'select * from website_property where user_id_id=%s'
             user_temp = ''
+            user_prop = ''
             user = info[0]
             print(user)
             with connection.cursor() as cursor:
                 cursor.execute(get_user, [user])
                 user_temp = tuple(cursor.fetchall())[0]
+                cursor.execute(get_prop,[user])
+                user_prop = tuple(cursor.fetchall())
             user_data ={
                 'user_id':info[0],
                 'username':user_temp[1],
                 'email':user_temp[2],
                 'address':user_temp[3],
-                
+                'user_img':user_temp[4],
+                'prop':user_prop, 
             }
             return render(request, 'user.html', user_data)
-
-        #return render(request, 'user.html', {'user_id': info[1]})
     return render(request, 'user.html')
 
 def home(request):
@@ -210,24 +207,6 @@ def property(request):
     print(property_data)
     return render(request, 'property.html', {'data': property_data, 'user_id':user})
 
-def property_img(request):
-    info = sessionInfo()
-    login_info = info[1]
-    if request.method=='POST':
-        image = request.FILES['property_img']
-        print(image," image")
-        with open('media/' + image.name, 'wb') as f:
-            for chunk in image.chunks():
-                f.write(chunk)
-        insert = 'update website_user set property_img=%s where user_id=%s'
-        update = f"update webssite_user set"
-        with connection.cursor() as cursor:
-            cursor.execute(insert, (image.name,info[0]))
-    if info[1]=="True":
-        messages.success(request, 'Image uploaded successfully.')
-        return redirect('user')
-    else:
-        return redirect('user')
 
 def support(request):
     info = sessionInfo()
@@ -248,7 +227,12 @@ def property_registration(request):
     login_info = info[1]
     user = info[0]
     if info[1]=="True":
-        return render(request, 'property_registration.html', {'user_id':info[0]})
+        agent_list = ''
+        with connection.cursor() as cursor:
+            cursor.execute("select employee_id,name from website_employee where employee_id like 'agent%'")
+            agent_list = tuple(cursor.fetchall())
+        print(agent_list)
+        return render(request, 'property_registration.html', {'user_id':info[0], 'agents':agent_list})
         
     else:
         return render(request, 'property_registration.html')
@@ -266,8 +250,9 @@ def property_save(request):
         status = request.POST['status']
         type = request.POST['type']
         image = request.FILES['property_img']
-        print(image," image")
-        with open('media/' + image.name, 'wb') as f:
+        prop_agent = request.POST['hired_agent']
+        print(prop_agent,'-----------23423423')
+        with open('media/property/' + image.name, 'wb') as f:
             for chunk in image.chunks():
                 f.write(chunk)
         all_properties = 'select property_id from website_property'
@@ -279,11 +264,10 @@ def property_save(request):
 
         
         property_insert = "INSERT INTO website_property(property_id, status, location, name, size, type, price, agent_id_id, user_id_id,property_img) values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
-        print("RUNNING SAVE")
         with connection.cursor() as cursor:
-            cursor.execute(property_insert, (property_id, status, location, name, size, type, price, 'not_hired', user,image))
+            cursor.execute(property_insert, (property_id, status, location, name, size, type, price, prop_agent, user,'property/'+image.name))
             messages.success(request, "Property Submitted")
-    return redirect('user')
+    return redirect('dashboard')
 
 
 def property_list(request):
@@ -323,34 +307,35 @@ def hire_support(request):
     return redirect('support')
     
 def user_edit_profile(request):
-    print("hello")
     info = sessionInfo()
     login_info = info[1]
     user = info[0]
     
     if request.method == 'POST':
         
-        retrieve_user_info = "select username, address, email, password from website_user where user_id = %s"
+        retrieve_user_info = "select username, address, email, password,user_img from website_user where user_id = %s"
         user_data = None
         with connection.cursor() as cursor:
             cursor.execute(retrieve_user_info, [user])
             user_data = tuple(cursor.fetchall())[0]
-            print(user_data)
         old_dict = {
             'username' : user_data[0],
             'address' : user_data[1],
-            'email' : str(user_data[2]),
-            'password' : user_data[3]
+            'email' : user_data[2],
+            'password' : user_data[3],
+            'user_img': user_data[4]
         }
-
+        image  = request.FILES['user_image']
+        with open('media/user' + image.name, 'wb') as f:
+            for chunk in image.chunks():
+                f.write(chunk)
         new_dict = {
-        'username' : request.POST['username'],
-        'address' : request.POST['address'],
-        'email' : str(request.POST['email']),
-        'password' : request.POST['password']
+            'username' : request.POST['username'],
+            'address' : request.POST['address'],
+            'email' : request.POST['email'],
+            'password' : request.POST['password'],
+            'user_pic':'user/'+image.name
         }
-
-        
         dict={}
         for keys in new_dict.keys():
             if len(new_dict[keys]) != 0:
@@ -358,21 +343,13 @@ def user_edit_profile(request):
             else:
                 dict[keys] = old_dict[keys]
         print(dict,old_dict,new_dict)
-        
-        # image = request.FILES['user_img']
-        # with open('media/' + image.name, 'wb') as f:
-        #     for chunk in image.chunks():
-        #         f.write(chunk)
-        # insert_img = 'update website_user set user_img=%s where user_id=%s'
-        # update_user = 'update website_user set user_img=%s, email= %s,address = %s where user_id = %s '
-        update_user = 'update website_user set username = %s, email= %s,address = %s,password =%s where user_id = %s '
+        update_user = 'update website_user set username = %s, email= %s,address = %s,password =%s, user_img=%s where user_id = %s '
         with connection.cursor() as cursor:
-            cursor.execute(update_user, (dict['username'],dict['email'], dict['address'],dict['password'], user))
+            cursor.execute(update_user, (dict['username'],dict['email'], dict['address'],dict['password'],dict['user_pic'],user))
             messages.success(request, "Profile Updated")
-            # cursor.execute(update_user, (image.name ,email, address,password, info[0]))
-            # return redirect('user')
-
     return render(request, 'user_edit_profile.html', {'user_id': user})
+
+
 def auction(request):
     info = sessionInfo()
     login_info = info[1]
