@@ -241,7 +241,7 @@ def agents(request):
     if info[1]=="True":
         return render(request, 'agents.html',{'user_id':info[0],'data': agent_data})
     else:
-        return render(request, 'agents.html')
+        return render(request, 'agents.html' , {'data': agent_data})
 
 def about(request):
     info = sessionInfo()
