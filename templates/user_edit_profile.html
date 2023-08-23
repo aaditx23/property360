@@ -7,7 +7,7 @@
     <form action = "/user_edit_profile" method ="post" enctype="multipart/form-data" >
       {%csrf_token%}
       <div class="mb-3">
-        <label for="username" class="form-label">New User Name:</label>
+        <label for="username" class="form-label">Edit User Name:</label>
         <input type="text" class="form-control" id="username" name="username" >
       </div>
       {% comment %} <div class="mb-3">
@@ -16,17 +16,17 @@
       </div> {% endcomment %}
     
       <div class="mb-3">
-        <label for="email" class="form-label">New Email:</label>
+        <label for="email" class="form-label">Edit Email:</label>
         <input type="email" class="form-control" id="email" name = "email">
       </div>
     
       <div class="mb-3">
-        <label for="password" class="form-label">New Password:</label>
+        <label for="password" class="form-label">Edit Password:</label>
         <input type="text" class="form-control" id="password" name = "password" >
       </div>
 
       <div class="mb-3">
-        <label for="address" class="form-label">New Address:</label>
+        <label for="address" class="form-label">Edit Address:</label>
         <input type="text" class="form-control" id="address" name= "address" >
       </div>
     
@@ -47,13 +47,15 @@
       </div> {% endcomment %}
 
       <div class="mb-3">
-        <label for="user_image" class="form-label">Upload Profile Picture</label>
+        <label for="user_image" class="form-label">Edit Profile Picture:</label>
         <div class="col-sm-3">
-            <input type="file" class="form-control" id="user_image" name="user_image">
+            <input type="file" class="form-control" id="user_image" accept=".jpg,.png,.jpeg" name="user_image">
         </div>
       </div>
-        <button type="submit" class="btn btn-primary">Save</button>
-        
+      <div class="mb-3">
+          <button type="submit" class="btn btn-primary">Save</button>
+
+        </div>
       
     </form>
   </div>
