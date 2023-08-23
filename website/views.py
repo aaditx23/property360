@@ -36,11 +36,25 @@ def setLogin(user):
     setlogin = "update website_session set user=%s, login = 'True' where user='user_0000'"
     with connection.cursor() as cursor:
         cursor.execute(setlogin, [user])
+        
 
-# def fetch_current_property(request):
-#     data = {
-#         "property" : request.POST["pid"]
-#     }
+def fetch_property(request):
+    info = sessionInfo()
+    user = info[0]
+    if 'user' in user:
+        if request.method == "POST":
+            property_id = request.POST['property_id']
+            request.session['property_id'] = property_id
+        return redirect('property_edit_info')
+    elif "agent" in user:
+        if request.method == 'POST':
+            property_id = request.POST['property_id']
+            update_status = "update website_property set status = 'for sale' where property_id = %s "
+            with connection.cursor() as cursor:
+                cursor.execute(update_status, [property_id])
+                messages.success (request, 'Property Added To Market')
+            request.session['property_id'] = property_id
+        return redirect('property')
 
 def setLogout():
     setlogout = "update website_session set user='user_0000', login = 'False' where login='True'"
@@ -104,26 +118,47 @@ def user(request):
         messages.success(request, 'Signup Successful')
         return render(request, 'user.html', data)
     return render(request, 'user.html')
-    
+
+
+
+
+def agent_dashboard(request):
+    info = sessionInfo()
+    if info[1]=='True':
+        return render(request, 'agent_dashboard.html')
+    return render(request, 'user.html')
+
 
 def dashboard(request):
     info = sessionInfo()
     if info[1]=='True':
         if 'agent' in info[0]:
-            get_agent= 'select employee_id, name, email, address from website_employee, website_agent where agent_id_id=employee_id and employee_id=%s'
+            get_agent= 'select employee_id, name, email, address, phone, supervisor_id from website_employee, website_agent where agent_id_id=employee_id and employee_id=%s'
+            get_prop = 'select * from website_property where agent_id_id=%s'
             agent_temp=''
+            agent_prop = ''
             agent=info[0]
             with connection .cursor() as cursor:
                 cursor.execute(get_agent,[agent])
                 agent_temp=tuple(cursor.fetchall())[0]
+                cursor.execute(get_prop,[agent])
+                agent_prop = tuple(cursor.fetchall())
             agent_data={
-                'user_id': info[0],
+                'agent_id': info[0],
                 'agentname':agent_temp[1],
                 'email':agent_temp[2],
                 'address':agent_temp[3],               
+                'phone' : agent_temp[4],
+                'supervisor_id' : agent_temp[5],
+                'prop': agent_prop,
             }
-            return render(request, 'user.html', agent_data)
-            
+            print(agent_data)
+            return render(request, 'agent_dashboard.html', agent_data)
+        
+         
+
+
+
         elif 'user' in info[0]:
             get_user = 'select user_id, username, email, address,user_img from website_user where user_id=%s'
             get_prop = 'select * from website_property where user_id_id=%s'
@@ -144,8 +179,11 @@ def dashboard(request):
                 'user_img':user_temp[4],
                 'prop':user_prop, 
             }
+            
             return render(request, 'user.html', user_data)
     return render(request, 'user.html')
+
+
 
 def home(request):
     user = None
@@ -206,14 +244,16 @@ def property(request):
     info = sessionInfo()
     login_info = info[1]
     user = info[0]
-    property_retrieve = "select property_id, name, location, size, type, price, status from website_property"
+    property_retrieve = "select property_id, name,agent_id_id, location, size, type, price, status from website_property where status = 'for sale'"
     property_data =  None
     with connection.cursor() as cursor:
         cursor.execute(property_retrieve)
         property_data = tuple(cursor.fetchall())
     print(property_data)
-    return render(request, 'property.html', {'data': property_data, 'user_id':user})
 
+    if info[1] == 'True':
+        return render(request, 'property.html', {'data': property_data, 'user_id':user})
+    return render(request, 'property.html', {'data': property_data})
 
 def support(request):
     info = sessionInfo()
@@ -362,11 +402,7 @@ def user_edit_profile(request):
 
     return render(request, 'user_edit_profile.html', {'user_id': user})
 
-def fetch_property(request):
-    if request.method == "POST":
-        property_id = request.POST['property_id']
-        request.session['property_id'] = property_id
-    return redirect('property_edit_info')
+
 
 def property_edit_info(request):
     info = sessionInfo()
