@@ -20,5 +20,7 @@ urlpatterns = [
     path('user_edit_profile', views.user_edit_profile, name= 'user_edit_profile'),
     path('agent_img',views.agent_img, name='agent_img'),
     path('user',views.dashboard, name='user'),
+    path('property_edit_info', views.property_edit_info, name= 'property_edit_info'),
+    path('fetch_property', views.fetch_property, name= 'fetch_property'),
     
 ]
