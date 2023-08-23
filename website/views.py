@@ -221,6 +221,7 @@ def support(request):
         
     else:
         return render(request, 'support.html', {'data': support_data})
+    
 
 def property_registration(request):
     info = sessionInfo()
@@ -287,8 +288,6 @@ def property_list(request):
     # else:
     #     return render(request, 'user.html', {'data': property_data})
 
-
-
  
 
 def hire_support(request):
@@ -298,11 +297,15 @@ def hire_support(request):
     user = info[0]
 
     support = request.POST['support_id']
-    print(user,support)
+    property = request.POST['property_id']
+    print(user,support,property)
     
     insert_into_hires = "insert into website_hires (user_id, support_id) values (%s,%s)"
+    insert_into_maintains = "insert into website_maintains (property_id_id,support_id_id) values (%s,%s)"
     with connection.cursor() as cursor:
         cursor.execute(insert_into_hires, (user,support))
+        cursor.execute(insert_into_maintains, (property,support))
+
 
     return redirect('support')
     
