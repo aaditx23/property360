@@ -151,17 +151,21 @@ def home(request):
     user = None
     password = None
     if request.method=="POST":
-        user = str(request.POST['uid'])
-        password = str(request.POST['pswd'])
-        retrieve_pass = "select password from website_user where user_id= %s"
-        retrieve_name = "select username from website_user where user_id = %s"
+        user = request.POST['uid']
+        retrieve_pass = ''
+        retrieve_name = ''
+        if 'user' in user:
+            retrieve_pass = "select password from website_user where user_id= %s"
+            retrieve_name = "select username from website_user where user_id = %s"
+        elif 'agent' in user:
+            retrieve_pass = "select password from website_employee where employee_id= %s"
+            retrieve_name = "select name from website_employee where employee_id = %s"
+        password = request.POST['pswd']
         pass_data = ""
         name_data = ""
         with connection.cursor() as cursor:
             cursor.execute(retrieve_pass, [user])
-            temp = tuple(cursor.fetchall())
-            print("--------------------------", temp)
-            pass_data = temp[0][0]
+            pass_data = tuple(cursor.fetchall())[0][0]
             cursor.execute(retrieve_name,[user])
             name_data = tuple(cursor.fetchall())[0][0]
         if pass_data==password:
