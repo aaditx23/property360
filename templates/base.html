@@ -15,9 +15,62 @@
           </button>
           <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-              <li class="nav-item">
-                <a class="nav-link {% if request.path == '/user' or request.path == '/dashboard' %}active{% endif %}" href="/dashboard">Dashboard</a>
+              {% if 'user' in user_id %}
+                <li class="nav-item">
+                  <a class="nav-link {% if request.path == '/user' or request.path == '/dashboard' or request.path == '/agent_dashboard' %}active{% endif %}" href="/dashboard">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link {% if request.path == '/home' %}active{% endif %}" href="/home">Home</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link {% if request.path == '/agents' %}active{% endif %}" href="/agents">Agents</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link {% if request.path == '/property' %}active{% endif %}" href="/property">Properties</a>
+                </li>
+                
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    More
+                  </a>
+                  <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="/support">Support</a></li>
+                  </ul>
+                </li>
+                
+                <li class="nav-item">
+                  <a class="nav-link {% if request.path == '/auction' %}active{% endif %}" href="/auction">Auction</a>
+                </li>
+                <li id="login">
+                  <a class="nav-link" >{{ user_id }}</a>
+                  <li class="nav-item"> <a class="nav-link" href="/logout">Logout</a> </li>
+                  {% comment %} {% if user_id %}
+                  {% else %}
+                      <a class="nav-link" href="/login">Login</a>
+                  {% endif %} {% endcomment %}
+  
               </li>
+              
+              {% elif 'agent' in user_id %}
+              <li class="nav-item">
+                <a class="nav-link {% if request.path == '/user' or request.path == '/dashboard' or request.path == '/agent_dashboard' %}active{% endif %}" href="/dashboard">Dashboard</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link {% if request.path == '/home' %}active{% endif %}" href="/home">Home</a>
+              </li>
+              
+              <li class="nav-item">
+                <a class="nav-link {% if request.path == '/property' %}active{% endif %}" href="/property">Properties</a>
+              </li>
+              
+              
+              <li id="login">
+                <a class="nav-link" >{{ user_id }}</a>
+                <li class="nav-item"> <a class="nav-link" href="/logout">Logout</a> </li>
+            
+              </li>
+              {% else %}
+              
               <li class="nav-item">
                 <a class="nav-link {% if request.path == '/home' %}active{% endif %}" href="/home">Home</a>
               </li>
@@ -27,6 +80,7 @@
               <li class="nav-item">
                 <a class="nav-link {% if request.path == '/property' %}active{% endif %}" href="/property">Properties</a>
               </li>
+              
               <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                   More
@@ -35,17 +89,18 @@
                   <li><a class="dropdown-item" href="/support">Support</a></li>
                 </ul>
               </li>
+              
               <li class="nav-item">
                 <a class="nav-link {% if request.path == '/auction' %}active{% endif %}" href="/auction">Auction</a>
               </li>
               <li id="login">
-                {% if user_id %}
-                    <a class="nav-link" >{{ user_id }}</a>
-                    <li class="nav-item"> <a class="nav-link" href="/logout">Logout</a> </li>
-                {% else %}
-                    <a class="nav-link" href="/login">Login</a>
-                {% endif %}
-            </li>
+                  <a class="nav-link" href="/login">Login</a>
+              
+              </li>
+
+              {% endif %}
+
+              
             </ul>
             <form class="d-flex" role="search">
               <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
