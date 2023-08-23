@@ -10,7 +10,9 @@
           <div class="card mb-4">
             <div class="card-body text-center">
               <img src="/media/{{user_img}}" alt="user image"
-              class="rounded-circle img-fluid" style="width: 150px;">
+              class="rounded-circle img-fluid" style="width: 150px;" 
+              >
+              {% comment %} onerror="this.src='path of the default image'"> {% endcomment %}
               <h5 class="my-3">{{username}}</h5>
               <p class="text-muted mb-1">{{email}}</p>
               <p class="text-muted mb-4">{{address}}</p>
@@ -35,18 +37,24 @@
             <div class="card-body p-4">
               <div class="d-flex text-black">
                 <div class="flex-shrink-0">
-                  <img src="/media/{{p.9}}"
+                  <img src="/media/{{p.7}}"
                     alt="property_image" class="img-fluid"
                     style="width: 180px; border-radius: 10px;">
                 </div>
                 <div class="flex-grow-1 ms-3">
-                  <h5 class="mb-1">{{p.3}}</h5>
+                  
+
+                    <div style="color: #2b2a2a;" align="right">{{p.0}}</div>
+                    <h5 class="mb-1">{{p.3}}</h5> 
+                  
                   <p class="mb-2 pb-1" style="color: #2b2a2a;">{{p.2}}</p>
                   <div class="d-flex justify-content-start rounded-3 p-2 mb-3"
-                    style="background-color: #efefef;">
+                    style="background-color: #efefef;"
+                    >
+                    {% comment %} onerror="this.src='path of the default image'"> {% endcomment %}
                     <div class="px-5">
                       <p class="small text-muted mb-1">[Size]</p>
-                      <p class="mb-0">41{{p.4}}</p>
+                      <p class="mb-0">{{p.4}}</p>
                     </div>
                     <div class="px-5">
                       <p class="small text-muted mb-1">[type]</p>
@@ -59,7 +67,7 @@
                     <div class="px-5">
                       <p class="small text-muted mb-1">[Agent]</p>
                       <a href="">
-                          <p class="mb-0">{{p.8}}</p>
+                          <p class="mb-0">{{p.9}}</p>
                       </a>
                     </div>
                     <div class="px-5">
@@ -67,10 +75,16 @@
                       <p class="mb-0">{{p.1}}</p>
                     </div>
                   </div>
-                  <div class="d-flex pt-1">
-                    <button type="submit" class="btn btn-outline-primary me-1 flex-grow-1">Edit info</button>
-                    {% comment %} <button type="button" class="btn btn-primary flex-grow-1">Details</button> {% endcomment %}
-                  </div>
+                  <form action="/fetch_property" method = "POST">
+                    {% csrf_token %}
+                    <div class="d-flex pt-1">
+                      
+                      {% comment %} c  {% endcomment %}
+                      <input type="hidden" name = 'property_id' value= {{p.0}}>
+                      {% comment %} c {% endcomment %}
+                      <button type="submit" class="btn btn-outline-primary me-1 flex-grow-1">Edit info</button>
+                    </div>
+                  </form>
                 </div>
               </div>
             </div>

@@ -37,6 +37,11 @@ def setLogin(user):
     with connection.cursor() as cursor:
         cursor.execute(setlogin, [user])
 
+# def fetch_current_property(request):
+#     data = {
+#         "property" : request.POST["pid"]
+#     }
+
 def setLogout():
     setlogout = "update website_session set user='user_0000', login = 'False' where login='True'"
     with connection.cursor() as cursor:
@@ -146,17 +151,21 @@ def home(request):
     user = None
     password = None
     if request.method=="POST":
-        user = str(request.POST['uid'])
-        password = str(request.POST['pswd'])
-        retrieve_pass = "select password from website_user where user_id= %s"
-        retrieve_name = "select username from website_user where user_id = %s"
+        user = request.POST['uid']
+        retrieve_pass = ''
+        retrieve_name = ''
+        if 'user' in user:
+            retrieve_pass = "select password from website_user where user_id= %s"
+            retrieve_name = "select username from website_user where user_id = %s"
+        elif 'agent' in user:
+            retrieve_pass = "select password from website_employee where employee_id= %s"
+            retrieve_name = "select name from website_employee where employee_id = %s"
+        password = request.POST['pswd']
         pass_data = ""
         name_data = ""
         with connection.cursor() as cursor:
             cursor.execute(retrieve_pass, [user])
-            temp = tuple(cursor.fetchall())
-            print("--------------------------", temp)
-            pass_data = temp[0][0]
+            pass_data = tuple(cursor.fetchall())[0][0]
             cursor.execute(retrieve_name,[user])
             name_data = tuple(cursor.fetchall())[0][0]
         if pass_data==password:
@@ -215,7 +224,7 @@ def property(request):
 def support(request):
     info = sessionInfo()
     login_info = info[1]
-    support_retrieve = "select name, type, phone, hiring_price, support_id from website_support s, website_employee e where e.employee_id = s.support_id"
+    support_retrieve = "select name, type, phone, hiring_price, support_id_id from website_support s, website_employee e where e.employee_id = s.support_id_id"
     support_data =  None
     with connection.cursor() as cursor:
         cursor.execute(support_retrieve)
@@ -267,7 +276,7 @@ def property_save(request):
             property_id = createProp((entries+1))
 
         
-        property_insert = "INSERT INTO website_property(property_id, status, location, name, size, type, price, agent_id_id, user_id_id,property_img) values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+        property_insert = "INSERT INTO website_property(property_id, status, location, name, size, type, price, agent_id_id, user_id_id, property_img) values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
         with connection.cursor() as cursor:
             cursor.execute(property_insert, (property_id, status, location, name, size, type, price, prop_agent, user,image.name))
             messages.success(request, "Property Submitted")
@@ -304,10 +313,11 @@ def hire_support(request):
     support = request.POST['support_id']
     print(user,support)
     
-    insert_into_hires = "insert into website_hires (user_id, support_id) values (%s,%s)"
+    insert_into_hires = "insert into website_hires (user_id_id, support_id_id) values (%s,%s)"
     with connection.cursor() as cursor:
         cursor.execute(insert_into_hires, (user,support))
-
+        messages.success(request, "Successfully Hired Support")
+        
     return redirect('support')
 
 
@@ -333,14 +343,16 @@ def user_edit_profile(request):
         }
         image  = request.FILES['user_image']
         with open("media/" + image.name, 'wb') as f:
+        
             for chunk in image.chunks():
                 f.write(chunk)
+        
         new_dict = {
             'username' : request.POST['username'],
             'address' : request.POST['address'],
             'email' : request.POST['email'],
             'password' : request.POST['password'],
-            'user_pic':image.name
+            'user_img':image.name
         }
         dict={}
         for keys in new_dict.keys():
@@ -349,11 +361,73 @@ def user_edit_profile(request):
             else:
                 dict[keys] = old_dict[keys]
         print(dict,old_dict,new_dict)
+
+
         update_user = 'update website_user set username = %s, email= %s,address = %s,password =%s, user_img=%s where user_id = %s '
         with connection.cursor() as cursor:
-            cursor.execute(update_user, (dict['username'],dict['email'], dict['address'],dict['password'],dict['user_pic'],user))
+            cursor.execute(update_user, (dict['username'],dict['email'], dict['address'],dict['password'],dict['user_img'],user))
             messages.success(request, "Profile Updated")
+
     return render(request, 'user_edit_profile.html', {'user_id': user})
+
+def fetch_property(request):
+    if request.method == "POST":
+        property_id = request.POST['property_id']
+        request.session['property_id'] = property_id
+    return redirect('property_edit_info')
+
+def property_edit_info(request):
+    info = sessionInfo()
+    login_info = info[1]
+    user = info[0]
+  
+    if request.method == 'POST':
+        property_id = request.POST['property_id']
+    
+        print(property_id)
+        retrieve_property_info = "select name,location,size,type,price,property_img from website_property where property_id = %s"
+        property_data = None
+        with connection.cursor() as cursor:
+            cursor.execute(retrieve_property_info, [property_id])
+            property_data = tuple(cursor.fetchall())[0]
+        print(property_data)
+        old_dict = {
+            'p_name' : property_data[0],
+            
+            'location' : property_data[1],
+            'size' : property_data[2],
+            'type' : property_data[3],
+            'price' :property_data[4],
+            'property_img': property_data[5]
+        }
+        image  = request.FILES['property_image']
+        with open("media/" + image.name, 'wb') as f:
+            for chunk in image.chunks():
+                f.write(chunk)
+        print(old_dict)
+        new_dict = {
+            'p_name' : request.POST['p_name'],
+            'location' : request.POST['location'],
+            'size' : request.POST['size'],
+            'type' : request.POST['type'],
+            'price' : request.POST['price'],
+            'property_img':image.name
+        }
+        print(new_dict)
+        dict={}
+        for keys in new_dict.keys():
+            if len(new_dict[keys]) != 0:
+                dict[keys] = new_dict[keys]
+            else:
+                dict[keys] = old_dict[keys]
+        print(dict,old_dict,new_dict)
+        update_property = 'update website_property set name =%s,location=%s,size=%s,type=%s,price=%s,property_img = %s where property_id = %s '
+        with connection.cursor() as cursor:
+            cursor.execute(update_property, (dict['p_name'], dict['location'],dict['size'],dict['type'],dict['price'],dict['property_img'],property_id))
+            messages.success(request, "Property Info Updated")
+        
+    return render(request, 'property_edit_info.html', {'user_id': user,})
+
 
 
 def auction(request):
