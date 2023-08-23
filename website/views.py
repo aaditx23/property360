@@ -97,9 +97,9 @@ def user(request):
                 print(agent_list)
                 entries = len(agent_list)
                 uid = createAgent((entries+1))
-                cursor.execute(insert_agent, (uid, name, email, psswd, addrss))
+                cursor.execute(insert_emp, (uid, name, email, psswd, addrss))
             setLogin(uid)
-            cursor.execute(insert, (uid, name, email, psswd, addrss))
+            
         data.update({'user_id': sessionInfo()[0]})
         messages.success(request, 'Signup Successful')
         return render(request, 'user.html', data)
@@ -187,7 +187,9 @@ def home(request):
 def agents(request):
     info = sessionInfo()
     login_info=info[1]
-    agent_retrieve="select agent_id_id, supervisor_id from website_agent"
+    #agent_retrieve="select agent_id_id, supervisor_id from website_agent"
+   
+    agent_retrieve="select agent_id_id, supervisor_id ,name, email ,phone, address from website_agent,website_employee where agent_id_id =employee_id and agent_id_id like 'agent%' "
     agent_data=None
     with connection.cursor() as cursor:
         cursor.execute(agent_retrieve)
@@ -318,6 +320,8 @@ def hire_support(request):
         messages.success(request, "Successfully Hired Support")
         
     return redirect('support')
+
+
     
 def user_edit_profile(request):
     info = sessionInfo()
