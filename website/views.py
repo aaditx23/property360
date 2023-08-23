@@ -227,6 +227,9 @@ def home(request):
     
 
 def agents(request):
+    
+    
+    
     info = sessionInfo()
     login_info=info[1]
     #agent_retrieve="select agent_id_id, supervisor_id from website_agent"
@@ -241,6 +244,7 @@ def agents(request):
     if info[1]=="True":
         return render(request, 'agents.html',{'user_id':info[0],'data': agent_data})
     else:
+        
         return render(request, 'agents.html' , {'data': agent_data})
 
 def about(request):
@@ -352,6 +356,10 @@ def property_list(request):
  
 
 def hire_support(request):
+    
+    info = sessionInfo()
+    if '0000' in info[0]:
+        return redirect('login')
     
     info = sessionInfo()
     login_info = info[1]
@@ -504,15 +512,9 @@ def agent_img(request):
         return redirect('user')
 
 # --------------------
-# use this template when you need to implement different views for different types of users
+# for every button function insert this code snippet at the very beginning
 # --------------------
-# usertype = "user"
-# info = sessionInfo()
-# if request.method=="POST":
-#     if '@property360.agent.com' in email:
-#         usertype = "agent"
-#     elif '@property360.support.com' in email:
-#         usertype = "support"
 
-    # return redirect
-    # render render(request, 'website_name.html')
+    # info = sessionInfo()
+    # if '0000' in info[0]:
+    #     return redirect('login')
