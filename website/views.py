@@ -134,6 +134,7 @@ def dashboard(request):
             with connection.cursor() as cursor:
                 cursor.execute(get_user, [user])
                 user_temp = tuple(cursor.fetchall())[0]
+                print(user_temp)
                 cursor.execute(get_prop,[user])
                 user_prop = tuple(cursor.fetchall())
             user_data ={
