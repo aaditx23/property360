@@ -250,7 +250,52 @@ def property_registration(request):
         
     else:
         return render(request, 'property_registration.html')
+    
+def propertyId_submit(request):
+    info=sessionInfo()
+    login_info= info[1]
+    user =info[0]
+    if request.method=='POST':
+        agent_id =request.POST['agent_id']
 
+        if info[1]=="True":
+            return render(request, 'propertyId_submit.html' , {'user_id': info[0], 'agent_id':agent_id})
+    else:
+        return render (request,'propertyId_submit.html')
+    
+def hire_agent(request):
+    info=sessionInfo()
+    login_info=info[1]
+    user=info[0]
+    if request.method=='POST':
+        password= request.POST['confirm_password']
+        property_id=request.POST['prop_id']
+        agent_id=request.POST['agent_id']
+        password1=''
+        user_id=''
+        retrieve_pass= 'select password from website_user where user_id= %s'
+        retrieve_user_id= 'select user_id_id from website_property where property_id=%s'
+        update_agent= 'update website_property set agent_id_id=%s where property_id=%s'
+        insert_seller= 'insert into website_seller (seller_id_id ,agent_id_id) values (%s,%s)'
+        with connection.cursor() as cursor:
+            cursor.execute(retrieve_pass, [user])
+            password1= tuple(cursor.fetchall())[0][0]
+            cursor.execute(retrieve_user_id,[property_id])
+            user_id=tuple(cursor.fetchall())[0][0]
+            print(user_id)
+            print(agent_id)
+            if password==password1 and user==user_id:
+                cursor.execute(update_agent, (agent_id,property_id))
+                cursor.execute(insert_seller,(user,agent_id))
+                messages.success(request, "Agent_Id Updated")
+    return redirect('agents')
+
+
+                
+
+                
+                
+        
 
 def property_save(request):
     info = sessionInfo()

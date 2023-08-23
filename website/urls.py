@@ -22,5 +22,7 @@ urlpatterns = [
     path('user',views.dashboard, name='user'),
     path('property_edit_info', views.property_edit_info, name= 'property_edit_info'),
     path('fetch_property', views.fetch_property, name= 'fetch_property'),
+    path('propertyId_submit', views.propertyId_submit, name='propertyId_submit'),
+    path ('hire_agent', views.hire_agent , name='hire_agent'),
     
 ]
