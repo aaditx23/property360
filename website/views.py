@@ -111,9 +111,9 @@ def user(request):
                 print(agent_list)
                 entries = len(agent_list)
                 uid = createAgent((entries+1))
-                cursor.execute(insert_agent, (uid, name, email, psswd, addrss))
+                cursor.execute(insert_emp, (uid, name, email, psswd, addrss))
             setLogin(uid)
-            cursor.execute(insert, (uid, name, email, psswd, addrss))
+            
         data.update({'user_id': sessionInfo()[0]})
         messages.success(request, 'Signup Successful')
         return render(request, 'user.html', data)
@@ -169,6 +169,7 @@ def dashboard(request):
             with connection.cursor() as cursor:
                 cursor.execute(get_user, [user])
                 user_temp = tuple(cursor.fetchall())[0]
+                print(user_temp)
                 cursor.execute(get_prop,[user])
                 user_prop = tuple(cursor.fetchall())
             user_data ={
@@ -189,17 +190,21 @@ def home(request):
     user = None
     password = None
     if request.method=="POST":
-        user = str(request.POST['uid'])
-        password = str(request.POST['pswd'])
-        retrieve_pass = "select password from website_user where user_id= %s"
-        retrieve_name = "select username from website_user where user_id = %s"
+        user = request.POST['uid']
+        retrieve_pass = ''
+        retrieve_name = ''
+        if 'user' in user:
+            retrieve_pass = "select password from website_user where user_id= %s"
+            retrieve_name = "select username from website_user where user_id = %s"
+        elif 'agent' in user:
+            retrieve_pass = "select password from website_employee where employee_id= %s"
+            retrieve_name = "select name from website_employee where employee_id = %s"
+        password = request.POST['pswd']
         pass_data = ""
         name_data = ""
         with connection.cursor() as cursor:
             cursor.execute(retrieve_pass, [user])
-            temp = tuple(cursor.fetchall())
-            print("--------------------------", temp)
-            pass_data = temp[0][0]
+            pass_data = tuple(cursor.fetchall())[0][0]
             cursor.execute(retrieve_name,[user])
             name_data = tuple(cursor.fetchall())[0][0]
         if pass_data==password:
@@ -220,7 +225,9 @@ def home(request):
 def agents(request):
     info = sessionInfo()
     login_info=info[1]
-    agent_retrieve="select agent_id_id, supervisor_id from website_agent"
+    #agent_retrieve="select agent_id_id, supervisor_id from website_agent"
+   
+    agent_retrieve="select agent_id_id, supervisor_id ,name, email ,phone, address from website_agent,website_employee where agent_id_id =employee_id and agent_id_id like 'agent%' "
     agent_data=None
     with connection.cursor() as cursor:
         cursor.execute(agent_retrieve)
@@ -353,6 +360,8 @@ def hire_support(request):
         messages.success(request, "Successfully Hired Support")
         
     return redirect('support')
+
+
     
 def user_edit_profile(request):
     info = sessionInfo()
