@@ -124,9 +124,10 @@ def user(request):
 
 def agent_dashboard(request):
     info = sessionInfo()
+    user = info[0]
     if info[1]=='True':
-        return render(request, 'agent_dashboard.html')
-    return render(request, 'user.html')
+        return render(request, 'agent_dashboard.html',{'user':user})
+    # return render(request, 'user.html')
 
 
 def dashboard(request):
@@ -152,8 +153,11 @@ def dashboard(request):
                 'supervisor_id' : agent_temp[5],
                 'prop': agent_prop,
             }
+            
             print(agent_data)
-            return render(request, 'agent_dashboard.html', agent_data)
+            # return render(request, 'agent_dashboard.html',  agent_data)
+            return render(request, 'agent_dashboard.html',  {'user_id':info[0],'data': agent_data})
+            
         
          
 
@@ -180,7 +184,7 @@ def dashboard(request):
                 'user_img':user_temp[4],
                 'prop':user_prop, 
             }
-            
+            print(user_data)
             return render(request, 'user.html', user_data)
     return render(request, 'user.html')
 
@@ -251,6 +255,7 @@ def property(request):
     info = sessionInfo()
     login_info = info[1]
     user = info[0]
+    
     property_retrieve = "select property_id, name,agent_id_id, location, size, type, price, status from website_property where status = 'for sale'"
     property_data =  None
     with connection.cursor() as cursor:
@@ -260,6 +265,7 @@ def property(request):
 
     if info[1] == 'True':
         return render(request, 'property.html', {'data': property_data, 'user_id':user})
+    
     return render(request, 'property.html', {'data': property_data})
 
 def support(request):
