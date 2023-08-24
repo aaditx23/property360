@@ -20,7 +20,9 @@ urlpatterns = [
     path('join_auction', views.join_auction, name='join_auction'),
     path('leave_auction', views.leave_auction, name='leave_auction'),
     path('auction_property_submission', views.auction_property_submission, name='auction_property_submission'),
+    path('auction_property_removal', views.auction_property_removal, name='auction_property_removal'),
     path('user_edit_profile', views.user_edit_profile, name= 'user_edit_profile'),
+    path('agent_edit_profile',views.user_edit_profile, name = 'agent_edit_profile'),
     path('agent_img',views.agent_img, name='agent_img'),
     path('user',views.dashboard, name='user'),
     path('property_edit_info', views.property_edit_info, name= 'property_edit_info'),
@@ -28,6 +30,7 @@ urlpatterns = [
     path('propertyId_submit', views.propertyId_submit, name='propertyId_submit'),
     path ('hire_agent', views.hire_agent , name='hire_agent'),
     path('add_auction_property', views.add_auction_property, name= 'add_auction_property'),
+    path('remove_auction_property', views.remove_auction_property, name= 'remove_auction_property'),
 
     
 ]
