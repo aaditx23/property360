@@ -6,8 +6,8 @@ class User(models.Model):
     email = models.CharField(max_length=50)
     password = models.CharField(max_length=50)
     address = models.CharField(max_length=50)
-    user_img = models.CharField(max_length=50, default=None)
-    auction_status = models.CharField(max_length=15, default=None)
+    user_img = models.CharField(max_length=50, null=True)
+    auction_status = models.CharField(max_length=15, null=True)
 
 
 class Employee(models.Model):
@@ -23,7 +23,7 @@ class Agent(models.Model):
     agent_id = models.ForeignKey(Employee, on_delete = models.CASCADE, to_field= 'employee_id', primary_key = True)
 
     supervisor_id = models.CharField(max_length=50)
-    agent_img = models.CharField(max_length=50, default=None)
+    agent_img = models.CharField(max_length=50, null=True)
 
 
 
@@ -42,7 +42,7 @@ class Property(models.Model):
     size = models.CharField(max_length=10)
     type = models.CharField(max_length =20)
     price = models.CharField(max_length=15)
-    property_img = models.CharField(max_length=50, default=None)
+    property_img = models.CharField(max_length=50, null=True)
 
 class Auction(models.Model):
     auction_id = models.CharField(max_length = 20, primary_key = True)
@@ -54,6 +54,7 @@ class Auction(models.Model):
 class Auction_Property(models.Model):
     auction_id = models.ForeignKey(Auction, on_delete=models.CASCADE, to_field='auction_id', db_index=True)
     property_id = models.ForeignKey(Property, on_delete = models.CASCADE, to_field = 'property_id', primary_key=True)
+    owner_id = models.ForeignKey(User, on_delete=models.CASCADE, to_field='user_id')
     starting_price = models.CharField(max_length=15)
     increment = models.CharField(max_length = 10,default='0')
     selling_price = models.CharField(max_length=15,default='0')
@@ -64,7 +65,7 @@ class Auction_Property(models.Model):
 
 class Admin(models.Model):
     admin_id = models.CharField(max_length = 20, primary_key = True)
-
+    email = models.EmailField(max_length=254)
     name = models.CharField(max_length = 20)
     password = models.CharField(max_length = 20)
     branch = models.CharField(max_length = 20)

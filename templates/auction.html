@@ -76,15 +76,22 @@
             <th scope="col">TYPE</th>
             <th scope="col">SIZE</th>
             <th scope="col">PRICE</th>
+            {% if user_status == "joined" %}
             <th scope="col">
                 <div class="container text-center">
                     <form action="/auction_property_submission" method="post">
                         {% csrf_token %}
-                    <button type="submit" id = 'auc_id' name = 'auc_id' value={{auct_id}} class="btn btn-success">Add Property</button>
+                    <button type="submit" id = 'auc_id' name = 'auc_id' value={{auct_id}} class="btn btn-success btn-sm"> Add Property </button>
+                    </form>
+                    <h1>     </h1>
+                    <form action="/auction_property_removal" method="post">
+                        {% csrf_token %}
+                    <button type="submit" class="btn btn-danger btn-sm">Remove Property</button>
                     </form>
                 </div>
 
             </th>
+            {% endif %}
           </tr>
         </thead>
         <tbody>
