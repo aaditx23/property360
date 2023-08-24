@@ -136,14 +136,19 @@ def dashboard(request):
         if 'agent' in info[0]:
             get_agent= 'select employee_id, name, email, address, phone, supervisor_id, agent_img from website_employee, website_agent where agent_id_id=employee_id and employee_id=%s'
             get_prop = 'select * from website_property where agent_id_id=%s'
+            # all_prop = 'select property_id, agent_id_id from website_property'
             agent_temp=''
             agent_prop = ''
+            # all_prop = ''
             agent=info[0]
             with connection .cursor() as cursor:
                 cursor.execute(get_agent,[agent])
                 agent_temp=tuple(cursor.fetchall())[0]
                 cursor.execute(get_prop,[agent])
                 agent_prop = tuple(cursor.fetchall())
+                # cursor.execute(all_prop)
+                # all_prop = tuple(cursor.fetchall())
+                
             agent_data={
                 'agent_id': info[0],
                 'agentname':agent_temp[1],
@@ -153,6 +158,7 @@ def dashboard(request):
                 'supervisor_id' : agent_temp[5],
                 'agent_img': agent_temp[6],
                 'prop': agent_prop,
+                # 'all_prop': all_prop,
             }
             
             print(agent_data)
@@ -598,6 +604,7 @@ def auction(request):
                         """
         with connection.cursor() as cursor:
             cursor.execute(find_auction)
+            print(tuple(cursor.fetchall()))
             temp = tuple(cursor.fetchall())[0]
             auction_id = temp[0]
             auction_running_status = temp[1]
@@ -709,6 +716,18 @@ def agent_img(request):
     else:
         return redirect('user')
 
+
+def delete_property(request):
+    info = sessionInfo()
+    user = info[0]
+
+    if request.method == "POST":
+        property_id_del = request.POST['property_id_del']
+        change_status = "update website_property set status = 'available' where property_id = %s"
+        with connection.cursor() as cursor:
+            cursor.execute(change_status,[property_id_del])
+            messages.warning(request,'Property Removed From Market')
+    return redirect('dashboard')
 # --------------------
 # for every button function insert this code snippet at the very beginning
 # --------------------

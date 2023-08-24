@@ -32,6 +32,7 @@
 
   {% if data.prop %}
   {% for p in data.prop %}
+ 
   <div class="container py-3 h-100">
       <div class="row ">
         <div class="col col-md-12">
@@ -82,6 +83,7 @@
                       <p class="mb-0">{{p.1}}</p>
                     </div>
                   </div>
+                  {% if 'for sale' not in p %}
                   <form action="/fetch_property" method = "POST">
                   {% comment %} <form action="" method = "POST"> {% endcomment %}
                     {% csrf_token %}
@@ -90,9 +92,23 @@
                       {% comment %} c  {% endcomment %}
                       <input type="hidden" name = 'property_id' value= {{p.0}}>
                       {% comment %} c {% endcomment %}
-                      <button type="submit" class="btn btn-outline-primary me-1 flex-grow-1">Upload To Market</button>
+                      <button type="submit" class="btn btn-outline-success me-1 flex-grow-1">Upload To Market</button>
                     </div>
+                    {% comment %} delete property  {% endcomment %}
                   </form>
+                    {%else%}
+                    <form action="/delete_property" method = "POST">
+                      {% csrf_token %}
+                      <div class="d-flex pt-1">
+                        
+                        {% comment %} c  {% endcomment %}
+                        <input type="hidden" name = 'property_id_del' value= {{p.0}}>
+                        {% comment %} c {% endcomment %}
+                        {% comment %} <button type="submit" class="btn btn-outline-primary me-1 flex-grow-1">Upload To Market</button> {% endcomment %}
+                        <button type="submit" class="btn btn-outline-danger me-1 flex-grow-1">Remove From Market</button>
+                      </div>
+                    </form>
+                    {% endif %}
                 </div>
               </div>
             </div>
