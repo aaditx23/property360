@@ -286,6 +286,7 @@ def support(request):
         
     else:
         return render(request, 'support.html', {'data': support_data})
+    
 
 def property_registration(request):
     info = sessionInfo()
@@ -301,7 +302,52 @@ def property_registration(request):
         
     else:
         return render(request, 'property_registration.html')
+    
+def propertyId_submit(request):
+    info=sessionInfo()
+    login_info= info[1]
+    user =info[0]
+    if request.method=='POST':
+        agent_id =request.POST['agent_id']
 
+        if info[1]=="True":
+            return render(request, 'propertyId_submit.html' , {'user_id': info[0], 'agent_id':agent_id})
+    else:
+        return render (request,'propertyId_submit.html')
+    
+def hire_agent(request):
+    info=sessionInfo()
+    login_info=info[1]
+    user=info[0]
+    if request.method=='POST':
+        password= request.POST['confirm_password']
+        property_id=request.POST['prop_id']
+        agent_id=request.POST['agent_id']
+        password1=''
+        user_id=''
+        retrieve_pass= 'select password from website_user where user_id= %s'
+        retrieve_user_id= 'select user_id_id from website_property where property_id=%s'
+        update_agent= 'update website_property set agent_id_id=%s where property_id=%s'
+        insert_seller= 'insert into website_seller (seller_id_id ,agent_id_id) values (%s,%s)'
+        with connection.cursor() as cursor:
+            cursor.execute(retrieve_pass, [user])
+            password1= tuple(cursor.fetchall())[0][0]
+            cursor.execute(retrieve_user_id,[property_id])
+            user_id=tuple(cursor.fetchall())[0][0]
+            print(user_id)
+            print(agent_id)
+            if password==password1 and user==user_id:
+                cursor.execute(update_agent, (agent_id,property_id))
+                cursor.execute(insert_seller,(user,agent_id))
+                messages.success(request, "Agent_Id Updated")
+    return redirect('agents')
+
+
+                
+
+                
+                
+        
 
 def property_save(request):
     info = sessionInfo()
@@ -352,8 +398,6 @@ def property_list(request):
     # else:
     #     return render(request, 'user.html', {'data': property_data})
 
-
-
  
 
 def hire_support(request):
@@ -367,13 +411,14 @@ def hire_support(request):
     user = info[0]
 
     support = request.POST['support_id']
-    print(user,support)
+    property = request.POST['property_id']
+    print(user,support,property)
     
-    insert_into_hires = "insert into website_hires (user_id_id, support_id_id) values (%s,%s)"
+    insert_into_hires = "insert into website_hires (user_id, support_id) values (%s,%s)"
+    insert_into_maintains = "insert into website_maintains (property_id_id,support_id_id) values (%s,%s)"
     with connection.cursor() as cursor:
         cursor.execute(insert_into_hires, (user,support))
-        messages.success(request, "Successfully Hired Support")
-        
+
     return redirect('support')
 
 
@@ -538,12 +583,113 @@ def auction(request):
     login_info = info[1]
     user = info[0]
     if info[1]=="True":
-        return render(request, 'auction.html', {'user_id':info[0]})
+        auction_id = ''
+        property_data = ''
+        user_status = ''
+        auction_running_status = ''
+        find_user_status = 'select auction_status from website_user where user_id=%s'
+        find_auction = "select auction_id, auction_running from website_auction where auction_status='active'"
+        find_property = """ 
+                        select p.property_id, p.location, p.name, p.size, p.type, p.price
+                        from website_auction as a
+                        inner join website_auction_property as ap on a.auction_id = ap.auction_id_id
+                        inner join website_property as p on ap.property_id_id = p.property_id
+                        where a.auction_status = 'active' 
+                        """
+        with connection.cursor() as cursor:
+            cursor.execute(find_auction)
+            temp = tuple(cursor.fetchall())[0]
+            auction_id = temp[0]
+            auction_running_status = temp[1]
+            print(auction_running_status,'---------------------')
+            cursor.execute(find_property)
+            property_data = tuple(cursor.fetchall())
+            cursor.execute(find_user_status, [info[0]])
+            user_status = tuple(cursor.fetchall())[0][0]
+            dic = {
+                'user_id':info[0], 
+                'auct_id':auction_id,
+                'data': property_data,
+                'user_status' : user_status,
+                'running_status': auction_running_status
+                }
+        return render(request, 'auction.html', dic )
     else:
         return render(request, 'auction.html')
 
 def join_auction(request):
-    pass
+    info = sessionInfo()
+    login_info = info[1]
+    user = info[0]
+    if info[1]=="True":
+        if request.method=='POST':
+            insert_pass = request.POST['confirm_password']
+            retrieve_pass='select password from website_user where user_id=%s'
+            add_auction_to_user = "update website_user set auction_status='joined' where user_id=%s"
+            psw=''
+            with connection.cursor() as cursor:
+                cursor.execute(retrieve_pass, [info[0]])
+                psw = tuple(cursor.fetchall())[0][0]
+                if insert_pass==psw:
+                    cursor.execute(add_auction_to_user, [info[0]])
+                    messages.success(request, 'Succesfully joined Auction')
+    return redirect('auction')
+
+def leave_auction(request):
+    info = sessionInfo()
+    login_info = info[1]
+    user = info[0]
+    if info[1]=="True":
+        if request.method=='POST':
+            insert_pass = request.POST['confirm_password']
+            retrieve_pass='select password from website_user where user_id=%s'
+            remove_auction_from_user = "update website_user set auction_status='not_joined' where user_id=%s"
+            psw=''
+            with connection.cursor() as cursor:
+                cursor.execute(retrieve_pass, [info[0]])
+                psw = tuple(cursor.fetchall())[0][0]
+                if insert_pass==psw:
+                    cursor.execute(remove_auction_from_user, [info[0]])
+                    messages.warning(request, 'Left Auction')
+    return redirect('auction')
+    
+def auction_property_submission(request):
+    info = sessionInfo()
+    login_info = info[1]
+    user = info[0]
+    if info[1]=="True":
+        if request.method=='POST':
+            auct_id = request.POST['auc_id']
+            return render(request, 'confirm_property.html', {'user_id':info[0],'auct_id':auct_id})
+    else:
+        return render(request, 'confirm_property.html')
+
+def add_auction_property(request):
+    info = sessionInfo()
+    login_info = info[1]
+    user = info[0]
+    if info[1]=="True":
+        if request.method=='POST':
+            insert_prop = request.POST['prop_id']
+            insert_starting_price = request.POST['starting_price']
+            insert_pass = request.POST['confirm_password']
+            auction_id = request.POST['auct_id']
+            retrieve_pass='select password from website_user where user_id=%s'
+            retrieve_user  = 'select user_id_id from website_property where property_id=%s'
+            update_user = "update website_user set auction_status='Joined'"
+            insert_property = 'insert into website_auction_property (auction_id_id, property_id_id, starting_price,selling_price,number_of_bids,increment) values (%s,%s,%s,%s, %s, %s)'
+            psw=''
+            user=''
+            with connection.cursor() as cursor:
+                cursor.execute(retrieve_pass, [info[0]])
+                psw = tuple(cursor.fetchall())[0][0]
+                cursor.execute(retrieve_user,[insert_prop])
+                usr = tuple(cursor.fetchall())[0][0]
+                if insert_pass==psw and usr==info[0]:
+                    cursor.execute(insert_property, (auction_id, insert_prop, insert_starting_price,'0','0','0'))
+                    messages.success(request, 'Property Added to Auction')
+    return redirect('auction')
+
 
 def agent_img(request):
     info = sessionInfo()

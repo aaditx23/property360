@@ -7,6 +7,7 @@ class User(models.Model):
     password = models.CharField(max_length=50)
     address = models.CharField(max_length=50)
     user_img = models.CharField(max_length=50, default=None)
+    auction_status = models.CharField(max_length=15, default=None)
 
 
 class Employee(models.Model):
@@ -45,15 +46,21 @@ class Property(models.Model):
 
 class Auction(models.Model):
     auction_id = models.CharField(max_length = 20, primary_key = True)
+    auction_status = models.CharField(max_length=50, default='Inactive')
+    auction_running = models.BooleanField()
     
-    price = models.IntegerField()
-    number_of_bids = models.IntegerField()
-    starting_price = models.IntegerField()
-    increment = models.CharField(max_length = 10)
+    
 
-    property_id = models.ForeignKey(Property, on_delete = models.CASCADE, to_field = 'property_id')
-
-
+class Auction_Property(models.Model):
+    auction_id = models.ForeignKey(Auction, on_delete=models.CASCADE, to_field='auction_id', db_index=True)
+    property_id = models.ForeignKey(Property, on_delete = models.CASCADE, to_field = 'property_id', primary_key=True)
+    starting_price = models.CharField(max_length=15)
+    increment = models.CharField(max_length = 10,default='0')
+    selling_price = models.CharField(max_length=15,default='0')
+    number_of_bids = models.CharField(max_length=15,default='0')
+    
+    class Meta:
+        unique_together=("auction_id","property_id")
 
 class Admin(models.Model):
     admin_id = models.CharField(max_length = 20, primary_key = True)

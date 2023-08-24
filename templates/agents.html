@@ -29,10 +29,10 @@
             
             
             <td>
-              <form action="/agents" method="post">
+              <form action="/propertyId_submit" method="post">
                 {% csrf_token %}
-                <input type="hidden" name = 'agent_id' value= {{item.6}}>
-                <button type="submit" class="btn btn-outline-success" >HIRE</button>
+                
+                <button type="submit" class="btn btn-primary" name="agent_id" id="agent_id" value={{item.0}}   >HIRE</button>
               </form>
             </td>
           </tr>
