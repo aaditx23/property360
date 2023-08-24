@@ -232,15 +232,13 @@ def agents(request):
     
     info = sessionInfo()
     login_info=info[1]
-    #agent_retrieve="select agent_id_id, supervisor_id from website_agent"
-   
-    agent_retrieve="select agent_id_id, supervisor_id ,name, email ,phone, address from website_agent,website_employee where agent_id_id =employee_id and agent_id_id like 'agent%' "
+   #EXCLUDED AGENT_0000
+    agent_retrieve="select agent_id_id, supervisor_id ,name, email ,phone, address from website_agent,website_employee where agent_id_id =employee_id and agent_id_id like 'agent%' and agent_id_id <> 'agent_0000'"
     agent_data=None
     with connection.cursor() as cursor:
         cursor.execute(agent_retrieve)
         agent_data = tuple(cursor.fetchall())
     print(agent_data)
-    #return render(request, 'agents.html', {'data': agent_data})
     if info[1]=="True":
         return render(request, 'agents.html',{'user_id':info[0],'data': agent_data})
     else:
@@ -275,7 +273,7 @@ def property(request):
 def support(request):
     info = sessionInfo()
     login_info = info[1]
-    support_retrieve = "select name, type, phone, hiring_price, support_id_id from website_support s, website_employee e where e.employee_id = s.support_id_id"
+    support_retrieve = "select name, type, phone, hiring_price, support_id from website_support s, website_employee e where e.employee_id = s.support_id"
     support_data =  None
     with connection.cursor() as cursor:
         cursor.execute(support_retrieve)
@@ -406,7 +404,6 @@ def hire_support(request):
     if '0000' in info[0]:
         return redirect('login')
     
-    info = sessionInfo()
     login_info = info[1]
     user = info[0]
 
@@ -608,9 +605,38 @@ def auction_property_submission(request):
     if info[1]=="True":
         if request.method=='POST':
             auct_id = request.POST['auc_id']
-            return render(request, 'confirm_property.html', {'user_id':info[0],'auct_id':auct_id})
+            property_list = ''
+            find_property = 'select property_id, name from website_property where user_id_id=%s and property_id not in (select property_id_id from website_auction_property)'
+            with connection.cursor() as cursor:
+                cursor.execute(find_property,[info[0]])
+                property_list = tuple(cursor.fetchall())
+            dic = {
+                'user_id':info[0],
+                'auct_id':auct_id,
+                'properties':property_list
+                }
+            return render(request, 'confirm_property.html', dic )
     else:
         return render(request, 'confirm_property.html')
+
+def auction_property_removal(request):
+    info = sessionInfo()
+    login_info = info[1]
+    user = info[0]
+    if info[1]=="True":
+        if request.method=='POST':
+            property_list = ''
+            find_property = 'select property_id_id from website_auction_property where owner_id_id=%s '
+            with connection.cursor() as cursor:
+                cursor.execute(find_property,[info[0]])
+                property_list = tuple(cursor.fetchall())
+            dic = {
+                'user_id':info[0],
+                'properties':property_list
+                }
+            return render(request, 'remove_auction_property.html', dic )
+    else:
+        return render(request, 'remove_auction_property.html')
 
 def add_auction_property(request):
     info = sessionInfo()
@@ -623,19 +649,38 @@ def add_auction_property(request):
             insert_pass = request.POST['confirm_password']
             auction_id = request.POST['auct_id']
             retrieve_pass='select password from website_user where user_id=%s'
-            retrieve_user  = 'select user_id_id from website_property where property_id=%s'
-            update_user = "update website_user set auction_status='Joined'"
-            insert_property = 'insert into website_auction_property (auction_id_id, property_id_id, starting_price,selling_price,number_of_bids,increment) values (%s,%s,%s,%s, %s, %s)'
+            update_user = "update website_user set auction_status='joined'"
+            insert_property = 'insert into website_auction_property (auction_id_id, owner_id_id, property_id_id, starting_price,selling_price,number_of_bids,increment) values (%s, %s,%s,%s,%s, %s, %s)'
             psw=''
             user=''
             with connection.cursor() as cursor:
                 cursor.execute(retrieve_pass, [info[0]])
                 psw = tuple(cursor.fetchall())[0][0]
-                cursor.execute(retrieve_user,[insert_prop])
-                usr = tuple(cursor.fetchall())[0][0]
-                if insert_pass==psw and usr==info[0]:
-                    cursor.execute(insert_property, (auction_id, insert_prop, insert_starting_price,'0','0','0'))
+                if insert_pass==psw:
+                    cursor.execute(insert_property, (auction_id, info[0], insert_prop, insert_starting_price,'0','0','0'))
                     messages.success(request, 'Property Added to Auction')
+    return redirect('auction')
+
+
+def remove_auction_property(request):
+    info = sessionInfo()
+    login_info = info[1]
+    user = info[0]
+    if info[1]=="True":
+        if request.method=='POST':
+            delete_prop = request.POST['prop_id']
+            insert_pass = request.POST['confirm_password']
+            retrieve_pass='select password from website_user where user_id=%s'
+            update_user = "update website_user set auction_status='joined'"
+            delete_property = 'delete from website_auction_property where property_id_id = %s'
+            psw=''
+            user=''
+            with connection.cursor() as cursor:
+                cursor.execute(retrieve_pass, [info[0]])
+                psw = tuple(cursor.fetchall())[0][0]
+                if insert_pass==psw:
+                    cursor.execute(delete_property, [delete_prop])
+                    messages.error(request, 'Property Removed from Auction')
     return redirect('auction')
 
 
@@ -664,3 +709,6 @@ def agent_img(request):
     # info = sessionInfo()
     # if '0000' in info[0]:
     #     return redirect('login')
+
+def countdown(request):
+    return render(request, 'countdown.html')
