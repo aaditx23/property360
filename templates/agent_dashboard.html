@@ -19,7 +19,7 @@
               <p class="text-muted mb-1">{{data.phone}}</p>
               <p class="text-muted mb-4">{{data.address}}</p>
               <div class="d-flex justify-content-center mb-2">
-                  <form action="/user_edit_profile">
+                  <form action="/agent_edit_profile">
                     <button type="submit" class="btn btn-outline-primary me-1 flex-grow-1">edit profile</button>
                   </form>
               </div>
@@ -106,12 +106,12 @@
 
 
 
-    <div class='container'>
+    {% comment %} <div class='container'>
       <form action='/property_registration'>
         <div class="container py-3 h-10">
           <button type="submit" class="btn btn-primary" id="property_registration" >Register Property</button>
         </div>
       </form>
-    </div>
+    </div> {% endcomment %}
 </section>
   {% endblock %}
