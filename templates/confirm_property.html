@@ -7,9 +7,13 @@
     <form action = "/add_auction_property" method ="post" enctype="multipart/form-data" >
       {%csrf_token%}
         
-        <div class="mb-3">
-            <label for="prop_id" class="form-label">Enter Property ID:</label>
-        <input type="text" class="form-control" id="prop_id" name= "prop_id" >
+      <div class="mb-3">
+        <label for='hired_agent' class="form-label">Select Agent</label>
+        <select class="form-select" aria-label="Property" id = 'prop_id' name='prop_id'  required>
+          {% for property in properties %}
+          <option value={{property.0}}>{{property.1}} > ID: {{property.0}}  </option>
+          {% endfor %}
+        </select>
       </div>
       
       <div class="mb-3">
