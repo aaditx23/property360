@@ -3,181 +3,273 @@
 {% block body %}
 
 
-<section style="background-color: #9de2ff;">
+<section style="background-color: #C8EEFF;">
 
-  <div class="container-fluid">
-    <div class= 'container py-3 h-100'>
-      <div  align = "justify" >
-        <div class="col-lg-4" >
-          <div class="card mb-4" style="border-radius: 15px;">
-            <div class="card-body text-center">
-              <img src="/media/{{user_img}}" alt="user image"
-              class="rounded-circle img-fluid" style="width: 150px;" 
-              >
-              {% comment %} onerror="this.src='path of the default image'"> {% endcomment %}
-              <h5 class="my-3">{{username}}</h5>
-              <p class="text-muted mb-1">{{email}}</p>
-              <p class="text-muted mb-4">{{address}}</p>
-              <div class="d-flex justify-content-center mb-2">
-                  <form action="/user_edit_profile">
-                    <button type="submit" class="btn btn-outline-primary me-1 flex-grow-1">edit profile</button>
-                  </form>
+  
+
+
+
+
+
+
+
+<body>
+    
+  <div class="row">
+      <div class= 'container py-4 px-1 h-10'>
+        <div class="row">
+
+          <div class="col-sm-5">
+            
+                <div class="card mb-4" style="border-radius: 15px;">
+                <div class="card-body text-center">
+                  <img src="/media/{{user_img}}" alt="user image"
+                  class="rounded-circle img-fluid" style="width: 150px;" 
+                  >
+                  {% comment %} onerror="this.src='path of the default image'"> {% endcomment %}
+                  <h5 class="my-3">{{username}}</h5>
+                  <p class="text-muted mb-1">{{email}}</p>
+                  <p class="text-muted mb-4">{{address}}</p>
+                  <div class="d-flex justify-content-center mb-2">
+                      <form action="/user_edit_profile">
+                        <button type="submit" class="btn btn-outline-primary me-1 flex-grow-1">edit profile</button>
+                      </form>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    {% if prop %}
-    {% for p in prop %}
-    
-    <div class="container py-3 h-100">
-      <div class="row ">
-        <div class="col col-md-12">
-          <div class="card" style="border-radius: 15px;">
-            <div class="card-body p-4">
-              <div class="d-flex text-black">
-                <div class="flex-shrink-0">
-                  <img src="/media/{{p.7}}"
-                  alt="property_image" class="img-fluid"
-                  style="width: 180px; border-radius: 10px;">
-                </div>
-                <div class="flex-grow-1 ms-3">
-                  
-                  
-                  <div style="color: #2b2a2a;" align="right">
-                    <p class="small text-muted mb-1">
-                      
-                        #{{p.0}}
-                      </p>
-                    </div>
-                    <h5 class="mb-1">{{p.3}}</h5> 
-                    
-                    <p class="mb-2 pb-1" style="color: #2b2a2a;">{{p.2}}</p>
-                    <div class="d-flex justify-content-start rounded-3 p-2 mb-3"
-                    style="background-color: #efefef;"
-                    >
-                    {% comment %} onerror="this.src='path of the default image'"> {% endcomment %}
-                    <div class="px-5">
-                      <p class="small text-muted mb-1">[Size]</p>
-                      <p class="mb-0">{{p.4}}</p>
-                    </div>
-                    <div class="px-5">
-                      <p class="small text-muted mb-1">[type]</p>
-                      <p class="mb-0">{{p.5}}</p>
-                    </div>
-                    <div class="px-5">
-                      <p class="small text-muted mb-1">[Price]</p>
-                      <p class="mb-0">{{p.6}}</p>
-                    </div>
-                    <div class="px-5">
-                      <p class="small text-muted mb-1">[Agent]</p>
-                      <a href="">
-                        <p class="mb-0">{{p.9}}</p>
-                      </a>
-                    </div>
-                    <div class="px-5">
-                      <p class="small text-muted mb-1">[Status]</p>
-                      <p class="mb-0">{{p.1}}</p>
-                    </div>
-                  </div>
-                  {% comment %} <div class = 'd-flex justify-content-start rounded-3 p-2 mb-3'> {% endcomment %}
-                    {% comment %} <div class = 'd-flex-grow pt-2'>
-                      
-                      <form action="/fetch_property" method = "POST">
-                        {% csrf_token %}
-                        <div class="d-flex pt-1">
-                          
-                          <input type="hidden" name = 'property_id' value= {{p.0}}>
-                          <button type="submit" class="btn btn-outline-primary me-1 flex-grow-1">Edit info</button>
-                        </div>
-                      </form>
-                    </div>
-                    <div class = 'd-flex-grow pt-2'>
-                      <form action="/fetch_property" method = "POST">
-                        {% csrf_token %}
-                        <div class="d-flex pt-1">
-                          
-                          <input type="hidden" name = 'property_id' value= {{p.0}}>
-                          <button type="submit" class="btn btn-outline-primary me-1 flex-grow-1">Edit info</button>
-                        </div>
-                      </form> {% endcomment %}
+          
+          
+          
+          
+          
+          
+          
+          <div class="col-sm-7">
+            <div class="card mb-4" style="border-radius: 15px;">
+            <div class="card-body">
+              <h5 class="card-title">Activity</h5>
+              
+            </div>
+            <ul class="list-group list-group-flush">
 
-                    {% comment %} <form action="/delete_property" method = "POST">
-                      {% csrf_token %}
-                      <div class="d-flex pt-1">
-                        
-                        <input type="hidden" name = 'property_id' value= {{p.0}}>
-                    
-                        <button type="submit" class="btn btn-outline-danger me-1 flex-grow-1">Remove Property [working]</button>
-                      </form> {% endcomment %}
-                      <form action="/fetch_property" method = "POST">
-                        {% csrf_token %}
-                        <div class="d-flex pt-1">
-                          
-                          {% comment %} c  {% endcomment %}
-                          <input type="hidden" name = 'property_id' value= {{p.0}}>
-                          {% comment %} c {% endcomment %}
-                          <button type="submit" class="btn btn-outline-primary me-1 flex-grow-1">Edit info</button>
-                        {% comment %} </div> {% endcomment %}
-                      </form>
-                      
-                      <button type="button" class="btn btn-outline-danger me-1 flex-grow-1" data-toggle="modal" data-target="#exampleModal{{p.0}}" data-whatever="@mdo">Remove Property</button>
-                      
-                      
-                      <div class="modal fade" id="exampleModal{{p.0}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel{{p.0}}" aria-hidden="true">
-                        <div class="modal-dialog" role="document">
-                          <div class="modal-content">
-                            <div class="modal-header">
-                              <h5 class="modal-title" id="exampleModalLabel{{p.0}}">Enter Password {{p.0}}</h5>
-                              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                              </button>
-                            </div>
-                            <div class="modal-body">
-                              <form action="/delete_property" method="post">
-                                {% csrf_token %}
-                                <div class="form group">
-                                  <input type="hidden" name = 'property_id' value={{p.0}}>
-                                  <input type="password" class="form-control" id="password" name="password" required>
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                              <button type="submit" class="btn btn-danger">Delete</button>
-                            </div>
-                          </div>
-                          </div>
-                        </div>
+              <li class="list-group-item">
+              
+                <div class="d-flex pt-1">
+
+                  <button class="btn btn-outline-info me-1 flex-grow-1" type="button" data-bs-toggle="collapse" data-bs-target="#property_status" aria-expanded="false" aria-controls="collapseExample">
+                  Property Status
+                </button>
+              </div>
+
+                <div class="collapse" id="property_status">
+                  <div class="card card-body">
+                    <div class = 'container my-3'>
+                      <div class="mb-3">
+                        hello
                       </div>
-                    </form>
+                    </div>
                   </div>
+              
+              
+              </li>
+
+
+
+
+              <li class="list-group-item">
+                <div class="d-flex pt-1">
+
+                  <button class="btn btn-outline-info me-1 flex-grow-1" type="button" data-bs-toggle="collapse" data-bs-target="#agents_hired" aria-expanded="false" aria-controls="collapseExample">
+                  Agents Hired
+                </button>
+                </div>
+                
+
+                <div class="collapse" id="agents_hired">
+                  <div class="card card-body">
+                    <div class = 'container my-3'>
+                      <div class="mb-3">
+                        hello
+                      </div>
+                    </div>
+                  </div>
+              </div>
+
+            </li>
+              <li class="list-group-item">
+                <div class="d-flex pt-1">
+
+                  <button class="btn btn-outline-info me-1 flex-grow-1" type="button" data-bs-toggle="collapse" data-bs-target="#supports_hired" aria-expanded="false" aria-controls="collapseExample">
+                  Supports Hired
+                </button>
+              </div>
+
+                <div class="collapse" id="supports_hired">
+                  <div class="card card-body">
+                    <div class = 'container my-3'>
+                      <div class="mb-3">
+                        hello
+                      </div>
+                    </div>
+                  </div>
+              
+            </li>
+              <li class="list-group-item">
+              
+                <div class="d-flex pt-1">
+
+                  <button class="btn btn-outline-info me-1 flex-grow-1" type="button" data-bs-toggle="collapse" data-bs-target="#auction_status" aria-expanded="false" aria-controls="collapseExample">
+                  Auction Status
+                </button>
+              </div>
+
+                <div class="collapse" id="auction_status">
+                  <div class="card card-body">
+                    <div class = 'container my-3'>
+                      <div class="mb-3">
+                        hello
+                      </div>
+                    </div>
+                  </div>
+              
+              
+              </li>
+            </ul>
+            <div class="card-body">
+              <a href="auction" class="card-link">Check Auction</a>
+              <a href="agents" class="card-link">Hire Agent</a>
+              <a href="support" class="card-link">Hire Support</a>
+            </div>
+          </div>
+        </div>
+          </div>
+        
+      </div>
+        
+
+
+
+
+        {% if prop %}
+        {% for p in prop %}
+      
+        <div class="col-sm-12">
+          <div class = 'container py-4 px-1 h-10'>
+            <div class="card" style="border-radius: 15px;">
+              <div class="card-body p-4">
+                <div class="d-flex text-black">
+                  <div class="flex-shrink-0">
+                    <img src="/media/{{p.7}}"
+                    alt="property_image" class="img-fluid"
+                    style="width: 180px; border-radius: 10px;">
+                  </div>
+                  <div class="flex-grow-1 ms-3">
                  
-
-
-
-
+                    
+                    
+                    <div style="color: #2b2a2a;" align="right">
+                      <p class="small text-muted mb-1">
+                        
+                          #{{p.0}}
+                        </p>
+                      </div>
+                      <h5 class="mb-1">{{p.3}}</h5> 
+                      
+                      <p class="mb-2 pb-1" style="color: #2b2a2a;">{{p.2}}</p>
+                      <div class="d-flex justify-content-start rounded-3 p-2 mb-3"
+                      style="background-color: #efefef;"
+                      >
+                      <div class="px-5">
+                        <p class="small text-muted mb-1">[Size]</p>
+                        <p class="mb-0">{{p.4}}</p>
+                      </div>
+                      <div class="px-5">
+                        <p class="small text-muted mb-1">[type]</p>
+                        <p class="mb-0">{{p.5}}</p>
+                      </div>
+                      <div class="px-5">
+                        <p class="small text-muted mb-1">[Price]</p>
+                        <p class="mb-0">{{p.6}}</p>
+                      </div>
+                      <div class="px-5">
+                        <p class="small text-muted mb-1">[Agent]</p>
+                        <a href="">
+                          <p class="mb-0">{{p.9}}</p>
+                        </a>
+                      </div>
+                      <div class="px-5">
+                        <p class="small text-muted mb-1">[Status]</p>
+                        <p class="mb-0">{{p.1}}</p>
+                      </div>
+                    </div>
+                    
+                        <form action="/fetch_property" method = "POST">
+                          {% csrf_token %}
+                          <div class="d-flex pt-1">
+                            
+                            <input type="hidden" name = 'property_id' value= {{p.0}}>
+                            <button type="submit" class="btn btn-outline-primary me-1 flex-grow-1">Edit info</button>
+                        </form>
+                        
+                        <button type="button" class="btn btn-outline-danger me-1 flex-grow-1" data-toggle="modal" data-target="#exampleModal{{p.0}}" data-whatever="@mdo">Remove Property</button>
+                        
+                        
+                        <div class="modal fade" id="exampleModal{{p.0}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel{{p.0}}" aria-hidden="true">
+                          <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel{{p.0}}">Enter Password</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                  <span aria-hidden="true">&times;</span>
+                                </button>
+                              </div>
+                              <div class="modal-body">
+                                <form action="/delete_property" method="post">
+                                  {% csrf_token %}
+                                  <div class="form group">
+                                    <input type="hidden" name = 'property_id' value={{p.0}}>
+                                    <input type="password" class="form-control" id="password" name="password" required>
+                                  </div>
+                              </div>
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-danger">Delete</button>
+                              </div>
+                            </div>
+                            </div>
+                          </div>
+                        </div>
+                      </form>
+                    </div>
+                   
+  
+  
+  
+  
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
-    {% endfor %}
+      
+      {% endfor %}
     {% endif %}
-    
-    
-    
-    
-    <div class='container'>
-      <form action='/property_registration'>
-        <div class="container py-3 h-10">
-          <button type="submit" class="btn btn-primary" id="property_registration" >Register Property</button>
-        </div>
-      </form>
+
+    <div class="col-sm-12">
+      <div class = 'container py-4 px-1 h-10'>
+        
+          
+          <form action='/property_registration'>
+            <div class="d-flex pt-1">
+              <button type="submit" class="btn btn-outline-success me-1 flex-grow-1" id="property_registration" >Add New Property</button>
+              
+            </div>
+            </form>
+        
     </div>
   </div>
+</div>
   </section>
   {% endblock %}
