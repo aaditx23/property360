@@ -300,7 +300,7 @@ def property(request):
 def support(request):
     info = sessionInfo()
     login_info = info[1]
-    support_retrieve = "select name, type, phone, hiring_price, support_id_id from website_support s, website_employee e where e.employee_id = s.support_id_id"
+    support_retrieve = "select name, type, phone, hiring_price, support_id from website_support s, website_employee e where e.employee_id = s.support_id"
     support_data =  None
     with connection.cursor() as cursor:
         cursor.execute(support_retrieve)
@@ -448,7 +448,7 @@ def hire_support(request):
     property = request.POST['property_id']
     # print(user,support,property)
     
-    insert_into_hires = "insert into website_hires (user_id_id, support_id_id) values (%s,%s)"
+    insert_into_hires = "insert into website_hires (user_id, support_id) values (%s,%s)"
     insert_into_maintains = "insert into website_maintains (property_id_id,support_id_id) values (%s,%s)"
     with connection.cursor() as cursor:
         cursor.execute(insert_into_hires, (user,support))
