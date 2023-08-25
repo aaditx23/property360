@@ -16,6 +16,7 @@ urlpatterns = [
     path('property_registration', views.property_registration, name='property_registration'),
     path('property_save', views.property_save, name='property_save'),
     path('hire_support', views.hire_support, name='hire_support'),
+    path('remove_support', views.remove_support, name= 'remove_support'),
     path('auction', views.auction, name = 'auction'),
     path('join_auction', views.join_auction, name='join_auction'),
     path('leave_auction', views.leave_auction, name='leave_auction'),
