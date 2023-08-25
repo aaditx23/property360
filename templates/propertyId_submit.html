@@ -7,9 +7,13 @@ submit
     <form action = "/hire_agent" method ="post" enctype="multipart/form-data" >
       {%csrf_token%}
 
-        <div class="mb-3">
-            <label for="prop_id" class="form-label"><b>Enter Property ID:</b></label>
-        <input type="text" class="form-control" id="prop_id" name= "prop_id" >
+      <div class="mb-3">
+        <label for='hired_agent' class="form-label"><b>Select Property ID</b></label>
+        <select class="form-select" aria-label="Property" id = 'prop_id' name='prop_id'  required>
+          {% for property in properties %}
+          <option value={{property.0}} > ID: {{property.0}}  </option>
+          {% endfor %}
+        </select>
       </div>
 
       <div class="mb-3">

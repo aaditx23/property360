@@ -300,13 +300,23 @@ def property(request):
 def support(request):
     info = sessionInfo()
     login_info = info[1]
+    user = info[0]
+    print(user)
     support_retrieve = "select name, type, phone, hiring_price, support_id_id from website_support s, website_employee e where e.employee_id = s.support_id_id"
     support_data =  None
+    hire_retrieve = "select support_id_id from website_hires where user_id_id=%s"
+    hired = []
     with connection.cursor() as cursor:
         cursor.execute(support_retrieve)
         support_data = tuple(cursor.fetchall())
+        cursor.execute(hire_retrieve,[user])
+        hire_data = tuple(cursor.fetchall())
+        for id in hire_data:
+            hired.append((id[0]))
+    hired = tuple(hired)
+    print(hire_data)
     if info[1]=="True":
-        return render(request, 'support.html', {'data': support_data,'user_id':info[0]})
+        return render(request, 'support.html', {'data': support_data, 'hired': hired, 'user_id':info[0]})
         
     else:
         return render(request, 'support.html', {'data': support_data})
@@ -331,11 +341,20 @@ def propertyId_submit(request):
     info=sessionInfo()
     login_info= info[1]
     user =info[0]
-    if request.method=='POST':
-        agent_id =request.POST['agent_id']
-
-        if info[1]=="True":
-            return render(request, 'propertyId_submit.html' , {'user_id': info[0], 'agent_id':agent_id})
+    if info[1]=="True":
+        if request.method=='POST':
+            agent_id = request.POST['agent_id']
+            property_list = ''
+            find_property = 'select property_id from website_property where user_id_id=%s and agent_id_id<>%s '
+            with connection.cursor() as cursor:
+                cursor.execute(find_property,(user,agent_id))
+                property_list = tuple(cursor.fetchall())
+            dic = {
+                'user_id':info[0],
+                'agent_id':agent_id,
+                'properties':property_list
+                }
+            return render(request, 'propertyId_submit.html', dic )
     else:
         return render (request,'propertyId_submit.html')
     
@@ -443,9 +462,31 @@ def hire_support(request):
     insert_into_maintains = "insert into website_maintains (property_id_id,support_id_id) values (%s,%s)"
     with connection.cursor() as cursor:
         cursor.execute(insert_into_hires, (user,support))
+        cursor.execute(insert_into_maintains, (property,support))
 
     return redirect('support')
 
+def remove_support(request):
+    info = sessionInfo()
+    if '0000' in info[0]:
+        return redirect('login')
+    
+    info = sessionInfo()
+    login_info = info[1]
+    user = info[0]
+
+    support = request.POST['support_id']
+    property = request.POST['property_id']
+    print(user,support)
+
+    remove_from_hires = "delete from website_hires where user_id=%s and support_id=%s"
+    remove_from_maintains = "delete from website_maintains where property_id_id=%s and support_id_id=%s"
+
+    with connection.cursor() as cursor:
+        cursor.execute(remove_from_hires, (user,support))
+        cursor.execute(remove_from_maintains, (property,support))
+
+    return redirect('support')
 
     
 def user_edit_profile(request):
@@ -691,6 +732,7 @@ def auction_property_submission(request):
             with connection.cursor() as cursor:
                 cursor.execute(find_property,[info[0]])
                 property_list = tuple(cursor.fetchall())
+            print(property_list)
             dic = {
                 'user_id':info[0],
                 'auct_id':auct_id,

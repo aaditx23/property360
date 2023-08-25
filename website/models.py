@@ -130,8 +130,8 @@ class Agents_Clients(models.Model):
 
 
 class Hires(models.Model):
-    user_id=models.ForeignKey(User, on_delete = models.CASCADE, to_field = 'user_id', db_index=True)
-    support_id=models.ForeignKey(Employee, on_delete = models.CASCADE, to_field = 'employee_id', primary_key = True)
+    user_id=models.ForeignKey(User, on_delete = models.CASCADE, to_field = 'user_id')
+    support_id=models.ForeignKey(Employee, on_delete = models.CASCADE, to_field = 'employee_id')
 
     class Meta:
         unique_together=("support_id","user_id")
