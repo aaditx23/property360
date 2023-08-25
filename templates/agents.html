@@ -29,11 +29,18 @@
             
             
             <td>
+              {% if item.6 == "Not_Hired" %}
+
               <form action="/propertyId_submit" method="post">
                 {% csrf_token %}
                 
                 <button type="submit" class="btn btn-primary" name="agent_id" id="agent_id" value={{item.0}}   >HIRE</button>
               </form>
+              {% else %}
+              <form action="">
+                Not hired
+              </form>
+              {% endif %}
             </td>
           </tr>
           {% endfor %}

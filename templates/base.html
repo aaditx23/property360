@@ -69,6 +69,37 @@
                 <li class="nav-item"> <a class="nav-link" href="/logout">Logout</a> </li>
             
               </li>
+
+              {% elif 'adm' in user_id %}
+              <li class="nav-item">
+                <a class="nav-link {% if request.path == '/user' or request.path == '/dashboard' or request.path == '/agent_dashboard' %}active{% endif %}" href="/dashboard">Dashboard</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link {% if request.path == '/home' %}active{% endif %}" href="/home">Home</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link {% if request.path == '/agents' %}active{% endif %}" href="/agents">Agents</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link {% if request.path == '/property' %}active{% endif %}" href="/property">Properties</a>
+              </li>
+              
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  More
+                </a>
+                <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href="/support">Support</a></li>
+                </ul>
+              </li>
+              
+              <li class="nav-item">
+                <a class="nav-link {% if request.path == '/auction' %}active{% endif %}" href="/auction">Auction</a>
+              </li>
+              <li id="login">
+                <a class="nav-link" >{{ user_id }}</a>
+                <li class="nav-item"> <a class="nav-link" href="/logout">Logout</a> </li>
+
               {% else %}
               
               <li class="nav-item">

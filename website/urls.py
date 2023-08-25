@@ -6,7 +6,6 @@ urlpatterns = [
     path('', views.about,name = 'about'),
     path('user', views.user, name = 'user'),
     path('dashboard', views.dashboard, name='dashboard'),
-    # path('agent_dashboard', views.agent_dashboard, name='agent_dashboard'),
     path('login', views.login, name = 'login'),
     path('agents', views.agents, name='agents'),
     path('home', views.home, name = 'home'),
@@ -31,6 +30,8 @@ urlpatterns = [
     path ('hire_agent', views.hire_agent , name='hire_agent'),
     path('add_auction_property', views.add_auction_property, name= 'add_auction_property'),
     path('remove_auction_property', views.remove_auction_property, name= 'remove_auction_property'),
+    path('create_auction', views.create_auction, name= 'create_auction'),
+    path('cancel_auction', views.cancel_auction, name= 'cancel_auction'),
 
     
 ]

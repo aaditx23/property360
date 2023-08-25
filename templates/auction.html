@@ -2,123 +2,271 @@
 
 {% block body  %}
 
-<div class="container mt-5 align-items-center">
-    <h3>Auction {{auct_id}} will start on {{auc_date}}</h3>
-    {% if user_status == "not_joined" %}
-    <p class="d-inline-flex gap-1">
-        <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#joinAuctionForm" aria-expanded="false" aria-controls="collapseExample">
-          Join Auction
-        </button>
-    </p>
-    {% elif user_status == "joined" %}
-    <p class="d-inline-flex gap-1">
-        <h6>Congratulations! You have already joined this auction!</h6>
-        <h6>Please wait till the auction starts. Thank you.</h6>
-        <button class="btn btn-danger" type="button" data-bs-toggle="collapse" data-bs-target="#leaveAuctionForm" aria-expanded="false" aria-controls="collapseExample">
-          Leave Auction
-        </button>
-    </p>
+    {% if 'adm' not in user_id %}
+    <div class="container mt-5 align-items-center">
+        {% if auct_id != 0 %}
+        <h3>Auction {{auct_id}} will start on {{auc_date}}</h3>
+        {% if user_status == "not_joined" %}
+        <p class="d-inline-flex gap-1">
+            <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#joinAuctionForm" aria-expanded="false" aria-controls="collapseExample">
+              Join Auction
+            </button>
+        </p>
+        {% elif user_status == "joined" %}
+        <p class="d-inline-flex gap-1">
+            <h6>Congratulations! You have already joined this auction!</h6>
+            <h6>Please wait till the auction starts. Thank you.</h6>
+            <button class="btn btn-danger" type="button" data-bs-toggle="collapse" data-bs-target="#leaveAuctionForm" aria-expanded="false" aria-controls="collapseExample">
+              Leave Auction
+            </button>
+        </p>
+        {% endif %}
+    
+    
+        <div class="collapse" id="joinAuctionForm">
+            <div class="card card-body">
+                <div class = 'container my-3'>
+                    <h4>Confirm Password to Continue  {{auct_id}}</h4>
+                        <form action = "/join_auction" method ="post" enctype="multipart/form-data" >
+                        {%csrf_token%}
+                            <div class="mb-3">
+                                <label for="confirm_password" class="form-label">Confirm Password: </label>
+                                <div class="col-sm-3">
+                                    <input type="password" class="form-control" id="confirm_password" name="confirm_password">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <button type="submit" class="btn btn-primary">Confirm</button> 
+                            </div>
+                        </form>
+                </div>
+            </div>
+        </div>
+    
+        <div class="collapse" id="leaveAuctionForm">
+            <div class="card card-body">
+                <div class = 'container my-3'>
+                    <h4>Confirm Password to leave  {{auct_id}}</h4>
+                        <form action = "/leave_auction" method ="post" enctype="multipart/form-data" >
+                        {%csrf_token%}
+                            <div class="mb-3">
+                                <label for="confirm_password" class="form-label">Confirm Password: </label>
+                                <div class="col-sm-3">
+                                    <input type="password" class="form-control" id="confirm_password" name="confirm_password">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <button type="submit" class="btn btn-primary">Confirm</button> 
+                            </div>
+                        </form>
+                </div>
+            </div>
+        </div>
+        
+        
+
+    </div>
+    
+    
+    
+    <h3 align="center">Offered Properties</h3>
+    
+    <div>
+        <table class="table">
+            <thead>
+              <tr align="center">
+                <th scope="col">PROPERTY ID</th>
+                <th scope="col">PROPERTY NAME</th>   
+                <th scope="col">LOCATOIN</th>
+                <th scope="col">SIZE</th>
+                <th scope="col">TYPE</th>
+                <th scope="col">STARTING PRICE</th>
+                {% if user_status == "joined" %}
+                <th scope="col">
+                    <div class="container text-center">
+                        <form action="/auction_property_submission" method="post">
+                            {% csrf_token %}
+                        <button type="submit" id = 'auc_id' name = 'auc_id' value={{auct_id}} class="btn btn-success btn-sm"> Add Property </button>
+                        </form>
+                        
+                        <h1>     </h1>
+                        <form action="/auction_property_removal" method="post">
+                            {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm">Remove Property</button>
+                        </form>
+                    </div>
+    
+                </th>
+                {% endif %}
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in data %}
+              <tr align="center">
+                <td>{{item.0}}</td>
+                <td>{{item.1}}</td>
+                <td>{{item.2}}</td>
+                <td>{{item.3}}</td>
+                <td>{{item.4}}</td>
+                <td>{{item.5}}</td>
+                
+                
+                <td>
+                {% if running_status == 1 %}
+                    <form action="/agents" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name = 'agent_id' value= {{item.6}}>
+                    <button type="submit" id = 'auction_prop' name='auction_prop' value={{item.0}} class="btn btn-outline-success" >BID</button>
+                    </form>
+                {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+              
+            </tbody>
+          </table>
+
+        {% else %}
+        <h3>There is no auction active currently. Please wait till any auction starts.</h3>
+        {% endif %}
+    </div>
+
+    {% else %}
+
+    <div class="container mt-5 align-items-center">
+        <h3>Welcome Admin {{user_id}}</h3>
+        {% if auct_id == 0 %}
+        <p class="d-inline-flex gap-1">
+            <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#createAuctionForm" aria-expanded="false" aria-controls="collapseExample">
+              Create Auction
+            </button>
+        </p>
+        {% else %}
+        <h3>The current auction {{auct_id}} has not finished yet. Please wait for it to finish in order to create another auction.</h3>
+        <p class="d-inline-flex gap-1">
+            <button class="btn btn-danger" type="button" data-bs-toggle="collapse" data-bs-target="#cancelAuctionForm" aria-expanded="false" aria-controls="collapseExample">
+              Cancel Auction
+            </button>
+        </p>
+        {% endif %}
+        <div class="collapse" id="createAuctionForm">
+            <div class="card card-body">
+                <div class = 'container my-3'>
+                    <h4>Create new auction</h4>
+                        <form action = "/create_auction" method ="post" >
+                        {%csrf_token%}
+                            <div class="mb-3">
+
+                                <label for="auction_time" class="form-label">Starting date: </label>
+                                <div class="col-sm-3">
+                                    <input type="date" class="form-control" id="auction_time" name="auction_time">
+                                </div>
+
+                                <label for="confirm_password" class="form-label">Confirm Password: </label>
+                                <div class="col-sm-3">
+                                    <input type="password" class="form-control" id="confirm_password" name="confirm_password">
+                                </div>
+                                
+                            </div>
+                            <div class="mb-3">
+                                <button type="submit" class="btn btn-primary">Confirm</button> 
+                            </div>
+                        </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="collapse" id="cancelAuctionForm">
+            <div class="card card-body">
+                <div class = 'container my-3'>
+                    <h4>Cancel auction {{auct_id}}</h4>
+                        <form action = "/cancel_auction" method ="post" >
+                        {%csrf_token%}
+                            <div class="mb-3">
+
+                                <label for="confirm_password" class="form-label">Confirm Password: </label>
+                                <div class="col-sm-3">
+                                    <input type="hidden" id = 'auc_id' name='auc_id' value = {{auct_id}}>
+                                    <input type="password" class="form-control" id="confirm_password" name="confirm_password">
+                                </div>
+                                
+                            </div>
+                            <div class="mb-3">
+                                <button type="submit" class="btn btn-danger" >Confirm</button> 
+                            </div>
+                        </form>
+                </div>
+            </div>
+        </div>
+    
+        
+    </div>
+    
+    
+    {% if auct_id != 0 %}
+    <h3 align="center">Current Auction: Offered Properties</h3>
+    
+    <div>
+        <table class="table">
+            <thead>
+              <tr align="center">
+                <th scope="col">PROPERTY ID</th>
+                <th scope="col">PROPERTY NAME</th>   
+                <th scope="col">LOCATOIN</th>
+                <th scope="col">SIZE</th>
+                <th scope="col">TYPE</th>
+                <th scope="col">STARTING PRICE</th>
+            {% if user_status == "joined" %}
+                <th scope="col">
+                    <div class="container text-center">
+                        <form action="/auction_property_submission" method="post">
+                            {% csrf_token %}
+                        <button type="submit" id = 'auc_id' name = 'auc_id' value={{auct_id}} class="btn btn-success btn-sm"> Add Property </button>
+                        </form>
+                        
+                        <h1>     </h1>
+                        <form action="/auction_property_removal" method="post">
+                            {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm">Remove Property</button>
+                        </form>
+                    </div>
+    
+                </th>
+            {% endif %}
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in data %}
+              <tr align="center">
+                <td>{{item.0}}</td>
+                <td>{{item.1}}</td>
+                <td>{{item.2}}</td>
+                <td>{{item.3}}</td>
+                <td>{{item.4}}</td>
+                <td>{{item.5}}</td>
+                
+                
+                <td>
+                {% if running_status == 1 %}
+                    <form action="/agents" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name = 'agent_id' value= {{item.6}}>
+                    <button type="submit" id = 'auction_prop' name='auction_prop' value={{item.0}} class="btn btn-outline-success" >BID</button>
+                    </form>
+                {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+              
+            </tbody>
+          </table>
+    </div>
     {% endif %}
 
 
-    <div class="collapse" id="joinAuctionForm">
-        <div class="card card-body">
-            <div class = 'container my-3'>
-                <h4>Confirm Password to Continue  {{auct_id}}</h4>
-                    <form action = "/join_auction" method ="post" enctype="multipart/form-data" >
-                    {%csrf_token%}
-                        <div class="mb-3">
-                            <label for="confirm_password" class="form-label">Confirm Password: </label>
-                            <div class="col-sm-3">
-                                <input type="password" class="form-control" id="confirm_password" name="confirm_password">
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <button type="submit" class="btn btn-primary">Confirm</button> 
-                        </div>
-                    </form>
-            </div>
-        </div>
-    </div>
-
-    <div class="collapse" id="leaveAuctionForm">
-        <div class="card card-body">
-            <div class = 'container my-3'>
-                <h4>Confirm Password to leave  {{auct_id}}</h4>
-                    <form action = "/leave_auction" method ="post" enctype="multipart/form-data" >
-                    {%csrf_token%}
-                        <div class="mb-3">
-                            <label for="confirm_password" class="form-label">Confirm Password: </label>
-                            <div class="col-sm-3">
-                                <input type="password" class="form-control" id="confirm_password" name="confirm_password">
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <button type="submit" class="btn btn-primary">Confirm</button> 
-                        </div>
-                    </form>
-            </div>
-        </div>
-    </div>
-</div>
+    {% endif %}
 
 
 
-<h3 align="center">Offered Properties</h3>
-
-<div>
-    <table class="table">
-        <thead>
-          <tr align="center">
-            <th scope="col">PROPERTY ID</th>
-            <th scope="col">PROPERTY NAME</th>   
-            <th scope="col">LOCATOIN</th>
-            <th scope="col">TYPE</th>
-            <th scope="col">SIZE</th>
-            <th scope="col">PRICE</th>
-            {% if user_status == "joined" %}
-            <th scope="col">
-                <div class="container text-center">
-                    <form action="/auction_property_submission" method="post">
-                        {% csrf_token %}
-                    <button type="submit" id = 'auc_id' name = 'auc_id' value={{auct_id}} class="btn btn-success btn-sm"> Add Property </button>
-                    </form>
-                    <h1>     </h1>
-                    <form action="/auction_property_removal" method="post">
-                        {% csrf_token %}
-                    <button type="submit" class="btn btn-danger btn-sm">Remove Property</button>
-                    </form>
-                </div>
-
-            </th>
-            {% endif %}
-          </tr>
-        </thead>
-        <tbody>
-          {% for item in data %}
-          <tr align="center">
-            <td>{{item.0}}</td>
-            <td>{{item.1}}</td>
-            <td>{{item.2}}</td>
-            <td>{{item.3}}</td>
-            <td>{{item.4}}</td>
-            <td>{{item.5}}</td>
-            
-            
-            <td>
-            {% if running_status == 1 %}
-                <form action="/agents" method="post">
-                {% csrf_token %}
-                <input type="hidden" name = 'agent_id' value= {{item.6}}>
-                <button type="submit" id = 'auction_prop' name='auction_prop' value={{item.0}} class="btn btn-outline-success" >BID</button>
-                </form>
-            {% endif %}
-            </td>
-          </tr>
-          {% endfor %}
-          
-        </tbody>
-      </table>
-</div>
 {% endblock  %}
 
