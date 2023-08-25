@@ -305,11 +305,20 @@ def propertyId_submit(request):
     info=sessionInfo()
     login_info= info[1]
     user =info[0]
-    if request.method=='POST':
-        agent_id =request.POST['agent_id']
-
-        if info[1]=="True":
-            return render(request, 'propertyId_submit.html' , {'user_id': info[0], 'agent_id':agent_id})
+    if info[1]=="True":
+        if request.method=='POST':
+            agent_id = request.POST['agent_id']
+            property_list = ''
+            find_property = 'select property_id from website_property where user_id_id=%s and agent_id_id<>%s '
+            with connection.cursor() as cursor:
+                cursor.execute(find_property,(user,agent_id))
+                property_list = tuple(cursor.fetchall())
+            dic = {
+                'user_id':info[0],
+                'agent_id':agent_id,
+                'properties':property_list
+                }
+            return render(request, 'propertyId_submit.html', dic )
     else:
         return render (request,'propertyId_submit.html')
     
@@ -411,7 +420,7 @@ def hire_support(request):
     property = request.POST['property_id']
     print(user,support,property)
     
-    insert_into_hires = "insert into website_hires (user_id, support_id) values (%s,%s)"
+    insert_into_hires = "insert into website_hires (user_id_id, support_id_id) values (%s,%s)"
     insert_into_maintains = "insert into website_maintains (property_id_id,support_id_id) values (%s,%s)"
     with connection.cursor() as cursor:
         cursor.execute(insert_into_hires, (user,support))
@@ -662,6 +671,7 @@ def auction_property_submission(request):
             with connection.cursor() as cursor:
                 cursor.execute(find_property,[info[0]])
                 property_list = tuple(cursor.fetchall())
+            print(property_list)
             dic = {
                 'user_id':info[0],
                 'auct_id':auct_id,
