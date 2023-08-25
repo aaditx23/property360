@@ -251,27 +251,6 @@ def home(request):
         return render(request, 'home.html')
     
 
-    
-
-def agents(request):
-    
-    
-    
-    info = sessionInfo()
-    login_info=info[1]
-   #EXCLUDED AGENT_0000
-    agent_retrieve="select agent_id_id, supervisor_id ,name, email ,phone, address from website_agent,website_employee where agent_id_id =employee_id and agent_id_id like 'agent%' and agent_id_id <> 'agent_0000'"
-    agent_data=None
-    with connection.cursor() as cursor:
-        cursor.execute(agent_retrieve)
-        agent_data = tuple(cursor.fetchall())
-    # print(agent_data)
-    if info[1]=="True":
-        return render(request, 'agents.html',{'user_id':info[0],'data': agent_data})
-    else:
-        
-        return render(request, 'agents.html' , {'data': agent_data})
-
 def about(request):
     info = sessionInfo()
     login_info = info[1]
@@ -337,6 +316,37 @@ def property_registration(request):
     else:
         return render(request, 'property_registration.html')
     
+
+def agents(request):
+    info = sessionInfo()
+    login_info=info[1]
+   #EXCLUDED AGENT_0000
+    agent_retrieve="select agent_id_id, supervisor_id ,name, email ,phone, address from website_agent,website_employee where agent_id_id =employee_id and agent_id_id like 'agent%' and agent_id_id <> 'agent_0000'"
+    agent_data=None
+    seller_retrieve = 'select agent_id_id from  website_seller where seller_id_id=%s'
+    seller_agent_data=''
+    with connection.cursor() as cursor:
+        cursor.execute(agent_retrieve)
+        agent_data = list(tuple(cursor.fetchall()))
+        cursor.execute(seller_retrieve, [info[0]])
+        seller_agent_data = tuple(cursor.fetchall())
+    for agent in agent_data:
+        temp_agent = list(agent)
+        if any(temp_agent[0] in hired for hired in seller_agent_data):
+            temp_agent.append('Hired')
+        else:
+            temp_agent.append('Not_Hired')
+        i = agent_data.index(agent)
+        agent_data[i]=tuple(temp_agent)
+    agent_data = tuple(agent_data)
+    print(agent_data)
+
+    if info[1]=="True":
+        return render(request, 'agents.html',{'user_id':info[0],'data': agent_data})
+    else:
+
+        return render(request, 'agents.html' , {'data': agent_data})
+    
 def propertyId_submit(request):
     info=sessionInfo()
     login_info= info[1]
@@ -377,13 +387,58 @@ def hire_agent(request):
             password1= tuple(cursor.fetchall())[0][0]
             cursor.execute(retrieve_user_id,[property_id])
             user_id=tuple(cursor.fetchall())[0][0]
-            # print(user_id)
-            # print(agent_id)
             if password==password1 and user==user_id:
                 cursor.execute(update_agent, (agent_id,property_id))
                 cursor.execute(insert_seller,(user,agent_id))
                 messages.success(request, "Agent_Id Updated")
     return redirect('agents')
+
+def agent_remove(request):
+    info=sessionInfo()
+    login_info=info[1]
+    user=info[0]
+    if request.method=='POST':
+        password= request.POST['confirm_password']
+        property_id=request.POST['prop_id']
+        agent_id=request.POST['agent_id']
+        password1=''
+        retrieve_pass= 'select password from website_user where user_id= %s'
+        update_agent= "update website_property set agent_id_id='agent_0000' where property_id=%s"
+        delete_seller= 'delete from  website_seller where agent_id_id=%s'
+
+        with connection.cursor() as cursor:
+            cursor.execute(retrieve_pass, [user])
+            password1= tuple(cursor.fetchall())[0][0]
+            if password==password1 :
+                cursor.execute(update_agent, [property_id])
+                cursor.execute(delete_seller,[agent_id])
+                messages.success(request, "Agent_Id Remove")
+    return redirect('agents')
+   
+
+
+def remove_propertyId_submission(request):
+    info=sessionInfo()
+    login_info= info[1]
+    user =info[0]
+    if info[1]=="True":
+        if request.method=='POST':
+            agent_id = request.POST['agent_id']
+            property_list = ''
+            find_property = 'select property_id from website_property where user_id_id=%s and agent_id_id=%s '
+            with connection.cursor() as cursor:
+                cursor.execute(find_property,(user,agent_id))
+                property_list = tuple(cursor.fetchall())
+            dic = {
+                'user_id':info[0],
+                'agent_id':agent_id,
+                'properties':property_list
+                }
+            return render(request, 'remove_propertyId_submission.html', dic )
+    else:
+        return render (request,'remove_propertyId_submission.html')
+    
+    
 
 
                 
