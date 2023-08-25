@@ -151,7 +151,8 @@ def dashboard(request):
     if info[1]=='True':
         if 'agent' in info[0]:
             get_agent= 'select employee_id, name, email, address, phone, supervisor_id, agent_img from website_employee, website_agent where agent_id_id=employee_id and employee_id=%s'
-            get_prop = 'select * from website_property where agent_id_id=%s'
+            # get_prop = 'select * from website_property where agent_id_id=%s'
+            get_prop = 'select property_id,status,location,name,size,type,price,property_img,user_id_id,agent_id_id from website_property where agent_id_id=%s'
             # all_prop = 'select property_id, agent_id_id from website_property'
             agent_temp=''
             agent_prop = ''
@@ -177,7 +178,7 @@ def dashboard(request):
                 # 'all_prop': all_prop,
             }
             
-            # print(agent_data)
+            print(agent_data)
             # return render(request, 'agent_dashboard.html',  agent_data)
             return render(request, 'agent_dashboard.html',  {'user_id':info[0],'data': agent_data})
             
@@ -788,11 +789,29 @@ def delete_from_market(request):
     user = info[0]
 
     if request.method == "POST":
-        property_id = request.POST['property_id']
-        change_status = "update website_property set status = 'available' where property_id = %s"
+        password = request.POST['password']
+        retrieve_password = 'select password from website_employee where employee_id = %s'
+        confirm_password = ''
         with connection.cursor() as cursor:
-            cursor.execute(change_status,[property_id])
-            messages.warning(request,'Property Removed From Market')
+            cursor.execute(retrieve_password,[user])
+            confirm_password = tuple(cursor)[0][0]
+
+        print("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",confirm_password, password)
+
+        if password == confirm_password:
+
+            property_id = request.POST['property_id']
+            change_status = "update website_property set status = 'available' where property_id = %s"
+            with connection.cursor() as cursor:
+                cursor.execute(change_status,[property_id])
+                messages.warning(request,'Property Removed From Market')
+        
+        else:
+            messages.error(request, 'Incorrect Password')
+
+
+
+        
     return redirect('dashboard')
 
 
@@ -802,11 +821,25 @@ def delete_property(request):
     user = info[0]
 
     if request.method == "POST":
-        property_id = request.POST['property_id']
-        delete_property = 'delete from website_property where property_id = %s'
+        password = request.POST['password']
+        retrieve_password = 'select password from website_user where user_id = %s'
+        confirm_password = ''
         with connection.cursor() as cursor:
-            cursor.execute(delete_property,[property_id])
-            messages.warning(request, 'Property Deleted')
+            cursor.execute(retrieve_password,[user])
+            confirm_password = tuple(cursor)[0][0]
+
+        print("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",confirm_password, password)
+
+        if password == confirm_password:
+
+            property_id = request.POST['property_id']
+            delete_property = 'delete from website_property where property_id = %s'
+            with connection.cursor() as cursor:
+                cursor.execute(delete_property,[property_id])
+                messages.warning(request, 'Property Deleted')
+        
+        else:
+            messages.error(request, 'Incorrect Password')
 
     return redirect('dashboard')
     # return render(request, 'user.html', {'user_id': user})
