@@ -789,13 +789,24 @@ def delete_from_market(request):
     user = info[0]
 
     if request.method == "POST":
-        
+        password = request.POST['password']
+        retrieve_password = 'select password from website_employee where employee_id = %s'
+        confirm_password = ''
+        with connection.cursor() as cursor:
+            cursor.execute(retrieve_password,[user])
+            confirm_password = tuple(cursor)[0][0]
+        print("------------------------------",password,confirm_password)
+        if password == confirm_password:
 
             property_id = request.POST['property_id']
             change_status = "update website_property set status = 'available' where property_id = %s"
             with connection.cursor() as cursor:
                 cursor.execute(change_status,[property_id])
                 messages.warning(request,'Property Removed From Market')
+
+        else:
+
+            messages.warning(request, 'Incorrect Password')
         
         
 
