@@ -20,8 +20,23 @@ def createAgent(n):
 
 
 def createProp(n):
+    s = ''
+    # print("/////////////////////createprop///////////////////")
     if len(str(n))<4:
-        return ("prop_"+("0"*(4-len(str(n)))) + str(n))
+        s = ("prop_"+("0"*(4-len(str(n)))) + str(n))
+        
+        existing_prop = 'select property_id from website_property order by property_id asc'
+        prop_tuple = ''
+        with connection.cursor() as cursor:
+            cursor.execute(existing_prop)
+            prop_tuple = list(cursor.fetchall())
+        # print('-------/////////////////--------------',prop_tuple,s)
+        if (s,) in prop_tuple:
+            s = createProp(n+1)
+
+
+
+        return s
     else:
         return "prop_"+str(n)
 
@@ -101,14 +116,14 @@ def user(request):
             if usertype=="user":
                 cursor.execute(find_user)
                 user_list = tuple(cursor.fetchall())
-                print(user_list)
+                # print(user_list)
                 entries = len(user_list)
                 uid = createUser((entries+1))
                 cursor.execute(insert_user, (uid, name, email, psswd, addrss))
             else:
                 cursor.execute(find_agent)
                 agent_list = tuple(cursor.fetchall())
-                print(agent_list)
+                # print(agent_list)
                 entries = len(agent_list)
                 uid = createAgent((entries+1))
                 cursor.execute(insert_emp, (uid, name, email, psswd, addrss))
@@ -118,6 +133,7 @@ def user(request):
         messages.success(request, 'Signup Successful')
         return render(request, 'user.html', data)
     return render(request, 'user.html')
+    # return render(request, 'user.html', {'user_id': info[0]})
 
 
 
@@ -161,7 +177,7 @@ def dashboard(request):
                 # 'all_prop': all_prop,
             }
             
-            print(agent_data)
+            # print(agent_data)
             # return render(request, 'agent_dashboard.html',  agent_data)
             return render(request, 'agent_dashboard.html',  {'user_id':info[0],'data': agent_data})
             
@@ -172,15 +188,16 @@ def dashboard(request):
 
         elif 'user' in info[0]:
             get_user = 'select user_id, username, email, address,user_img from website_user where user_id=%s'
-            get_prop = 'select * from website_property where user_id_id=%s'
+            # get_prop = 'select * from website_property where user_id_id=%s'
+            get_prop = 'select property_id,status,location,name,size,type,price,property_img,user_id_id,agent_id_id from website_property where user_id_id=%s'
             user_temp = ''
             user_prop = ''
             user = info[0]
-            print(user)
+            # print(user)
             with connection.cursor() as cursor:
                 cursor.execute(get_user, [user])
                 user_temp = tuple(cursor.fetchall())[0]
-                print(user_temp)
+                # print(user_temp)
                 cursor.execute(get_prop,[user])
                 user_prop = tuple(cursor.fetchall())
             user_data ={
@@ -191,8 +208,10 @@ def dashboard(request):
                 'user_img':user_temp[4],
                 'prop':user_prop, 
             }
-            print(user_data)
+            # print(user_data)
             return render(request, 'user.html', user_data)
+            # return render(request, 'user.html',  {'user_id':info[0],'data': user_data})
+            
     return render(request, 'user.html')
 
 
@@ -225,7 +244,7 @@ def home(request):
             return render(request, 'home.html', arg)
     else:
         info = sessionInfo()
-        print(info)
+        # print(info)
         if info[1]=="True":
             return render(request, 'home.html', {'user_id':info[0]})
         return render(request, 'home.html')
@@ -245,7 +264,7 @@ def agents(request):
     with connection.cursor() as cursor:
         cursor.execute(agent_retrieve)
         agent_data = tuple(cursor.fetchall())
-    print(agent_data)
+    # print(agent_data)
     if info[1]=="True":
         return render(request, 'agents.html',{'user_id':info[0],'data': agent_data})
     else:
@@ -270,7 +289,7 @@ def property(request):
     with connection.cursor() as cursor:
         cursor.execute(property_retrieve)
         property_data = tuple(cursor.fetchall())
-    print(property_data)
+    # print(property_data)
 
     if info[1] == 'True':
         return render(request, 'property.html', {'data': property_data, 'user_id':user})
@@ -280,7 +299,7 @@ def property(request):
 def support(request):
     info = sessionInfo()
     login_info = info[1]
-    support_retrieve = "select name, type, phone, hiring_price, support_id from website_support s, website_employee e where e.employee_id = s.support_id"
+    support_retrieve = "select name, type, phone, hiring_price, support_id_id from website_support s, website_employee e where e.employee_id = s.support_id_id"
     support_data =  None
     with connection.cursor() as cursor:
         cursor.execute(support_retrieve)
@@ -301,7 +320,7 @@ def property_registration(request):
         with connection.cursor() as cursor:
             cursor.execute("select employee_id,name from website_employee where employee_id like 'agent%'")
             agent_list = tuple(cursor.fetchall())
-        print(agent_list)
+        # print(agent_list)
         return render(request, 'property_registration.html', {'user_id':info[0], 'agents':agent_list})
         
     else:
@@ -338,8 +357,8 @@ def hire_agent(request):
             password1= tuple(cursor.fetchall())[0][0]
             cursor.execute(retrieve_user_id,[property_id])
             user_id=tuple(cursor.fetchall())[0][0]
-            print(user_id)
-            print(agent_id)
+            # print(user_id)
+            # print(agent_id)
             if password==password1 and user==user_id:
                 cursor.execute(update_agent, (agent_id,property_id))
                 cursor.execute(insert_seller,(user,agent_id))
@@ -366,7 +385,7 @@ def property_save(request):
         type = request.POST['type']
         image = request.FILES['property_img']
         prop_agent = request.POST['hired_agent']
-        print(prop_agent,'-----------23423423')
+        # print(prop_agent,'-----------23423423')
         with open('media/' + image.name, 'wb') as f:
             for chunk in image.chunks():
                 f.write(chunk)
@@ -375,14 +394,16 @@ def property_save(request):
             cursor.execute(all_properties)
             property_tuple = tuple(cursor.fetchall())
             entries = len(property_tuple)
+            # print(entries)
             property_id = createProp((entries+1))
-
+            # print(property_id)
         
-        property_insert = "INSERT INTO website_property(property_id, status, location, name, size, type, price, agent_id_id, user_id_id, property_img) values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+        property_insert = "INSERT INTO website_property(property_id, status, location, name, size, type, price, property_img, user_id_id, agent_id_id) values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
         with connection.cursor() as cursor:
-            cursor.execute(property_insert, (property_id, status, location, name, size, type, price, prop_agent, user,image.name))
+            cursor.execute(property_insert, (property_id, status, location, name, size, type, price,image.name, user,prop_agent))
             messages.success(request, "Property Submitted")
-    return redirect('dashboard')
+    # return redirect('dashboard')
+    return render(request, 'property_registration.html', {'user_id': user})
 
 
 def property_list(request):
@@ -415,9 +436,9 @@ def hire_support(request):
 
     support = request.POST['support_id']
     property = request.POST['property_id']
-    print(user,support,property)
+    # print(user,support,property)
     
-    insert_into_hires = "insert into website_hires (user_id, support_id) values (%s,%s)"
+    insert_into_hires = "insert into website_hires (user_id_id, support_id_id) values (%s,%s)"
     insert_into_maintains = "insert into website_maintains (property_id_id,support_id_id) values (%s,%s)"
     with connection.cursor() as cursor:
         cursor.execute(insert_into_hires, (user,support))
@@ -465,7 +486,7 @@ def user_edit_profile(request):
                     dict[keys] = new_dict[keys]
                 else:
                     dict[keys] = old_dict[keys]
-            print(dict,old_dict,new_dict)
+            # print(dict,old_dict,new_dict)
 
 
             update_user = 'update website_user set username = %s, email= %s,address = %s,password =%s, user_img=%s where user_id = %s '
@@ -512,7 +533,7 @@ def user_edit_profile(request):
                     dict[keys] = new_dict[keys]
                 else:
                     dict[keys] = old_dict[keys]
-            print(dict,old_dict,new_dict)
+            # print(dict,old_dict,new_dict)
 
 
             # update_user = 'update website_user set agentname = %s, email= %s,address = %s,password =%s, user_img=%s where user_id = %s '
@@ -535,13 +556,13 @@ def property_edit_info(request):
     if request.method == 'POST':
         property_id = request.POST['property_id']
     
-        print(property_id)
+        # print(property_id)
         retrieve_property_info = "select name,location,size,type,price,property_img from website_property where property_id = %s"
         property_data = None
         with connection.cursor() as cursor:
             cursor.execute(retrieve_property_info, [property_id])
             property_data = tuple(cursor.fetchall())[0]
-        print(property_data)
+        # print(property_data)
         old_dict = {
             'p_name' : property_data[0],
             
@@ -555,7 +576,7 @@ def property_edit_info(request):
         with open("media/" + image.name, 'wb') as f:
             for chunk in image.chunks():
                 f.write(chunk)
-        print(old_dict)
+        # print(old_dict)
         new_dict = {
             'p_name' : request.POST['p_name'],
             'location' : request.POST['location'],
@@ -564,14 +585,14 @@ def property_edit_info(request):
             'price' : request.POST['price'],
             'property_img':image.name
         }
-        print(new_dict)
+        # print(new_dict)
         dict={}
         for keys in new_dict.keys():
             if len(new_dict[keys]) != 0:
                 dict[keys] = new_dict[keys]
             else:
                 dict[keys] = old_dict[keys]
-        print(dict,old_dict,new_dict)
+        # print(dict,old_dict,new_dict)
         update_property = 'update website_property set name =%s,location=%s,size=%s,type=%s,price=%s,property_img = %s where property_id = %s '
         with connection.cursor() as cursor:
             cursor.execute(update_property, (dict['p_name'], dict['location'],dict['size'],dict['type'],dict['price'],dict['property_img'],property_id))
@@ -601,11 +622,11 @@ def auction(request):
                         """
         with connection.cursor() as cursor:
             cursor.execute(find_auction)
-            print(tuple(cursor.fetchall()))
+            # print(tuple(cursor.fetchall()))
             temp = tuple(cursor.fetchall())[0]
             auction_id = temp[0]
             auction_running_status = temp[1]
-            print(auction_running_status,'---------------------')
+            # print(auction_running_status,'---------------------')
             cursor.execute(find_property)
             property_data = tuple(cursor.fetchall())
             cursor.execute(find_user_status, [info[0]])
@@ -748,7 +769,7 @@ def agent_img(request):
     login_info = info[1]
     if request.method=='POST':
         image = request.FILES['agent_img']
-        print(image," image")
+        # print(image," image")
         with open('media/' + image.name, 'wb') as f:
             for chunk in image.chunks():
                 f.write(chunk)
@@ -762,17 +783,35 @@ def agent_img(request):
         return redirect('user')
 
 
+def delete_from_market(request):
+    info = sessionInfo()
+    user = info[0]
+
+    if request.method == "POST":
+        property_id = request.POST['property_id']
+        change_status = "update website_property set status = 'available' where property_id = %s"
+        with connection.cursor() as cursor:
+            cursor.execute(change_status,[property_id])
+            messages.warning(request,'Property Removed From Market')
+    return redirect('dashboard')
+
+
+
 def delete_property(request):
     info = sessionInfo()
     user = info[0]
 
     if request.method == "POST":
-        property_id_del = request.POST['property_id_del']
-        change_status = "update website_property set status = 'available' where property_id = %s"
+        property_id = request.POST['property_id']
+        delete_property = 'delete from website_property where property_id = %s'
         with connection.cursor() as cursor:
-            cursor.execute(change_status,[property_id_del])
-            messages.warning(request,'Property Removed From Market')
+            cursor.execute(delete_property,[property_id])
+            messages.warning(request, 'Property Deleted')
+
     return redirect('dashboard')
+    # return render(request, 'user.html', {'user_id': user})
+    # return render(request, 'user.html', {'user_id': user})
+
 # --------------------
 # for every button function insert this code snippet at the very beginning
 # --------------------
@@ -782,4 +821,5 @@ def delete_property(request):
     #     return redirect('login')
 
 def countdown(request):
+    pass
     return render(request, 'countdown.html')

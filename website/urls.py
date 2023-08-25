@@ -29,7 +29,8 @@ urlpatterns = [
     path('fetch_property', views.fetch_property, name= 'fetch_property'),
     path('propertyId_submit', views.propertyId_submit, name='propertyId_submit'),
     path ('hire_agent', views.hire_agent , name='hire_agent'),
-    path('delete_property',views.delete_property, name = 'delete_property'),
+    path('delete_from_market',views.delete_from_market, name = 'delete_from_market'),
+    path('delete_property', views.delete_property, name = 'delete_property'),
     path('add_auction_property', views.add_auction_property, name= 'add_auction_property'),
     path('remove_auction_property', views.remove_auction_property, name= 'remove_auction_property'),
 

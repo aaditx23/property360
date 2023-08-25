@@ -97,12 +97,12 @@
                     {% comment %} delete property  {% endcomment %}
                   </form>
                     {%else%}
-                    <form action="/delete_property" method = "POST">
+                    <form action="/delete_from_market" method = "POST">
                       {% csrf_token %}
                       <div class="d-flex pt-1">
                         
                         {% comment %} c  {% endcomment %}
-                        <input type="hidden" name = 'property_id_del' value= {{p.0}}>
+                        <input type="hidden" name = 'property_id' value= {{p.0}}>
                         {% comment %} c {% endcomment %}
                         {% comment %} <button type="submit" class="btn btn-outline-primary me-1 flex-grow-1">Upload To Market</button> {% endcomment %}
                         <button type="submit" class="btn btn-outline-danger me-1 flex-grow-1">Remove From Market</button>
