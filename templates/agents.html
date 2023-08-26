@@ -49,8 +49,9 @@
                       <select class="form-select form-select-sm me-2" aria-label="Supervisor" name="supv_id" id="supv_id" required>
                         <option disabled selected> {% if item.1 == 'agent_0000' %} Not Set {% else %} {{item.1}} {% endif %}</option>  
                         {% for supervisor in supervisor_data %}
-                          
+                          {% if supervisor.0 != item.0 %}
                           <option value="{{supervisor.0}}">{{supervisor.0}}</option>
+                          {% endif %}
                           {% endfor %}
                       </select>
                       <input type="hidden" name="agent_id" id = "agent_id" value={{item.0}}>

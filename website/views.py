@@ -386,7 +386,7 @@ def remove_supervisor(request):
     agent = request.POST['agent_id']
     make_sup = 'update website_employee set supervisor= 0 where employee_id=%s'
     get_pass = 'select password from website_admin where admin_id = %s'
-    change_supervisor = "update website_agent set supervisor_id='agent_0000' where agent_id_id=%s"
+    change_supervisor = "update website_agent set supervisor_id='agent_0000' where supervisor_id=%s"
     adm_pass = request.POST['confirm_password']
     password  = ''
     with connection.cursor() as c:
@@ -550,6 +550,7 @@ def hire_agent(request):
                 cursor.execute(update_agent, (agent_id,property_id))
                 cursor.execute(insert_seller,(user,'0000',agent_id))
                 messages.success(request, "Agent_Id Updated")
+            
     return redirect('agents')
 
 def agent_remove(request):
@@ -908,6 +909,8 @@ def property_edit_info(request):
             messages.success(request, "Property Info Updated")
         
     return render(request, 'property_edit_info.html', {'user_id': user,})
+
+
 
 
 
