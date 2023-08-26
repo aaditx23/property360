@@ -36,7 +36,7 @@ class Property(models.Model):
     user_id = models.ForeignKey(User, on_delete = models.CASCADE, to_field = 'user_id')
     agent_id = models.ForeignKey(Agent, on_delete = models.CASCADE, to_field = 'agent_id')
 
-    status = models.CharField(max_length = 20)
+    status = models.CharField(max_length = 20, default = 'Not For Sale')
     location = models.CharField(max_length = 50)
     name = models.CharField(max_length = 20)
     size = models.CharField(max_length=10)

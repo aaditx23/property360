@@ -204,6 +204,8 @@ def dashboard(request):
             # starting work on activity
             get_property_and_status = 'select property_id, status from website_property where user_id_id = %s'
             prop_status = ''
+            get_property_and_agent = "select property_id, agent_id_id from website_property where user_id_id =%s"
+            prop_agent = ''
             with connection.cursor() as cursor:
                 cursor.execute(get_user, [user])
                 user_temp = tuple(cursor.fetchall())[0]
@@ -212,6 +214,8 @@ def dashboard(request):
 
                 cursor.execute(get_property_and_status,[user])
                 prop_status = tuple(cursor.fetchall())
+                cursor.execute(get_property_and_agent,[user])
+                prop_agent = tuple(cursor.fetchall())
             user_data ={
                 'user_id':info[0],
                 'username':user_temp[1],
@@ -220,6 +224,7 @@ def dashboard(request):
                 'user_img':user_temp[4],
                 'prop':user_prop,
                 'prop_status': prop_status, 
+                'prop_agent' : prop_agent,
             }
             print(user_data)
             return render(request, 'user.html', user_data)
@@ -552,7 +557,7 @@ def property_save(request):
         # status = request.POST['status']
         type = request.POST['type']
         image = request.FILES['property_img']
-        prop_agent = request.POST['hired_agent']
+        # prop_agent = request.POST['hired_agent']
         # print(prop_agent,'-----------23423423')
         with open('media/' + image.name, 'wb') as f:
             for chunk in image.chunks():
@@ -567,10 +572,10 @@ def property_save(request):
             # print(property_id)
         
         # property_insert = "INSERT INTO website_property(property_id, status, location, name, size, type, price, property_img, user_id_id, agent_id_id) values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
-        property_insert = "INSERT INTO website_property(property_id, location, name, size, type, price, property_img, user_id_id, agent_id_id) values (%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+        property_insert = "INSERT INTO website_property(property_id, location, name, size, type, price, property_img, user_id_id) values (%s,%s,%s,%s,%s,%s,%s,%s)"
         with connection.cursor() as cursor:
             # cursor.execute(property_insert, (property_id, status, location, name, size, type, price,image.name, user,prop_agent))
-            cursor.execute(property_insert, (property_id, location, name, size, type, price,image.name, user,prop_agent))
+            cursor.execute(property_insert, (property_id, location, name, size, type, price,image.name, user))
             messages.success(request, "Property Submitted")
     # return redirect('dashboard')
     return render(request, 'property_registration.html', {'user_id': user})
