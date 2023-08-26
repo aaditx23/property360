@@ -64,7 +64,7 @@ def fetch_property(request):
     elif "agent" in user:
         if request.method == 'POST':
             property_id = request.POST['property_id']
-            update_status = "update website_property set status = 'for sale' where property_id = %s "
+            update_status = "update website_property set status = 'For Sale' where property_id = %s "
             with connection.cursor() as cursor:
                 cursor.execute(update_status, [property_id])
                 messages.success (request, 'Property Added To Market')
@@ -151,20 +151,19 @@ def dashboard(request):
     if info[1]=='True':
         if 'agent' in info[0]:
             get_agent= 'select employee_id, name, email, address, phone, supervisor_id, agent_img from website_employee, website_agent where agent_id_id=employee_id and employee_id=%s'
-            # get_prop = 'select * from website_property where agent_id_id=%s'
             get_prop = 'select property_id,status,location,name,size,type,price,property_img,user_id_id,agent_id_id from website_property where agent_id_id=%s'
-            # all_prop = 'select property_id, agent_id_id from website_property'
             agent_temp=''
             agent_prop = ''
-            # all_prop = ''
+            # staring work on activity 
+            
             agent=info[0]
             with connection .cursor() as cursor:
                 cursor.execute(get_agent,[agent])
                 agent_temp=tuple(cursor.fetchall())[0]
                 cursor.execute(get_prop,[agent])
                 agent_prop = tuple(cursor.fetchall())
-                # cursor.execute(all_prop)
-                # all_prop = tuple(cursor.fetchall())
+                
+                
                 
             agent_data={
                 'agent_id': info[0],
@@ -188,28 +187,32 @@ def dashboard(request):
 
 
         elif 'user' in info[0]:
+            user = info[0]
             get_user = 'select user_id, username, email, address,user_img from website_user where user_id=%s'
-            # get_prop = 'select * from website_property where user_id_id=%s'
             get_prop = 'select property_id,status,location,name,size,type,price,property_img,user_id_id,agent_id_id from website_property where user_id_id=%s'
             user_temp = ''
             user_prop = ''
-            user = info[0]
-            # print(user)
+            # starting work on activity
+            get_property_and_status = 'select property_id, status from website_property where user_id_id = %s'
+            prop_status = ''
             with connection.cursor() as cursor:
                 cursor.execute(get_user, [user])
                 user_temp = tuple(cursor.fetchall())[0]
-                # print(user_temp)
                 cursor.execute(get_prop,[user])
                 user_prop = tuple(cursor.fetchall())
+
+                cursor.execute(get_property_and_status,[user])
+                prop_status = tuple(cursor.fetchall())
             user_data ={
                 'user_id':info[0],
                 'username':user_temp[1],
                 'email':user_temp[2],
                 'address':user_temp[3],
                 'user_img':user_temp[4],
-                'prop':user_prop, 
+                'prop':user_prop,
+                'prop_status': prop_status, 
             }
-            # print(user_data)
+            print(user_data)
             return render(request, 'user.html', user_data)
             # return render(request, 'user.html',  {'user_id':info[0],'data': user_data})
             
@@ -264,7 +267,7 @@ def property(request):
     login_info = info[1]
     user = info[0]
     
-    property_retrieve = "select property_id, name,agent_id_id, location, size, type, price, status from website_property where status = 'for sale'"
+    property_retrieve = "select property_id, name,agent_id_id, location, size, type, price, status from website_property where status = 'For Sale'"
     property_data =  None
     with connection.cursor() as cursor:
         cursor.execute(property_retrieve)
@@ -456,7 +459,7 @@ def property_save(request):
         location = request.POST['location']
         size = request.POST['size']
         price = request.POST['price']
-        status = request.POST['status']
+        # status = request.POST['status']
         type = request.POST['type']
         image = request.FILES['property_img']
         prop_agent = request.POST['hired_agent']
@@ -473,9 +476,11 @@ def property_save(request):
             property_id = createProp((entries+1))
             # print(property_id)
         
-        property_insert = "INSERT INTO website_property(property_id, status, location, name, size, type, price, property_img, user_id_id, agent_id_id) values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+        # property_insert = "INSERT INTO website_property(property_id, status, location, name, size, type, price, property_img, user_id_id, agent_id_id) values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+        property_insert = "INSERT INTO website_property(property_id, location, name, size, type, price, property_img, user_id_id, agent_id_id) values (%s,%s,%s,%s,%s,%s,%s,%s,%s)"
         with connection.cursor() as cursor:
-            cursor.execute(property_insert, (property_id, status, location, name, size, type, price,image.name, user,prop_agent))
+            # cursor.execute(property_insert, (property_id, status, location, name, size, type, price,image.name, user,prop_agent))
+            cursor.execute(property_insert, (property_id, location, name, size, type, price,image.name, user,prop_agent))
             messages.success(request, "Property Submitted")
     # return redirect('dashboard')
     return render(request, 'property_registration.html', {'user_id': user})
@@ -896,7 +901,7 @@ def delete_from_market(request):
         if password == confirm_password:
 
             property_id = request.POST['property_id']
-            change_status = "update website_property set status = 'available' where property_id = %s"
+            change_status = "update website_property set status = 'Available For Market' where property_id = %s"
             with connection.cursor() as cursor:
                 cursor.execute(change_status,[property_id])
                 messages.warning(request,'Property Removed From Market')
