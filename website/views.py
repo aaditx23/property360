@@ -333,7 +333,7 @@ def remove_supervisor(request):
     agent = request.POST['agent_id']
     make_sup = 'update website_employee set supervisor= 0 where employee_id=%s'
     get_pass = 'select password from website_admin where admin_id = %s'
-    change_supervisor = "update website_agent set supervisor_id='agent_0000' where agent_id_id=%s"
+    change_supervisor = "update website_agent set supervisor_id='agent_0000' where supervisor_id=%s"
     adm_pass = request.POST['confirm_password']
     password  = ''
     with connection.cursor() as c:
