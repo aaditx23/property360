@@ -38,6 +38,8 @@ urlpatterns = [
     path('create_auction', views.create_auction, name= 'create_auction'),
     path('cancel_auction', views.cancel_auction, name= 'cancel_auction'),
     path('make_supervisor', views.make_supervisor, name= 'make_supervisor'),
+    path('remove_supervisor', views.remove_supervisor, name= 'remove_supervisor'),
+    path('set_supervisor', views.set_supervisor, name= 'remove_supervisor'),
 
     
 ]

@@ -22,7 +22,7 @@ class Employee(models.Model):
 class Agent(models.Model):
     agent_id = models.ForeignKey(Employee, on_delete = models.CASCADE, to_field= 'employee_id', primary_key = True)
 
-    supervisor_id = models.CharField(max_length=50)
+    supervisor = models.ForeignKey(Employee, on_delete=models.CASCADE, to_field='employee_id', related_name='supervised_agents')
     agent_img = models.CharField(max_length=50, null=True)
 
 
