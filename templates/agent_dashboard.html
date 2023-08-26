@@ -83,7 +83,7 @@
                       <p class="mb-0">{{p.1}}</p>
                     </div>
                   </div>
-                  {% if 'for sale' not in p %}
+                  {% if 'For Sale' not in p %}
                   <form action="/fetch_property" method = "POST">
                   {% comment %} <form action="" method = "POST"> {% endcomment %}
                     {% csrf_token %}

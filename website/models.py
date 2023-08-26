@@ -22,7 +22,7 @@ class Employee(models.Model):
 class Agent(models.Model):
     agent_id = models.ForeignKey(Employee, on_delete = models.CASCADE, to_field= 'employee_id', primary_key = True)
 
-    supervisor_id = models.CharField(max_length=50)
+    supervisor = models.ForeignKey(Employee, on_delete=models.CASCADE, to_field='employee_id', related_name='supervised_agents')
     agent_img = models.CharField(max_length=50, null=True)
 
 
@@ -36,7 +36,7 @@ class Property(models.Model):
     user_id = models.ForeignKey(User, on_delete = models.CASCADE, to_field = 'user_id')
     agent_id = models.ForeignKey(Agent, on_delete = models.CASCADE, to_field = 'agent_id')
 
-    status = models.CharField(max_length = 20)
+    status = models.CharField(max_length = 20, default = 'Not For Sale')
     location = models.CharField(max_length = 50)
     name = models.CharField(max_length = 20)
     size = models.CharField(max_length=10)
@@ -48,6 +48,7 @@ class Auction(models.Model):
     auction_id = models.CharField(max_length = 20, primary_key = True)
     auction_status = models.CharField(max_length=50, default='Inactive')
     auction_running = models.BooleanField()
+    start_time = models.DateField(auto_now=False, auto_now_add=False)
     
     
 
@@ -68,7 +69,7 @@ class Admin(models.Model):
     email = models.EmailField(max_length=254)
     name = models.CharField(max_length = 20)
     password = models.CharField(max_length = 20)
-    branch = models.CharField(max_length = 20)
+    
 
 class Buyer(models.Model):
     buyer_id = models.ForeignKey(User, on_delete=models.CASCADE, to_field='user_id', primary_key = True) 
@@ -111,12 +112,12 @@ class Property_Features(models.Model):
         unique_together= ("property_id","features")
 
 
-class Organizes(models.Model):
-    admin_id = models.ForeignKey(Admin, on_delete = models.CASCADE, to_field = 'admin_id')
-    auction_id = models.ForeignKey(Auction, on_delete = models.CASCADE, to_field = 'auction_id')
+# class Organizes(models.Model):
+#     admin_id = models.ForeignKey(Admin, on_delete = models.CASCADE, to_field = 'admin_id')
+#     auction_id = models.ForeignKey(Auction, on_delete = models.CASCADE, to_field = 'auction_id')
 
-    class Meta:
-        unique_together=("admin_id","auction_id")
+#     class Meta:
+#         unique_together=("admin_id","auction_id")
 
 
 class Agents_Clients(models.Model):
@@ -130,6 +131,7 @@ class Agents_Clients(models.Model):
 
 
 class Hires(models.Model):
+    id = models.AutoField(primary_key=True)
     user_id=models.ForeignKey(User, on_delete = models.CASCADE, to_field = 'user_id')
     support_id=models.ForeignKey(Employee, on_delete = models.CASCADE, to_field = 'employee_id')
 

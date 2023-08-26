@@ -2,6 +2,7 @@ from django.shortcuts import render,redirect
 from django.http import HttpResponse
 from django.http import JsonResponse
 from django.contrib import messages
+from datetime import datetime
 # from website.models import User
 from django.db import connection
 # Create your views here.
@@ -40,6 +41,12 @@ def createProp(n):
     else:
         return "prop_"+str(n)
 
+def createAuct(n):
+    if len(str(n))<4:
+        return ("auct_"+("0"*(4-len(str(n)))) + str(n))
+    else:
+        return "auct_"+str(n)  
+
 def sessionInfo():
     retrieve_login = "select * from website_session"
     with connection.cursor() as cursor:
@@ -64,7 +71,7 @@ def fetch_property(request):
     elif "agent" in user:
         if request.method == 'POST':
             property_id = request.POST['property_id']
-            update_status = "update website_property set status = 'for sale' where property_id = %s "
+            update_status = "update website_property set status = 'For Sale' where property_id = %s "
             with connection.cursor() as cursor:
                 cursor.execute(update_status, [property_id])
                 messages.success (request, 'Property Added To Market')
@@ -93,13 +100,15 @@ def user(request):
         email = request.POST['email']
         password1 = request.POST['pswd1']
         password2 = request.POST['pswd2']
+        phone = request.POST['phone']
         psswd = None
         if password1==password2:
             psswd = password1
         else:
-            messages.error(request, "Please retype the password properly")
+            messages.warning(request, "Please retype the password properly")
         if '@property360.agent.com' in email:
             usertype = "agent"
+            print("USER AGENT")
 
         addrss = request.POST['address']
         data = {
@@ -107,10 +116,10 @@ def user(request):
             'user_email': email,
             'user_address': addrss
         }
-        find_agent = "select user_id from website_user where user_id like 'agent%'"
+        find_agent = "select employee_id from website_employee where employee_id like 'agent%'"
         find_user = "select user_id from website_user where user_id like 'user%'"
         insert_user = 'insert into website_user (user_id, username, email, password, address) values (%s, %s, %s, %s, %s)'
-        insert_emp = 'insert into website_employee (employee_id, name, email, password, address) values (%s %s %s %s %s) '
+        insert_emp = 'insert into website_employee (employee_id, name, phone, email, password, address,supervisor) values (%s, %s, %s, %s, %s, %s, %b) '
         with connection.cursor() as cursor:
             uid = ""
             if usertype=="user":
@@ -126,7 +135,7 @@ def user(request):
                 # print(agent_list)
                 entries = len(agent_list)
                 uid = createAgent((entries+1))
-                cursor.execute(insert_emp, (uid, name, email, psswd, addrss))
+                cursor.execute(insert_emp, (uid, name,phone, email, psswd, addrss,0))
             setLogin(uid)
             
         data.update({'user_id': sessionInfo()[0]})
@@ -151,20 +160,19 @@ def dashboard(request):
     if info[1]=='True':
         if 'agent' in info[0]:
             get_agent= 'select employee_id, name, email, address, phone, supervisor_id, agent_img from website_employee, website_agent where agent_id_id=employee_id and employee_id=%s'
-            # get_prop = 'select * from website_property where agent_id_id=%s'
             get_prop = 'select property_id,status,location,name,size,type,price,property_img,user_id_id,agent_id_id from website_property where agent_id_id=%s'
-            # all_prop = 'select property_id, agent_id_id from website_property'
             agent_temp=''
             agent_prop = ''
-            # all_prop = ''
+            # staring work on activity 
+            
             agent=info[0]
             with connection .cursor() as cursor:
                 cursor.execute(get_agent,[agent])
                 agent_temp=tuple(cursor.fetchall())[0]
                 cursor.execute(get_prop,[agent])
                 agent_prop = tuple(cursor.fetchall())
-                # cursor.execute(all_prop)
-                # all_prop = tuple(cursor.fetchall())
+                
+                
                 
             agent_data={
                 'agent_id': info[0],
@@ -188,28 +196,37 @@ def dashboard(request):
 
 
         elif 'user' in info[0]:
+            user = info[0]
             get_user = 'select user_id, username, email, address,user_img from website_user where user_id=%s'
-            # get_prop = 'select * from website_property where user_id_id=%s'
             get_prop = 'select property_id,status,location,name,size,type,price,property_img,user_id_id,agent_id_id from website_property where user_id_id=%s'
             user_temp = ''
             user_prop = ''
-            user = info[0]
-            # print(user)
+            # starting work on activity
+            get_property_and_status = 'select property_id, status from website_property where user_id_id = %s'
+            prop_status = ''
+            get_property_and_agent = "select property_id, agent_id_id from website_property where user_id_id =%s"
+            prop_agent = ''
             with connection.cursor() as cursor:
                 cursor.execute(get_user, [user])
                 user_temp = tuple(cursor.fetchall())[0]
-                # print(user_temp)
                 cursor.execute(get_prop,[user])
                 user_prop = tuple(cursor.fetchall())
+
+                cursor.execute(get_property_and_status,[user])
+                prop_status = tuple(cursor.fetchall())
+                cursor.execute(get_property_and_agent,[user])
+                prop_agent = tuple(cursor.fetchall())
             user_data ={
                 'user_id':info[0],
                 'username':user_temp[1],
                 'email':user_temp[2],
                 'address':user_temp[3],
                 'user_img':user_temp[4],
-                'prop':user_prop, 
+                'prop':user_prop,
+                'prop_status': prop_status, 
+                'prop_agent' : prop_agent,
             }
-            # print(user_data)
+            print(user_data)
             return render(request, 'user.html', user_data)
             # return render(request, 'user.html',  {'user_id':info[0],'data': user_data})
             
@@ -230,6 +247,9 @@ def home(request):
         elif 'agent' in user:
             retrieve_pass = "select password from website_employee where employee_id= %s"
             retrieve_name = "select name from website_employee where employee_id = %s"
+        elif 'adm' in user:
+            retrieve_pass = "select password from website_admin where admin_id= %s"
+            retrieve_name = "select name from website_admin where admin_id = %s"
         password = request.POST['pswd']
         pass_data = ""
         name_data = ""
@@ -241,7 +261,7 @@ def home(request):
         if pass_data==password:
             setLogin(user)
             info = sessionInfo()
-            arg = {'user_id':info[0], 'user_name': name_data, 'user_id':info[0]}
+            arg = {'user_id':info[0], 'user_name': name_data}
             return render(request, 'home.html', arg)
     else:
         info = sessionInfo()
@@ -250,6 +270,105 @@ def home(request):
             return render(request, 'home.html', {'user_id':info[0]})
         return render(request, 'home.html')
     
+
+    
+
+def agents(request):
+    
+    
+    
+    info = sessionInfo()
+    login_info=info[1]
+   #EXCLUDED AGENT_0000
+    agent_retrieve="select agent_id_id, supervisor_id ,name, email ,phone, address, supervisor from website_agent,website_employee where agent_id_id =employee_id and agent_id_id like 'agent%' and agent_id_id <> 'agent_0000'"
+    agent_data=None
+    seller_retrieve = 'select agent_id_id from  website_seller where seller_id_id=%s'
+    supervisor_data="select employee_id from website_employee where employee_id like 'agent%' and employee_id <> 'agent_0000' and supervisor=1"
+    supervisor_list = ''
+    seller_agent_data = ''
+    with connection.cursor() as cursor:
+        cursor.execute(agent_retrieve)
+        agent_data = list(tuple(cursor.fetchall()))
+        cursor.execute(supervisor_data)
+        supervisor_list = tuple(cursor.fetchall())
+        cursor.execute(seller_retrieve, [info[0]])
+        seller_agent_data = tuple(cursor.fetchall())
+    for agent in agent_data:
+        temp_agent = list(agent)
+        if any(temp_agent[0] in hired for hired in seller_agent_data):
+            temp_agent.append('Hired')
+        else:
+            temp_agent.append('Not_Hired')
+        i = agent_data.index(agent)
+        agent_data[i]=tuple(temp_agent)
+    agent_data = tuple(agent_data)
+    
+    
+    if info[1]=="True":
+        return render(request, 'agents.html',{'user_id':info[0],'data': agent_data, 'supervisor_data':supervisor_list})
+    else:
+        
+        return render(request, 'agents.html' , {'data': agent_data})
+
+def make_supervisor(request):
+    info = sessionInfo()
+    agent = request.POST['agent_id']
+    make_sup = 'update website_employee set supervisor=%b where employee_id=%s'
+    get_pass = 'select password from website_admin where admin_id = %s'
+    adm_pass = request.POST['confirm_password']
+    password  = ''
+    with connection.cursor() as c:
+        c.execute(get_pass,[info[0]])
+        password = tuple(c.fetchall())
+        if len(password)>0:
+            password=password[0][0]
+        else:
+            password= ''
+        if adm_pass==password:
+
+            c.execute(make_sup,(1, agent))
+            messages.warning(request, f"Agent {agent} promoted to Supervisor")
+        else:
+            messages.warning(request,'Plese Enter correct password')
+
+    return redirect('agents')
+
+def remove_supervisor(request):
+    info = sessionInfo()
+    agent = request.POST['agent_id']
+    make_sup = 'update website_employee set supervisor= 0 where employee_id=%s'
+    get_pass = 'select password from website_admin where admin_id = %s'
+    change_supervisor = "update website_agent set supervisor_id='agent_0000' where supervisor_id=%s"
+    adm_pass = request.POST['confirm_password']
+    password  = ''
+    with connection.cursor() as c:
+        c.execute(get_pass,[info[0]])
+        password = tuple(c.fetchall())
+        if len(password)>0:
+            password=password[0][0]
+        else:
+            password= ''
+        if adm_pass==password:
+            c.execute(change_supervisor,[agent])
+            c.execute(make_sup,[agent])
+            messages.warning(request, f"Agent {agent} demoted from Supervisor")
+        else:
+            messages.warning(request,'Plese Enter correct password')
+
+    return redirect('agents')
+
+def set_supervisor(request):
+    nfo = sessionInfo()
+    if request.method=="POST":
+        supervisor_id = request.POST['supv_id']
+        agent_id = request.POST['agent_id']
+        print(supervisor_id,'supervisor')
+        print(agent_id, 'agent')
+        set_supervisor = 'update website_agent set supervisor_id=%s where agent_id_id=%s'
+        with connection.cursor() as c:
+            c.execute(set_supervisor, (supervisor_id, agent_id))
+            messages.success(request, f"{supervisor_id} set Supervisor for {agent_id}")
+    return redirect('agents')
 
 def about(request):
     info = sessionInfo()
@@ -264,7 +383,7 @@ def property(request):
     login_info = info[1]
     user = info[0]
     
-    property_retrieve = "select property_id, name,agent_id_id, location, size, type, price, status from website_property where status = 'for sale'"
+    property_retrieve = "select property_id, name,agent_id_id, location, size, type, price, status from website_property where status = 'For Sale'"
     property_data =  None
     with connection.cursor() as cursor:
         cursor.execute(property_retrieve)
@@ -283,7 +402,7 @@ def support(request):
     print(user)
     support_retrieve = "select name, type, phone, hiring_price, support_id from website_support s, website_employee e where e.employee_id = s.support_id"
     support_data =  None
-    hire_retrieve = "select support_id from website_hires where user_id=%s"
+    hire_retrieve = "select support_id_id from website_hires where user_id_id=%s"
     hired = []
     with connection.cursor() as cursor:
         cursor.execute(support_retrieve)
@@ -295,11 +414,31 @@ def support(request):
     hired = tuple(hired)
     print(hire_data)
     if info[1]=="True":
-        return render(request, 'support.html', {'data': support_data, 'hired': hired, 'user_id':info[0]})
+        print(support_data)
+        return render(request, 'support.html', {'data': support_data,'user_id':info[0]})
         
     else:
         return render(request, 'support.html', {'data': support_data})
     
+def hire_support(request):
+    
+    info = sessionInfo()
+    if '0000' in info[0]:
+        return redirect('login')
+    
+    login_info = info[1]
+    user = info[0]
+
+    support = request.POST['support_id']
+    property = request.POST['property_id']
+    print(user,support,property)
+    
+    insert_into_hires = "insert into website_hires (user_id_id, support_id_id) values (%s,%s)"
+    insert_into_maintains = "insert into website_maintains (property_id_id,support_id_id) values (%s,%s)"
+    with connection.cursor() as cursor:
+        cursor.execute(insert_into_hires, (user,support))
+
+    return redirect('support')
 
 def property_registration(request):
     info = sessionInfo()
@@ -317,35 +456,7 @@ def property_registration(request):
         return render(request, 'property_registration.html')
     
 
-def agents(request):
-    info = sessionInfo()
-    login_info=info[1]
-   #EXCLUDED AGENT_0000
-    agent_retrieve="select agent_id_id, supervisor_id ,name, email ,phone, address from website_agent,website_employee where agent_id_id =employee_id and agent_id_id like 'agent%' and agent_id_id <> 'agent_0000'"
-    agent_data=None
-    seller_retrieve = 'select agent_id_id from  website_seller where seller_id_id=%s'
-    seller_agent_data=''
-    with connection.cursor() as cursor:
-        cursor.execute(agent_retrieve)
-        agent_data = list(tuple(cursor.fetchall()))
-        cursor.execute(seller_retrieve, [info[0]])
-        seller_agent_data = tuple(cursor.fetchall())
-    for agent in agent_data:
-        temp_agent = list(agent)
-        if any(temp_agent[0] in hired for hired in seller_agent_data):
-            temp_agent.append('Hired')
-        else:
-            temp_agent.append('Not_Hired')
-        i = agent_data.index(agent)
-        agent_data[i]=tuple(temp_agent)
-    agent_data = tuple(agent_data)
-    print(agent_data)
 
-    if info[1]=="True":
-        return render(request, 'agents.html',{'user_id':info[0],'data': agent_data})
-    else:
-
-        return render(request, 'agents.html' , {'data': agent_data})
     
 def propertyId_submit(request):
     info=sessionInfo()
@@ -381,7 +492,7 @@ def hire_agent(request):
         retrieve_pass= 'select password from website_user where user_id= %s'
         retrieve_user_id= 'select user_id_id from website_property where property_id=%s'
         update_agent= 'update website_property set agent_id_id=%s where property_id=%s'
-        insert_seller= 'insert into website_seller (seller_id_id ,agent_id_id) values (%s,%s)'
+        insert_seller= 'insert into website_seller (seller_id_id,hiring_price ,agent_id_id) values (%s,%s,%s)'
         with connection.cursor() as cursor:
             cursor.execute(retrieve_pass, [user])
             password1= tuple(cursor.fetchall())[0][0]
@@ -389,7 +500,7 @@ def hire_agent(request):
             user_id=tuple(cursor.fetchall())[0][0]
             if password==password1 and user==user_id:
                 cursor.execute(update_agent, (agent_id,property_id))
-                cursor.execute(insert_seller,(user,agent_id))
+                cursor.execute(insert_seller,(user,'0000',agent_id))
                 messages.success(request, "Agent_Id Updated")
             
     return redirect('agents')
@@ -457,10 +568,10 @@ def property_save(request):
         location = request.POST['location']
         size = request.POST['size']
         price = request.POST['price']
-        status = request.POST['status']
+        # status = request.POST['status']
         type = request.POST['type']
         image = request.FILES['property_img']
-        prop_agent = request.POST['hired_agent']
+        # prop_agent = request.POST['hired_agent']
         # print(prop_agent,'-----------23423423')
         with open('media/' + image.name, 'wb') as f:
             for chunk in image.chunks():
@@ -474,9 +585,11 @@ def property_save(request):
             property_id = createProp((entries+1))
             # print(property_id)
         
-        property_insert = "INSERT INTO website_property(property_id, status, location, name, size, type, price, property_img, user_id_id, agent_id_id) values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+        # property_insert = "INSERT INTO website_property(property_id, status, location, name, size, type, price, property_img, user_id_id, agent_id_id) values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+        property_insert = "INSERT INTO website_property(property_id, location, name, size, type, price, property_img, user_id_id) values (%s,%s,%s,%s,%s,%s,%s,%s)"
         with connection.cursor() as cursor:
-            cursor.execute(property_insert, (property_id, status, location, name, size, type, price,image.name, user,prop_agent))
+            # cursor.execute(property_insert, (property_id, status, location, name, size, type, price,image.name, user,prop_agent))
+            cursor.execute(property_insert, (property_id, location, name, size, type, price,image.name, user))
             messages.success(request, "Property Submitted")
     # return redirect('dashboard')
     return render(request, 'property_registration.html', {'user_id': user})
@@ -514,7 +627,7 @@ def hire_support(request):
     property = request.POST['property_id']
     # print(user,support,property)
     
-    insert_into_hires = "insert into website_hires (user_id, support_id) values (%s,%s)"
+    insert_into_hires = "insert into website_hires (user_id_id, support_id_id) values (%s,%s)"
     insert_into_maintains = "insert into website_maintains (property_id_id,support_id_id) values (%s,%s)"
     with connection.cursor() as cursor:
         cursor.execute(insert_into_hires, (user,support))
@@ -671,10 +784,11 @@ def property_edit_info(request):
             'property_img': property_data[5]
         }
         image  = request.FILES['property_image']
-        with open("media/" + image.name, 'wb') as f:
-            for chunk in image.chunks():
-                f.write(chunk)
-        # print(old_dict)
+        if image:
+            with open("media/" + image.name, 'wb') as f:
+                for chunk in image.chunks():
+                    f.write(chunk)
+        print(old_dict)
         new_dict = {
             'p_name' : request.POST['p_name'],
             'location' : request.POST['location'],
@@ -860,12 +974,12 @@ def add_auction_property(request):
             retrieve_pass='select password from website_user where user_id=%s'
             update_user = "update website_user set auction_status='joined'"
             insert_property = 'insert into website_auction_property (auction_id_id, owner_id_id, property_id_id, starting_price,selling_price,number_of_bids,increment) values (%s, %s,%s,%s,%s, %s, %s)'
-            psw=''
+            check_password=''
             user=''
             with connection.cursor() as cursor:
                 cursor.execute(retrieve_pass, [info[0]])
-                psw = tuple(cursor.fetchall())[0][0]
-                if insert_pass==psw:
+                check_password = tuple(cursor.fetchall())[0][0]
+                if insert_pass==check_password:
                     cursor.execute(insert_property, (auction_id, info[0], insert_prop, insert_starting_price,'0','0','0'))
                     messages.success(request, 'Property Added to Auction')
     return redirect('auction')
@@ -889,7 +1003,53 @@ def remove_auction_property(request):
                 psw = tuple(cursor.fetchall())[0][0]
                 if insert_pass==psw:
                     cursor.execute(delete_property, [delete_prop])
-                    messages.error(request, 'Property Removed from Auction')
+                    messages.warning(request, 'Property Removed from Auction')
+    return redirect('auction')
+
+def create_auction(request):
+    info = sessionInfo()
+    fetch_auction = 'select auction_id from website_auction'
+    get_password = 'select password from website_admin where admin_id = %s'
+    create_auction = 'insert into website_auction (auction_id, auction_status, auction_running, start_time) values (%s, %s, %s, %s)'
+    auct_id = ''
+    auction_status = 'active'
+    auction_running = False
+    time = request.POST['auction_time']
+    psswd = request.POST['confirm_password']
+    get_pass = ''
+    time = datetime.strptime(time, '%Y-%m-%d').date()
+    with connection.cursor() as cursor:
+        cursor.execute(get_password,[info[0]])
+        get_pass = tuple(cursor.fetchall())[0][0]
+        if get_pass==psswd:
+            cursor.execute(fetch_auction)
+            temp = tuple(cursor.fetchall())
+            entries = len(temp)
+            auct_id = createAuct(entries+1)
+            cursor.execute(create_auction,(auct_id, auction_status, auction_running, time))
+            messages.success(request, "Auction created")
+        else:
+            messages.warning(request, "Password not correct")
+    print(time)
+    return redirect('auction')
+
+
+def cancel_auction(request):
+    info = sessionInfo()
+    get_password = 'select password from website_admin where admin_id = %s'
+    remove_auction = 'delete from website_auction where auction_id=%s'
+    auct_id = request.POST['auc_id']
+    psswd = request.POST['confirm_password']
+    get_pass = ''
+    with connection.cursor() as cursor:
+        cursor.execute(get_password,[info[0]])
+        get_pass = tuple(cursor.fetchall())[0][0]
+        if get_pass==psswd:
+            cursor.execute(remove_auction, [auct_id])
+            
+            messages.success(request, "Auction Removed from database")
+        else:
+            messages.warning(request, "Password not correct")
     return redirect('auction')
 
 
@@ -927,7 +1087,7 @@ def delete_from_market(request):
         if password == confirm_password:
 
             property_id = request.POST['property_id']
-            change_status = "update website_property set status = 'available' where property_id = %s"
+            change_status = "update website_property set status = 'Available For Market' where property_id = %s"
             with connection.cursor() as cursor:
                 cursor.execute(change_status,[property_id])
                 messages.warning(request,'Property Removed From Market')
@@ -970,17 +1130,32 @@ def delete_property(request):
             messages.error(request, 'Incorrect Password')
 
     return redirect('dashboard')
-    # return render(request, 'user.html', {'user_id': user})
-    # return render(request, 'user.html', {'user_id': user})
+
 
 # --------------------
-# for every button function insert this code snippet at the very beginning
-# --------------------
+# for every button function insert this code snippet at the very beginning to implement the default view
 
     # info = sessionInfo()
     # if '0000' in info[0]:
     #     return redirect('login')
 
+# ----------------------
+
 def countdown(request):
     pass
     return render(request, 'countdown.html')
+
+
+def activity_support(request):
+    info = sessionInfo()
+    user = info[0]
+
+    if request.method == "POST":
+        support_retrieve = "select user_id_id, support_id_id from website_hires where user_id_id = %s"
+        support_data =  None
+        with connection.cursor() as cursor:
+            cursor.execute(support_retrieve,[user])
+            support_data = tuple(cursor.fetchall())[0]
+        if len(support_data) == 0:
+            support_data = (user, 'No Supports Hired')
+        return render(request, "user.html", {'user_data': user, 'support_data': support_data})
