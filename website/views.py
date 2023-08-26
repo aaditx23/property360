@@ -351,9 +351,9 @@ def support(request):
     login_info = info[1]
     user = info[0]
     print(user)
-    support_retrieve = "select name, type, phone, hiring_price, support_id from website_support s, website_employee e where e.employee_id = s.support_id"
+    support_retrieve = "select name, type, phone, hiring_price, support_id_id from website_support s, website_employee e where e.employee_id = s.support_id_id"
     support_data =  None
-    hire_retrieve = "select support_id from website_hires where user_id=%s"
+    hire_retrieve = "select support_id_id from website_hires where user_id_id=%s"
     hired = []
     with connection.cursor() as cursor:
         cursor.execute(support_retrieve)
@@ -1104,17 +1104,32 @@ def delete_property(request):
             messages.error(request, 'Incorrect Password')
 
     return redirect('dashboard')
-    # return render(request, 'user.html', {'user_id': user})
-    # return render(request, 'user.html', {'user_id': user})
+
 
 # --------------------
-# for every button function insert this code snippet at the very beginning
-# --------------------
+# for every button function insert this code snippet at the very beginning to implement the default view
 
     # info = sessionInfo()
     # if '0000' in info[0]:
     #     return redirect('login')
 
+# ----------------------
+
 def countdown(request):
     pass
     return render(request, 'countdown.html')
+
+
+def activity_support(request):
+    info = sessionInfo()
+    user = info[0]
+
+    if request.method == "POST":
+        support_retrieve = "select user_id_id, support_id_id from website_hires where user_id_id = %s"
+        support_data =  None
+        with connection.cursor() as cursor:
+            cursor.execute(support_retrieve,[user])
+            support_data = tuple(cursor.fetchall())[0]
+        if len(support_data) == 0:
+            support_data = (user, 'No Supports Hired')
+        return render(request, "user.html", {'user_data': user, 'support_data': support_data})
