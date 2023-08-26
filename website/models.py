@@ -48,7 +48,9 @@ class Auction(models.Model):
     auction_id = models.CharField(max_length = 20, primary_key = True)
     auction_status = models.CharField(max_length=50, default='Inactive')
     auction_running = models.BooleanField()
+    auction_ended = models.BooleanField(default=0)
     start_time = models.DateField(auto_now=False, auto_now_add=False)
+    total_properties = models.IntegerField(default = 0)
     
     
 

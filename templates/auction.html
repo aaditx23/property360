@@ -6,22 +6,22 @@
     <div class="container mt-5 align-items-center">
         {% if auct_id != 0 %}
         <h3>Auction {{auct_id}} will start on {{auc_date}}</h3>
-        {% if user_status == "not_joined" %}
-        <p class="d-inline-flex gap-1">
-            <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#joinAuctionForm" aria-expanded="false" aria-controls="collapseExample">
-              Join Auction
-            </button>
-        </p>
-        {% elif user_status == "joined" %}
-        <p class="d-inline-flex gap-1">
-            <h6>Congratulations! You have already joined this auction!</h6>
-            <h6>Please wait till the auction starts. Thank you.</h6>
-            <button class="btn btn-danger" type="button" data-bs-toggle="collapse" data-bs-target="#leaveAuctionForm" aria-expanded="false" aria-controls="collapseExample">
-              Leave Auction
-            </button>
-        </p>
-        {% endif %}
-    
+            {% if user_status == "not_joined" %}
+            <p class="d-inline-flex gap-1">
+                <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#joinAuctionForm" aria-expanded="false" aria-controls="collapseExample">
+                Join Auction
+                </button>
+            </p>
+            {% elif user_status == "joined" %}
+            <p class="d-inline-flex gap-1">
+                <h6>Congratulations! You have already joined this auction!</h6>
+                <h6>Please wait till the auction starts. Thank you.</h6>
+                <button class="btn btn-danger" type="button" data-bs-toggle="collapse" data-bs-target="#leaveAuctionForm" aria-expanded="false" aria-controls="collapseExample">
+                Leave Auction
+                </button>
+            </p>
+            {% endif %}
+        
     
         <div class="collapse" id="joinAuctionForm">
             <div class="card card-body">
@@ -92,7 +92,7 @@
                         <h1>     </h1>
                         <form action="/auction_property_removal" method="post">
                             {% csrf_token %}
-                        <button type="submit" class="btn btn-danger btn-sm">Remove Property</button>
+                        <button type="submit" id = 'auc_id' name = 'auc_id' value={{auct_id}} class="btn btn-danger btn-sm">Remove Property</button>
                         </form>
                     </div>
     
@@ -134,47 +134,52 @@
     {% else %}
 
     <div class="container mt-5 align-items-center">
-        <h3>Welcome Admin {{user_id}}</h3>
+        <h3><b>Welcome Admin {{user_id}}</b></h3>
         {% if auct_id == 0 %}
         <p class="d-inline-flex gap-1">
             <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#createAuctionForm" aria-expanded="false" aria-controls="collapseExample">
               Create Auction
             </button>
+
+            <div class="collapse" id="createAuctionForm">
+                <div class="card card-body">
+                    <div class = 'container my-3'>
+                        <h4>Create new auction</h4>
+                            <form action = "/create_auction" method ="post" >
+                            {%csrf_token%}
+                                <div class="mb-3">
+    
+                                    <label for="auction_time" class="form-label">Starting date: </label>
+                                    <div class="col-sm-3">
+                                        <input type="date" class="form-control" id="auction_time" name="auction_time">
+                                    </div>
+    
+                                    <label for="confirm_password" class="form-label">Confirm Password: </label>
+                                    <div class="col-sm-3">
+                                        <input type="password" class="form-control" id="confirm_password" name="confirm_password">
+                                    </div>
+                                    
+                                </div>
+                                <div class="mb-3">
+                                    <button type="submit" class="btn btn-primary">Confirm</button> 
+                                </div>
+                            </form>
+                    </div>
+                </div>
+            </div>
+
         </p>
         {% else %}
-        <h3>The current auction {{auct_id}} has not finished yet. Please wait for it to finish in order to create another auction.</h3>
+        <h5>The current auction {{auct_id}} has not finished yet. Please wait for it to finish in order to create another auction.</h5>
         <p class="d-inline-flex gap-1">
             <button class="btn btn-danger" type="button" data-bs-toggle="collapse" data-bs-target="#cancelAuctionForm" aria-expanded="false" aria-controls="collapseExample">
               Cancel Auction
             </button>
         </p>
-        {% endif %}
-        <div class="collapse" id="createAuctionForm">
-            <div class="card card-body">
-                <div class = 'container my-3'>
-                    <h4>Create new auction</h4>
-                        <form action = "/create_auction" method ="post" >
-                        {%csrf_token%}
-                            <div class="mb-3">
 
-                                <label for="auction_time" class="form-label">Starting date: </label>
-                                <div class="col-sm-3">
-                                    <input type="date" class="form-control" id="auction_time" name="auction_time">
-                                </div>
 
-                                <label for="confirm_password" class="form-label">Confirm Password: </label>
-                                <div class="col-sm-3">
-                                    <input type="password" class="form-control" id="confirm_password" name="confirm_password">
-                                </div>
-                                
-                            </div>
-                            <div class="mb-3">
-                                <button type="submit" class="btn btn-primary">Confirm</button> 
-                            </div>
-                        </form>
-                </div>
-            </div>
-        </div>
+
+        
 
         <div class="collapse" id="cancelAuctionForm">
             <div class="card card-body">
@@ -199,11 +204,67 @@
             </div>
         </div>
     
+        {% endif %}
+    
         
-    </div>
-    
-    
-    {% if auct_id != 0 %}
+
+        {% if current_running != 0%}
+        <div class="container my-3">
+            
+            <div class="col-md-13">
+                <div class="card mb-4 shadow-sm">
+                    
+                    <div class="card-body">
+                        <h5 class="card-text">Current Auction:</h5>
+                        <p> ID: {{auct_id}}</p>
+                        <p> Total Properties: {{prop_count}}</p>
+                        <p>Start Time: {{current_running.3}} </p>
+                        <p>
+                            {% if current_date == current_running.3 and current_running.2 != 1 %}
+                            <form method="post" action="/start_auction">
+                                {% csrf_token %}
+                                <input type="hidden" name="auc_id" id='auc_id' value = {{current_running.0}} >
+                                <button class="btn btn-outline-success btn-block btn-sm" type="submit" >Start Auction</button>
+                            </form>
+                            {% else %}
+                            <h5>The auction is not supposed to start today. {{current_running.3}} {{current_date}} </h5>
+                            {% endif %}
+                            {% if current_running.2 == 1 %}
+                            <form method="post" action="end_auction">
+                                {% csrf_token %}
+                                <input type="hidden" name="auc_id" id='auc_id' value = {{current_running.0}} >
+                                <button class="btn btn-outline-danger btn-block btn-sm" type="submit" >End Auction</button>
+                            </form>
+                            
+                            {% endif %}
+
+                        </p>
+                    </div>
+                </div>
+            </div>
+        
+        </div>
+        {% endif %}
+        {% if all_auction != 0 %}
+        
+        <div class="container my-3">
+            <h4>Auction History:</h4>
+            {% for auct in all_auction %}
+            {% if auct.4 == 1 %}
+            <div class="row">
+              <div class="col-md-4">
+                <div class="card mb-4 shadow-sm">
+                  <div class="card-body">
+                    <h5 class="card-text">{{auct.0}}</h5>
+                    <p>Total Properties: {{auct.5}}</p>
+                  </div>
+                </div>
+              </div>
+              {% endif %}
+              {% endfor %}
+        </div>
+        {% endif %}
+        {% if auct_id != 0 %}
     <h3 align="center">Current Auction: Offered Properties</h3>
     
     <div>
@@ -245,26 +306,22 @@
                 <td>{{item.4}}</td>
                 <td>{{item.5}}</td>
                 
-                
-                <td>
-                {% if running_status == 1 %}
-                    <form action="/agents" method="post">
-                    {% csrf_token %}
-                    <input type="hidden" name = 'agent_id' value= {{item.6}}>
-                    <button type="submit" id = 'auction_prop' name='auction_prop' value={{item.0}} class="btn btn-outline-success" >BID</button>
-                    </form>
-                {% endif %}
-                </td>
               </tr>
               {% endfor %}
               
             </tbody>
           </table>
     </div>
+</div>
     {% endif %}
 
+        {% endif %}
+        
+    
+    
+    
 
-    {% endif %}
+
 
 
 
