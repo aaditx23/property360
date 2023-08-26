@@ -280,13 +280,17 @@ def agents(request):
     info = sessionInfo()
     login_info=info[1]
    #EXCLUDED AGENT_0000
-    agent_retrieve="select agent_id_id, supervisor_id ,name, email ,phone, address from website_agent,website_employee where agent_id_id =employee_id and agent_id_id like 'agent%' and agent_id_id <> 'agent_0000'"
+    agent_retrieve="select agent_id_id, supervisor_id ,name, email ,phone, address, supervisor from website_agent,website_employee where agent_id_id =employee_id and agent_id_id like 'agent%' and agent_id_id <> 'agent_0000'"
     agent_data=None
     seller_retrieve = 'select agent_id_id from  website_seller where seller_id_id=%s'
-    seller_agent_data=''
+    supervisor_data="select employee_id from website_employee where employee_id like 'agent%' and employee_id <> 'agent_0000' and supervisor=1"
+    supervisor_list = ''
+    seller_agent_data = ''
     with connection.cursor() as cursor:
         cursor.execute(agent_retrieve)
         agent_data = list(tuple(cursor.fetchall()))
+        cursor.execute(supervisor_data)
+        supervisor_list = tuple(cursor.fetchall())
         cursor.execute(seller_retrieve, [info[0]])
         seller_agent_data = tuple(cursor.fetchall())
     for agent in agent_data:
@@ -298,10 +302,10 @@ def agents(request):
         i = agent_data.index(agent)
         agent_data[i]=tuple(temp_agent)
     agent_data = tuple(agent_data)
-    print(agent_data)
+    
     
     if info[1]=="True":
-        return render(request, 'agents.html',{'user_id':info[0],'data': agent_data})
+        return render(request, 'agents.html',{'user_id':info[0],'data': agent_data, 'supervisor_data':supervisor_list})
     else:
         
         return render(request, 'agents.html' , {'data': agent_data})
@@ -323,10 +327,47 @@ def make_supervisor(request):
         if adm_pass==password:
 
             c.execute(make_sup,(1, agent))
-            messages.warning(request, f"Agent {agent} made Supervisor")
+            messages.warning(request, f"Agent {agent} promoted to Supervisor")
         else:
             messages.warning(request,'Plese Enter correct password')
 
+    return redirect('agents')
+
+def remove_supervisor(request):
+    info = sessionInfo()
+    agent = request.POST['agent_id']
+    make_sup = 'update website_employee set supervisor= 0 where employee_id=%s'
+    get_pass = 'select password from website_admin where admin_id = %s'
+    change_supervisor = "update website_agent set supervisor_id='agent_0000' where agent_id_id=%s"
+    adm_pass = request.POST['confirm_password']
+    password  = ''
+    with connection.cursor() as c:
+        c.execute(get_pass,[info[0]])
+        password = tuple(c.fetchall())
+        if len(password)>0:
+            password=password[0][0]
+        else:
+            password= ''
+        if adm_pass==password:
+            c.execute(change_supervisor,[agent])
+            c.execute(make_sup,[agent])
+            messages.warning(request, f"Agent {agent} demoted from Supervisor")
+        else:
+            messages.warning(request,'Plese Enter correct password')
+
+    return redirect('agents')
+
+def set_supervisor(request):
+    nfo = sessionInfo()
+    if request.method=="POST":
+        supervisor_id = request.POST['supv_id']
+        agent_id = request.POST['agent_id']
+        print(supervisor_id,'supervisor')
+        print(agent_id, 'agent')
+        set_supervisor = 'update website_agent set supervisor_id=%s where agent_id_id=%s'
+        with connection.cursor() as c:
+            c.execute(set_supervisor, (supervisor_id, agent_id))
+            messages.success(request, f"{supervisor_id} set Supervisor for {agent_id}")
     return redirect('agents')
 
 def about(request):
@@ -359,7 +400,7 @@ def support(request):
     login_info = info[1]
     user = info[0]
     print(user)
-    support_retrieve = "select name, type, phone, hiring_price, support_id_id from website_support s, website_employee e where e.employee_id = s.support_id_id"
+    support_retrieve = "select name, type, phone, hiring_price, support_id from website_support s, website_employee e where e.employee_id = s.support_id"
     support_data =  None
     hire_retrieve = "select support_id_id from website_hires where user_id_id=%s"
     hired = []
@@ -415,35 +456,7 @@ def property_registration(request):
         return render(request, 'property_registration.html')
     
 
-def agents(request):
-    info = sessionInfo()
-    login_info=info[1]
-   #EXCLUDED AGENT_0000
-    agent_retrieve="select agent_id_id, supervisor_id ,name, email ,phone, address from website_agent,website_employee where agent_id_id =employee_id and agent_id_id like 'agent%' and agent_id_id <> 'agent_0000'"
-    agent_data=None
-    seller_retrieve = 'select agent_id_id from  website_seller where seller_id_id=%s'
-    seller_agent_data=''
-    with connection.cursor() as cursor:
-        cursor.execute(agent_retrieve)
-        agent_data = list(tuple(cursor.fetchall()))
-        cursor.execute(seller_retrieve, [info[0]])
-        seller_agent_data = tuple(cursor.fetchall())
-    for agent in agent_data:
-        temp_agent = list(agent)
-        if any(temp_agent[0] in hired for hired in seller_agent_data):
-            temp_agent.append('Hired')
-        else:
-            temp_agent.append('Not_Hired')
-        i = agent_data.index(agent)
-        agent_data[i]=tuple(temp_agent)
-    agent_data = tuple(agent_data)
-    print(agent_data)
 
-    if info[1]=="True":
-        return render(request, 'agents.html',{'user_id':info[0],'data': agent_data})
-    else:
-
-        return render(request, 'agents.html' , {'data': agent_data})
     
 def propertyId_submit(request):
     info=sessionInfo()
