@@ -76,7 +76,13 @@
                   
                   {% comment %} <div class = 'd-flex-grow-1'> {% endcomment %}
                     <div class="d-flex pt-1">
+                      {% if 'user' in user_id %}
                       <button type="button" class="btn btn-outline-success me-1 flex-grow-1" data-toggle="modal" data-target="#exampleModal{{p.0}}" data-whatever="@mdo">Buy Property</button>
+                      {% comment %} {% elif 'agent' in user_id%} {% endcomment %}
+                      {% else %}
+                      <button type="button" class="btn btn-outline-success me-1 flex-grow-1" data-toggle="modal" data-target="#exampleModal{{p.0}}" data-whatever="@mdo" disabled>Buy Property</button>
+
+                      {% endif %}
                     </div>
                             
                             <div class="modal fade" id="exampleModal{{p.0}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel{{p.0}}" aria-hidden="true">
