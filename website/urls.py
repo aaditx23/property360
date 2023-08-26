@@ -54,5 +54,7 @@ urlpatterns = [
     path('remove_supervisor', views.remove_supervisor, name= 'remove_supervisor'),
     path('set_supervisor', views.set_supervisor, name= 'remove_supervisor'),
 
+    path('buy_property', views.buy_property, name = 'buys_prorperty')
+
     
 ]

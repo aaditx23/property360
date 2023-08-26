@@ -137,11 +137,11 @@
 
                                 <button type="button" class="btn btn-outline-danger" data-toggle="modal" data-target="#exampleModal{{pa.0}}" data-whatever="@mdo">Remove</button>
                   
-                                <div class="modal fade" id="exampleModal{{pa.0}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                <div class="modal fade" id="{{pa.0}exampleModal}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                                   <div class="modal-dialog" role="document">
                                     <div class="modal-content">
                                       <div class="modal-header">
-                                        <h5 class="modal-title" id="exampleModal{{pa.0}}Label">Confirm Password:</h5>
+                                        <h5 class="modal-title" id="{{pa.0}exampleModal}Label">Confirm Password:</h5>
                                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                           <span aria-hidden="true">&times;</span>
                                         </button>
@@ -299,10 +299,10 @@
                             <button type="submit" class="btn btn-outline-primary me-1 flex-grow-1">Edit info</button>
                         </form>
                         
-                        <button type="button" class="btn btn-outline-danger me-1 flex-grow-1" data-toggle="modal" data-target="#exampleModal{{p.0}}" data-whatever="@mdo">Remove Property</button>
+                        <button type="button" class="btn btn-outline-danger me-1 flex-grow-1" data-toggle="modal" data-target="#{{p.0}}exampleModal" data-whatever="@mdo">Remove Property</button>
                         
                         
-                        <div class="modal fade" id="exampleModal{{p.0}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel{{p.0}}" aria-hidden="true">
+                        <div class="modal fade" id="{{p.0}}exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel{{p.0}}" aria-hidden="true">
                           <div class="modal-dialog" role="document">
                             <div class="modal-content">
                               <div class="modal-header">
@@ -312,18 +312,18 @@
                                 </button>
                               </div>
                               <div class="modal-body">
-                                <form action="/delete_property" method="post">
+                                <form action="/delete_property" method="POST">
                                   {% csrf_token %}
                                   <div class="form group">
                                     <input type="hidden" name = 'property_id' value={{p.0}}>
                                     <input type="password" class="form-control" id="password" name="password" required>
                                   </div>
+                                </div>
+                                <div class="modal-footer">
+                                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                  <button type="submit" class="btn btn-danger">Delete</button>
+                                </div>
                               </div>
-                              <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                                <button type="submit" class="btn btn-danger">Delete</button>
-                              </div>
-                            </div>
                             </div>
                           </div>
                         </div>

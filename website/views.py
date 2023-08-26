@@ -430,8 +430,8 @@ def property(request):
     info = sessionInfo()
     login_info = info[1]
     user = info[0]
-    
-    property_retrieve = "select property_id, name,agent_id_id, location, size, type, price, status from website_property where status = 'For Sale'"
+    property_retrieve =  " select property_id,status,location,name,size,type,price,property_img,user_id_id,agent_id_id from website_property where status = 'For Sale' "
+    # property_retrieve = "select property_id, name,agent_id_id, location, size, type, price, status from website_property where status = 'For Sale'"
     property_data =  None
     with connection.cursor() as cursor:
         cursor.execute(property_retrieve)
@@ -442,6 +442,50 @@ def property(request):
         return render(request, 'property.html', {'data': property_data, 'user_id':user})
     
     return render(request, 'property.html', {'data': property_data})
+
+
+
+def buy_property(request):
+    info = sessionInfo()
+    login_info = info[1]
+    user = info[0]
+    if request.method == "POST":
+        property_id = request.POST['property_id']
+        check_owner = "select user_id_id from website_property where property_id = %s"
+        owner = ''
+        with connection.cursor() as cursor:
+            cursor.execute(check_owner, [property_id])
+            owner = tuple(cursor.fetchall())[0]
+        if user not in owner:
+
+
+            
+
+
+
+            password = request.POST['password']
+            retrieve_password = 'select password from website_user where user_id = %s'
+            confirm_password = ''
+            with connection.cursor() as cursor:
+                cursor.execute(retrieve_password,[user])
+                confirm_password = tuple(cursor)[0][0]
+
+
+            if password == confirm_password:
+                update_owner = "update website_property set user_id_id = %s, status = 'Not For Sale' where property_id = %s"
+                with connection.cursor() as cursor:
+                    cursor.execute(update_owner, (user,property_id))
+                    messages.success(request, "Successfully Bought Property")      
+
+            else:
+                messages.warning(request, 'Incorrect Password')
+
+        else:
+            messages.warning(request,"Already Owned")
+            return redirect('property')
+        # else:
+    return redirect('property')
+
 
 def support(request):
     info = sessionInfo()
