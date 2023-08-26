@@ -17,7 +17,6 @@ admin.site.register(Bids_In)
 admin.site.register(Support)
 admin.site.register(Maintains)
 admin.site.register(Property_Features)
-
 admin.site.register(Agents_Clients)
 admin.site.register(Hires)
 admin.site.register(Seller)

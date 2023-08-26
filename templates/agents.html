@@ -29,22 +29,53 @@
             
             
             <td>
-              {% if item.6 == "Not_Hired" %}
-              <form action="/propertyId_submit" method="post">
+              {% if 'user' in user_id %}
+                {% if item.6 == "Not_Hired" %}
+                <form action="/propertyId_submit" method="post">
+                  {% csrf_token %}
+                  
+                  <button type="submit" class="btn btn-outline-success" name="agent_id" id="agent_id" value={{item.0}}   >HIRE</button>
+                </form>
+                {% else %}
+                <form action="/remove_propertyId_submission" method="post">
+                  {% csrf_token %}
+                  
+                  <button type="submit" class="btn btn-outline-success" name="agent_id" id="agent_id" value={{item.0}}   >REMOVE</button>
+                </form>
+                {% endif %}
+              {% elif 'adm' in user_id %}
+              <form action="/fire_agent" method="post">
                 {% csrf_token %}
                 
-                <button type="submit" class="btn btn-outline-success" name="agent_id" id="agent_id" value={{item.0}}   >HIRE</button>
+                <button class="btn btn-outline-warning btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#makeSupervisor{{item.0}}" aria-expanded="false" aria-controls="collapseExample">
+                  MAKE SUPERVISOR
+                </button>
               </form>
-              {% else %}
-              <form action="/remove_propertyId_submission" method="post">
-                {% csrf_token %}
-                
-                <button type="submit" class="btn btn-outline-success" name="agent_id" id="agent_id" value={{item.0}}   >REMOVE</button>
-              </form>
+              <div class="collapse" id="makeSupervisor{{item.0}}" align='right'>
+                <div class="card card-body">
+                    <div class = 'container my-3'>
+                        <h4>Confirm Password to Continue  {{auct_id}}</h4>
+                            <form action = "/make_supervisor" method ="post" enctype="multipart/form-data" >
+                            {%csrf_token%}
+                                <div class="mb-3">
+                                    <label for="confirm_password" class="form-label">Confirm Password: </label>
+                                    <div class="col-sm-8">
+                                        <input type="hidden" name="agent_id" id="agent_id" value={{item.0}}>
+                                        <input type="password" class="form-control" id="confirm_password" name="confirm_password">
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">Confirm</button> 
+                                </div>
+                            </form>
+                    </div>
+                </div>
+            </div>
               {% endif %}
             </td>
           </tr>
           {% endfor %}
+          
           
         </tbody>
       </table>

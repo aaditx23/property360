@@ -8,7 +8,7 @@
       {%csrf_token%}
         
       <div class="mb-3">
-        <label for='hired_agent' class="form-label">Select Agent</label>
+        <label for='prop_id' class="form-label">Select Agent</label>
         <select class="form-select" aria-label="Property" id = 'prop_id' name='prop_id'  required>
           {% for property in properties %}
           <option value={{property.0}}>{{property.1}} > ID: {{property.0}}  </option>
