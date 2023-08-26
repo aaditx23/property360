@@ -191,10 +191,58 @@ def dashboard(request):
             return render(request, 'agent_dashboard.html',  {'user_id':info[0],'data': agent_data})
             
         
+        #  admin dashboard
+        if 'adm' in info[0]:
+            # get_admin= 'select employee_id, name, email, address, phone, supervisor_id, agent_img from website_employee, website_agent where agent_id_id=employee_id and employee_id=%s'
+            get_admin= 'select admin_id, name, email from website_admin where admin_id=%s'
+            # get_prop = 'select property_id,status,location,name,size,type,price,property_img,user_id_id,agent_id_id from website_property where agent_id_id=%s'
+            admin_temp=''
+            # admin_prop = ''
+            # staring work on activity 
+            total_employee = 'select count(*) from website_employee'
+            t_emp = ''
+            total_property = 'select count(*) from website_property'
+            t_prop = ''
+            total_user = 'select count(*) from website_user'
+            t_user = ''
+
+            auction_status = 'select auction_status from website_auction'
+            a_status = ''
+            
+            admin=info[0]
+            with connection .cursor() as cursor:
+                cursor.execute(get_admin,[admin])
+                admin_temp=tuple(cursor.fetchall())[0]
+                # cursor.execute(get_prop,[admin])
+                # admin_prop = tuple(cursor.fetchall())
+                cursor.execute(total_employee)
+                t_emp = tuple(cursor)[0]
+                cursor.execute(total_property)
+                t_user = tuple(cursor)[0]
+                cursor.execute(total_user)
+                t_property = tuple(cursor)[0]
+                
+                cursor.execute(auction_status)
+                a_status = tuple(cursor)[0]
+            admin_data={
+                'admin_id': info[0],
+                'adminname':admin_temp[1],
+                'email':admin_temp[2],
+                't_emp' : t_emp,
+                't_user' : t_user,
+                't_property' : t_property,
+                'a_status' : a_status,
+            }
+            
+            print(admin_data)
+            # return render(request, 'agent_dashboard.html',  agent_data)
+            return render(request, 'admin_dashboard.html',  {'user_id':info[0],'data': admin_data})
+            
+        
          
 
 
-
+        # user dashboard
         elif 'user' in info[0]:
             user = info[0]
             get_user = 'select user_id, username, email, address,user_img from website_user where user_id=%s'
@@ -400,7 +448,7 @@ def support(request):
     login_info = info[1]
     user = info[0]
     print(user)
-    support_retrieve = "select name, type, phone, hiring_price, support_id from website_support s, website_employee e where e.employee_id = s.support_id"
+    support_retrieve = "select name, type, phone, hiring_price, support_id_id from website_support s, website_employee e where e.employee_id = s.support_id_id"
     support_data =  None
     hire_retrieve = "select support_id_id from website_hires where user_id_id=%s"
     hired = []
@@ -647,7 +695,7 @@ def remove_support(request):
     property = request.POST['property_id']
     print(user,support)
 
-    remove_from_hires = "delete from website_hires where user_id=%s and support_id=%s"
+    remove_from_hires = "delete from website_hires where user_id_id=%s and support_id_id=%s"
     remove_from_maintains = "delete from website_maintains where property_id_id=%s and support_id_id=%s"
 
     with connection.cursor() as cursor:
@@ -754,6 +802,56 @@ def user_edit_profile(request):
             return redirect('dashboard')
 
         return render(request, 'agent_edit_profile.html', {'user_id': user})
+
+
+
+    elif 'adm' in user:
+        if request.method == 'POST':
+            
+            retrieve_admin_info = "select name, email, password from website_admin where admin_id = %s"
+            admin_data = None
+            with connection.cursor() as cursor:
+                cursor.execute(retrieve_admin_info, [user])
+                admin_data = tuple(cursor.fetchall())[0]
+            old_dict = {
+                'adminname' : admin_data[0],
+                'email' : admin_data[1],
+                'password' : admin_data[2],
+                # 'address' : admin_data[2],
+                # 'phone' : admin_data[4],
+                # 'agent_img': admin_data[5]
+            }
+            # image  = request.FILES['admin_image']
+            # with open("media/" + image.name, 'wb') as f:
+            
+            #     for chunk in image.chunks():
+            #         f.write(chunk)
+            
+            new_dict = {
+                'adminname' : request.POST['adminname'],
+                'email' : request.POST['email'],
+                'password' : request.POST['password'],
+                # 'address' : request.POST['address'],
+                # 'phone' : request.POST['phone'],
+                # 'admin_img':image.name
+            }
+            dict={}
+            for keys in new_dict.keys():
+                if len(new_dict[keys]) != 0:
+                    dict[keys] = new_dict[keys]
+                else:
+                    dict[keys] = old_dict[keys]
+            # print(dict,old_dict,new_dict)
+
+
+            # update_user = 'update website_user set agentname = %s, email= %s,address = %s,password =%s, user_img=%s where user_id = %s '
+            update_admin = 'UPDATE website_admin SET name = %s, email = %s, password = %s where admin_id = %s'
+            with connection.cursor() as cursor:
+                cursor.execute(update_admin, (dict['adminname'],dict['email'],dict['password'],user))
+                messages.success(request, "Profile Updated")
+            return redirect('dashboard')
+
+        return render(request, 'admin_edit_profile.html', {'user_id': user})
 
 
 
