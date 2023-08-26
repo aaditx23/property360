@@ -35,6 +35,9 @@ urlpatterns = [
     path('remove_auction_property', views.remove_auction_property, name= 'remove_auction_property'),
     path('agent_remove', views.agent_remove , name="agent_remove"),
     path ('remove_propertyId_submission' , views.remove_propertyId_submission , name='remove_propertyId_submission'),
+    path('create_auction', views.create_auction, name= 'create_auction'),
+    path('cancel_auction', views.cancel_auction, name= 'cancel_auction'),
+    path('make_supervisor', views.make_supervisor, name= 'make_supervisor'),
 
     
 ]

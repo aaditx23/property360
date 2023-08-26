@@ -298,6 +298,29 @@ def agents(request):
         
         return render(request, 'agents.html' , {'data': agent_data})
 
+def make_supervisor(request):
+    info = sessionInfo()
+    agent = request.POST['agent_id']
+    make_sup = 'update website_employee set supervisor=%b where employee_id=%s'
+    get_pass = 'select password from website_admin where admin_id = %s'
+    adm_pass = request.POST['confirm_password']
+    password  = ''
+    with connection.cursor() as c:
+        c.execute(get_pass,[info[0]])
+        password = tuple(c.fetchall())
+        if len(password)>0:
+            password=password[0][0]
+        else:
+            password= ''
+        if adm_pass==password:
+
+            c.execute(make_sup,(1, agent))
+            messages.warning(request, f"Agent {agent} made Supervisor")
+        else:
+            messages.warning(request,'Plese Enter correct password')
+
+    return redirect('agents')
+
 def about(request):
     info = sessionInfo()
     login_info = info[1]

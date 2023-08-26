@@ -131,6 +131,7 @@ class Agents_Clients(models.Model):
 
 
 class Hires(models.Model):
+    id = models.AutoField(primary_key=True)
     user_id=models.ForeignKey(User, on_delete = models.CASCADE, to_field = 'user_id')
     support_id=models.ForeignKey(Employee, on_delete = models.CASCADE, to_field = 'employee_id')
 
