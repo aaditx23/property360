@@ -391,6 +391,7 @@ def hire_agent(request):
                 cursor.execute(update_agent, (agent_id,property_id))
                 cursor.execute(insert_seller,(user,agent_id))
                 messages.success(request, "Agent_Id Updated")
+            
     return redirect('agents')
 
 def agent_remove(request):
@@ -699,6 +700,8 @@ def property_edit_info(request):
 
 
 
+
+
 def auction(request):
     info = sessionInfo()
     login_info = info[1]
@@ -711,33 +714,61 @@ def auction(request):
         find_user_status = 'select auction_status from website_user where user_id=%s'
         find_auction = "select auction_id, auction_running from website_auction where auction_status='active'"
         find_property = """ 
-                        select p.property_id, p.location, p.name, p.size, p.type, p.price
+                        select p.property_id, p.location, p.name, p.size, p.type, ap.starting_price
                         from website_auction as a
                         inner join website_auction_property as ap on a.auction_id = ap.auction_id_id
                         inner join website_property as p on ap.property_id_id = p.property_id
                         where a.auction_status = 'active' 
                         """
-        with connection.cursor() as cursor:
-            cursor.execute(find_auction)
-            # print(tuple(cursor.fetchall()))
-            temp = tuple(cursor.fetchall())[0]
-            auction_id = temp[0]
-            auction_running_status = temp[1]
-            # print(auction_running_status,'---------------------')
-            cursor.execute(find_property)
-            property_data = tuple(cursor.fetchall())
-            cursor.execute(find_user_status, [info[0]])
-            user_status = tuple(cursor.fetchall())[0][0]
+        if 'user' in info[0]:
+            print('user is user')
+            with connection.cursor() as cursor:
+                cursor.execute(find_auction)
+                temp = tuple(cursor.fetchall())
+                if len(temp)>0:
+                    auction_id = temp[0]
+                    auction_running_status = temp[1]
+                else:
+                    auction_id = 0
+                    auction_running_status= 0
+                print(auction_running_status,'---------------------')
+                cursor.execute(find_property)
+                property_data = tuple(cursor.fetchall())
+                cursor.execute(find_user_status, [info[0]])
+                user_status = tuple(cursor.fetchall())[0][0]
+                dic = {
+                    'user_id':info[0], 
+                    'auct_id':auction_id,
+                    'data': property_data,
+                    'user_status' : user_status,
+                    'running_status': auction_running_status
+                    }
+            return render(request, 'auction.html', dic )
+        elif 'adm' in info[0]:
+
+            with connection.cursor() as cursor:
+                cursor.execute(find_auction)
+                temp = tuple(cursor.fetchall())
+                print(temp)
+                if len(temp)>0:
+                    auction_id = temp[0][0]
+                    auction_running_status = temp[0][1]
+                else:
+                    auction_id = 0
+                    auction_running_status= 0
+                print(auction_running_status,'---------------------')
+                cursor.execute(find_property)
+                property_data = tuple(cursor.fetchall())
+
             dic = {
-                'user_id':info[0], 
-                'auct_id':auction_id,
-                'data': property_data,
-                'user_status' : user_status,
-                'running_status': auction_running_status
+                    'user_id':info[0], 
+                    'auct_id':auction_id,
+                    'data': property_data,
+                    'running_status': auction_running_status
                 }
-        return render(request, 'auction.html', dic )
+            return render(request, 'auction.html',dic)
     else:
-        return render(request, 'auction.html')
+        return render(request, 'auction.html',{'user_id':info[0]})
 
 def join_auction(request):
     info = sessionInfo()
