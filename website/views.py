@@ -492,7 +492,7 @@ def support(request):
     login_info = info[1]
     user = info[0]
     print(user)
-    support_retrieve = "select name, type, phone, hiring_price, support_id_id from website_support s, website_employee e where e.employee_id = s.support_id_id"
+    support_retrieve = "select name, type, phone, hiring_price, support_id from website_support s, website_employee e where e.employee_id = s.support_id"
     support_data =  None
     hire_retrieve = "select support_id_id from website_hires where user_id_id=%s"
     hired = []
@@ -969,12 +969,13 @@ def auction(request):
         auction_running_status = ''
         count_prop = ''
         all_auction=''
+        current_running=''
         property_count = "select count(*) from website_auction_property where auction_id_id=%s"
 
         find_user_status = 'select auction_status from website_user where user_id=%s'
         find_auction = "select * from website_auction where auction_status='active'"
         find_property = """ 
-                        select p.property_id, p.location, p.name, p.size, p.type, ap.starting_price
+                        select p.property_id, p.location, p.name, p.size, p.type, ap.starting_price, ap.increment, ap.selling_price, ap.number_of_bids, ap.owner_id_id
                         from website_auction as a
                         inner join website_auction_property as ap on a.auction_id = ap.auction_id_id
                         inner join website_property as p on ap.property_id_id = p.property_id
@@ -988,10 +989,12 @@ def auction(request):
                 print(temp,'----------')
                 if len(temp)>0:
                     auction_id = temp[0][0]
-                    auction_running_status = temp[0][1]
+                    auction_running_status = temp[0][2]
+                    current_running = temp[0]
                 else:
                     auction_id = 0
                     auction_running_status= 0
+                    current_running=0
                 print(auction_running_status,'---------------------')
                 cursor.execute(find_property)
                 property_data = tuple(cursor.fetchall())
@@ -1002,12 +1005,13 @@ def auction(request):
                     'auct_id':auction_id,
                     'data': property_data,
                     'user_status' : user_status,
-                    'running_status': auction_running_status
+                    'running_status': auction_running_status,
+                    'current_running':current_running
                     }
             return render(request, 'auction.html', dic )
         elif 'adm' in info[0]:
             find_all_auction = 'select * from website_auction'
-            current_running=''
+            
             with connection.cursor() as cursor:
                 cursor.execute(find_auction)
                 temp = tuple(cursor.fetchall())
@@ -1031,7 +1035,7 @@ def auction(request):
                 cursor.execute(find_property)
                 property_data = tuple(cursor.fetchall())
                 current_date = datetime.now().date()
-                current_date = current_date+timedelta(days=1)
+                #current_date = current_date+timedelta(days=1)
             dic = {
                     'user_id':info[0], 
                     'auct_id':auction_id,
@@ -1045,8 +1049,34 @@ def auction(request):
             print(dic)
             return render(request, 'auction.html',dic)
     else:
-        # user na thakleo aucction_properties theke property data ene dekhaite hobe
-        return render(request, 'auction.html',)
+        prop_list = 0
+        current_auction = 0
+        find_auction = "select * from website_auction where auction_status='active'"
+        find_property = """ 
+                        select p.property_id, p.location, p.name, p.size, p.type, ap.starting_price
+                        from website_auction as a
+                        inner join website_auction_property as ap on a.auction_id = ap.auction_id_id
+                        inner join website_property as p on ap.property_id_id = p.property_id
+                        where a.auction_status = 'active' 
+                        """
+        with connection.cursor() as c:
+            c.execute(find_auction)
+            current_auction = tuple(c.fetchall())
+            if len(current_auction)==0: 
+                current_auction =  0
+            else:
+                current_auction = current_auction[0]
+            c.execute(find_property)
+            prop_list = tuple(c.fetchall())  
+            if len(prop_list)==0:
+                prop_list = 0
+            else:
+                prop_list = prop_list 
+            dic = {
+                'data':prop_list,
+                'current_auction':current_auction
+            }    
+        return render(request, 'auction.html', dic)
 
 def join_auction(request):
     info = sessionInfo()
@@ -1075,11 +1105,13 @@ def leave_auction(request):
             insert_pass = request.POST['confirm_password']
             retrieve_pass='select password from website_user where user_id=%s'
             remove_auction_from_user = "update website_user set auction_status='not_joined' where user_id=%s"
+            remove_auction_property =  "delete from website_auction_property where owner_id_id = %s"
             psw=''
             with connection.cursor() as cursor:
                 cursor.execute(retrieve_pass, [info[0]])
                 psw = tuple(cursor.fetchall())[0][0]
                 if insert_pass==psw:
+                    cursor.execute(remove_auction_property, [info[0]])
                     cursor.execute(remove_auction_from_user, [info[0]])
                     messages.warning(request, 'Left Auction')
     return redirect('auction')
@@ -1134,19 +1166,20 @@ def add_auction_property(request):
     if info[1]=="True":
         if request.method=='POST':
             insert_prop = request.POST['prop_id']
-            insert_starting_price = request.POST['starting_price']
+            insert_starting_price = float(request.POST['starting_price'])
+            print(type(insert_starting_price))
             insert_pass = request.POST['confirm_password']
             auction_id = request.POST['auct_id']
             retrieve_pass='select password from website_user where user_id=%s'
             update_auction_property = "UPDATE website_auction SET total_properties = total_properties + 1 WHERE auction_id = %s"
-            insert_property = 'insert into website_auction_property (auction_id_id, owner_id_id, property_id_id, starting_price,selling_price,number_of_bids,increment) values (%s, %s,%s,%s,%s, %s, %s)'
+            insert_property = 'insert into website_auction_property (auction_id_id, owner_id_id, property_id_id, starting_price,selling_price,number_of_bids,increment,bidder_id_id) values (%s, %s,%s,%s, %s, %s, %s,%s)'
             check_password=''
             user=''
             with connection.cursor() as cursor:
                 cursor.execute(retrieve_pass, [info[0]])
                 check_password = tuple(cursor.fetchall())[0][0]
                 if insert_pass==check_password:
-                    cursor.execute(insert_property, (auction_id, info[0], insert_prop, insert_starting_price,'0','0','0'))
+                    cursor.execute(insert_property, (auction_id, info[0], insert_prop, insert_starting_price,insert_starting_price,0,0.25,'user_0001'))
                     cursor.execute(update_auction_property, [ auction_id])
                     messages.success(request, 'Property Added to Auction')
     return redirect('auction')
@@ -1237,9 +1270,35 @@ def end_auction(request):
     if request.method=="POST":
         auct_id = request.POST['auc_id']
         set_ended = "update website_auction set auction_running = 0, auction_status='inacive', auction_ended=1 where auction_id = %s"
+        set_ownership = 'update website_auction_property set owner_id_id = bidder_id_id where auction_id_id = %s'
+        set_property = '''
+            UPDATE website_property
+            SET user_id_id = (
+                SELECT owner_id_id
+                FROM website_auction_property
+                WHERE website_auction_property.property_id_id = website_property.property_id 
+                and website_auction_property.auction_id_id = %s)
+         '''
+         #update user_id_id, price and status in website_property from website_auction_property
         with connection.cursor() as c:
             c.execute(set_ended, [auct_id])
+            #c.execute(set_ownership, [auct_id])
+            #c.execute(set_property, [auct_id])
             messages.success(request, f"Auction {auct_id} has Ended.")
+    return redirect('auction')
+
+def bid(request):
+    info = sessionInfo()
+    if request.method=="POST":
+        prop_id = request.POST['auction_prop']
+        set_bid  = '''update website_auction_property 
+                    set increment = increment+0.05, 
+                    selling_price = selling_price+selling_price*increment, 
+                    number_of_bids=number_of_bids+1,
+                    bidder_id_id = %s where property_id_id = %s'''
+        with connection.cursor() as c:
+            c.execute(set_bid,(info[0], prop_id))
+            messages.success(request, f"Bid to {prop_id} successful")
     return redirect('auction')
 
 def agent_img(request):
