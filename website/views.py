@@ -583,7 +583,7 @@ def hire_agent(request):
         user_id=''
         retrieve_pass= 'select password from website_user where user_id= %s'
         retrieve_user_id= 'select user_id_id from website_property where property_id=%s'
-        update_agent= 'update website_property set agent_id_id=%s where property_id=%s'
+        update_agent= "update website_property set agent_id_id=%s, status ='Available For Market' where property_id=%s"
         insert_seller= 'insert into website_seller (seller_id_id,hiring_price ,agent_id_id) values (%s,%s,%s)'
         with connection.cursor() as cursor:
             cursor.execute(retrieve_pass, [user])
@@ -608,7 +608,7 @@ def agent_remove(request):
         agent_id=request.POST['agent_id']
         password1=''
         retrieve_pass= 'select password from website_user where user_id= %s'
-        update_agent= "update website_property set agent_id_id='agent_0000' where property_id=%s"
+        update_agent= "update website_property set agent_id_id='agent_0000' , status = 'Not For Sale' where property_id=%s"
         delete_seller= 'delete from  website_seller where agent_id_id=%s'
 
         with connection.cursor() as cursor:
