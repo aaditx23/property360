@@ -255,8 +255,6 @@ def home(request):
 
 def agents(request):
     
-    
-    
     info = sessionInfo()
     login_info=info[1]
    #EXCLUDED AGENT_0000
@@ -302,21 +300,17 @@ def support(request):
     login_info = info[1]
     user = info[0]
     print(user)
-    support_retrieve = "select name, type, phone, hiring_price, support_id from website_support s, website_employee e where e.employee_id = s.support_id"
+    property_retrieve = "select property_id from website_property where user_id_id=%s"
+    property_list = None
+    support_retrieve = "select name, type, phone, hiring_price, support_id_id from website_support s, website_employee e where e.employee_id = s.support_id_id"
     support_data =  None
-    hire_retrieve = "select support_id from website_hires where user_id=%s"
-    hired = []
     with connection.cursor() as cursor:
         cursor.execute(support_retrieve)
         support_data = tuple(cursor.fetchall())
-        cursor.execute(hire_retrieve,[user])
-        hire_data = tuple(cursor.fetchall())
-        for id in hire_data:
-            hired.append((id[0]))
-    hired = tuple(hired)
-    print(hire_data)
+        cursor.execute(property_retrieve,[user])
+        property_list = tuple(cursor.fetchall())
     if info[1]=="True":
-        return render(request, 'support.html', {'data': support_data, 'hired': hired, 'user_id':info[0]})
+        return render(request, 'support.html', {'data': support_data, 'property_list': property_list, 'user_id':info[0]})
         
     else:
         return render(request, 'support.html', {'data': support_data})
@@ -456,13 +450,22 @@ def hire_support(request):
 
     support = request.POST['support_id']
     property = request.POST['property_id']
-    # print(user,support,property)
-    
-    insert_into_hires = "insert into website_hires (user_id_id, support_id_id) values (%s,%s)"
+
+
+    print(user,support,property)
+    hired_retrieve = "select property_id_id, support_id_id from website_hires where user_id_id=%s"
+    hired_data = None
+    insert_into_hires = "insert into website_hires (property_id_id, user_id_id, support_id_id) values (%s,%s,%s)"
     insert_into_maintains = "insert into website_maintains (property_id_id,support_id_id) values (%s,%s)"
     with connection.cursor() as cursor:
-        cursor.execute(insert_into_hires, (user,support))
-        cursor.execute(insert_into_maintains, (property,support))
+        cursor.execute(hired_retrieve,[user])
+        hired_data = tuple(cursor.fetchall())
+        if (property, support,) in hired_data:
+            messages.warning(request, "Property already added!")
+        else:
+            cursor.execute(insert_into_hires, (property,user,support))
+            cursor.execute(insert_into_maintains, (property,support))
+            messages.success(request, "Successfully added!")
 
     return redirect('support')
 
@@ -474,17 +477,25 @@ def remove_support(request):
     info = sessionInfo()
     login_info = info[1]
     user = info[0]
-
+    
     support = request.POST['support_id']
     property = request.POST['property_id']
     print(user,support)
-
-    remove_from_hires = "delete from website_hires where user_id=%s and support_id=%s"
+    
+    hired_retrieve = "select property_id_id, support_id_id from website_hires where user_id_id=%s"
+    hired_data = None
+    remove_from_hires = "delete from website_hires where user_id_id=%s and support_id_id=%s and property_id_id=%s"
     remove_from_maintains = "delete from website_maintains where property_id_id=%s and support_id_id=%s"
 
     with connection.cursor() as cursor:
-        cursor.execute(remove_from_hires, (user,support))
-        cursor.execute(remove_from_maintains, (property,support))
+        cursor.execute(hired_retrieve,[user])
+        hired_data = tuple(cursor.fetchall())
+        if (property, support,) in hired_data:
+            cursor.execute(remove_from_hires, (user,support, property))
+            cursor.execute(remove_from_maintains, (property,support))
+            messages.success(request, "Successfully removed!")
+        else:
+            messages.warning(request, "Property not added")
 
     return redirect('support')
 
