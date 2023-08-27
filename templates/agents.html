@@ -64,9 +64,9 @@
             </div>
           </td>
 
-            {% else %}
-              <td>{{item.1}}</td>
-            {% endif %}
+          {% else %}
+            <td>{{item.1}}</td>
+          {% endif %}
             <td>{{item.2}}</td>
             <td>{{item.3}}</td>
             <td>{{item.4}}</td>
@@ -77,6 +77,36 @@
               {% else %}
                 <td>True</td>
               {% endif %}
+            {% elif not user_id %}
+
+            <!-- Button trigger modal -->
+              <td>
+                <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                  HIRE
+                </button>
+              </td>
+
+              <!-- Modal -->
+              <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h1 class="modal-title fs-5" id="staticBackdropLabel">Signup/Login to Continue</h1>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                      <form action="/login">
+                        <button type="submit" class="btn btn-success" >Login/Signup</button>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+
             {% endif %}
             
             
