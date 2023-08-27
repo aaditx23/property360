@@ -17,9 +17,10 @@
               {% comment %} <p class="text-muted mb-1">Supervisor - {{data.supervisor_id}}</p> {% endcomment %}
               <p class="text-muted mb-1">{{data.email}}</p>
               {% comment %} <p class="text-muted mb-1">{{data.phone}}</p> {% endcomment %}
-              <p class="text-muted mb-4">{{data.address}}</p>
+              {% comment %} <p class="text-muted mb-4">{{data.address}}</p> {% endcomment %}
               <div class="d-flex justify-content-center mb-2">
                   <form action="/admin_edit_profile" method= 'POST'>
+                    {% csrf_token %}
                     <button type="submit" class="btn btn-outline-primary me-1 flex-grow-1">edit profile</button>
                   </form>
               </div>
@@ -72,7 +73,7 @@
                   </div>
                   <div class="px-5">
                     <p class="small text-muted mb-1">Auction Status</p>
-                    <p class="mb-0" align = 'center'>{{data.a_status.0}}</p>
+                    <p class="mb-0" align = 'center'>{{data.a_status}}</p>
                   </div>
                   
                 </div>

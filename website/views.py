@@ -207,7 +207,7 @@ def dashboard(request):
             total_employee = 'select count(*) from website_employee'
             t_emp = ''
             total_property = 'select count(*) from website_property'
-            t_prop = ''
+            t_property = ''
             total_user = 'select count(*) from website_user'
             t_user = ''
 
@@ -221,14 +221,20 @@ def dashboard(request):
                 # cursor.execute(get_prop,[admin])
                 # admin_prop = tuple(cursor.fetchall())
                 cursor.execute(total_employee)
-                t_emp = tuple(cursor)[0]
+                t_emp = tuple(cursor.fetchall())[0]
                 cursor.execute(total_property)
-                t_user = tuple(cursor)[0]
+                t_user = tuple(cursor.fetchall())[0]
                 cursor.execute(total_user)
-                t_property = tuple(cursor)[0]
+                t_property = tuple(cursor.fetchall())[0]
                 
+
                 cursor.execute(auction_status)
-                a_status = tuple(cursor)[0]
+                
+                a_status = tuple(cursor.fetchall())
+                if len(a_status) == 0:
+                    a_status = "No Auction Active"
+                else:
+                    a_status = "Active"
             admin_data={
                 'admin_id': info[0],
                 'adminname':admin_temp[1],
@@ -261,7 +267,9 @@ def dashboard(request):
             prop_agent = ''
             get_auction_property_and_price = "select property_id_id, starting_price, selling_price from website_auction_property where owner_id_id = %s "
             auction_prop_price = ''
-            
+            # get_property_and_support = "select hires.property_id_id, hires.support_id_id, support.type  from website_hires hires, website_support support where hires.support_id_id = support.support_id_id order by hires.support_id_id"
+            get_property_and_support = "select hires.property_id_id, hires.support_id_id, support.type  from website_hires hires, website_support support where hires.support_id_id = support.support_id_id and hires.user_id_id = %s"
+            prop_support = ''
             with connection.cursor() as cursor:
                 cursor.execute(get_user, [user])
                 user_temp = tuple(cursor.fetchall())[0]
@@ -274,6 +282,8 @@ def dashboard(request):
                 prop_agent = tuple(cursor.fetchall())
                 cursor.execute(get_auction_property_and_price,[user])
                 auction_prop_price = tuple(cursor.fetchall())
+                cursor.execute(get_property_and_support,[user])
+                prop_support = tuple(cursor.fetchall())
 
             user_data ={
                 'user_id':info[0],
@@ -284,6 +294,8 @@ def dashboard(request):
                 'prop':user_prop,
                 'prop_status': prop_status, 
                 'prop_agent' : prop_agent,
+                'prop_support' : prop_support,
+                'auction_prop_price' : auction_prop_price,
             }
             print(user_data)
             return render(request, 'user.html', user_data)
@@ -510,8 +522,8 @@ def support(request):
         support_data = tuple(cursor.fetchall())
         cursor.execute(property_retrieve,[user])
         property_list = tuple(cursor.fetchall())
-    if info[1]=="True":
-        return render(request, 'support.html', {'data': support_data, 'user_id':info[0]})
+    if info[1]=="True": 
+        return render(request, 'support.html', {'data': support_data,'property_list': property_list, 'user_id':info[0]})
         
     else:
         return render(request, 'support.html', {'data': support_data})
@@ -586,8 +598,8 @@ def hire_agent(request):
             else:
                 messages.warning(request, "Incorrect Password")
             
-    # return redirect('agents')
-    return redirect('dashboard')
+    return redirect('agents')
+    # return redirect('dashboard')
 
 def agent_remove(request):
     info = sessionInfo()
@@ -673,10 +685,10 @@ def property_save(request):
             # print(property_id)
         
         # property_insert = "INSERT INTO website_property(property_id, status, location, name, size, type, price, property_img, user_id_id, agent_id_id) values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
-        property_insert = "INSERT INTO website_property(property_id, location, name, size, type, price, property_img, user_id_id) values (%s,%s,%s,%s,%s,%s,%s,%s)"
+        property_insert = "INSERT INTO website_property(property_id, location, name, size, type, price, property_img, user_id_id, agent_id_id, status) values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
         with connection.cursor() as cursor:
             # cursor.execute(property_insert, (property_id, status, location, name, size, type, price,image.name, user,prop_agent))
-            cursor.execute(property_insert, (property_id, location, name, size, type, price,image.name, user))
+            cursor.execute(property_insert, (property_id, location, name, size, type, price,image.name, user, 'agent_0000', 'Not For Sale'))
             messages.success(request, "Property Submitted")
     # return redirect('dashboard')
     return render(request, 'property_registration.html', {'user_id': user})
@@ -700,15 +712,14 @@ def property_list(request):
     #     return render(request, 'user.html', {'data': property_data})
 
 
- 
 
 def hire_support(request):
-    
+
     info = sessionInfo()
     if '0000' in info[0]:
         messages.warning(request, "Login to continue")
         return redirect('login')
-    
+
     login_info = info[1]
     user = info[0]
 
@@ -722,10 +733,17 @@ def hire_support(request):
     insert_into_hires = "insert into website_hires (property_id_id, user_id_id, support_id_id) values (%s,%s,%s)"
     insert_into_maintains = "insert into website_maintains (property_id_id,support_id_id) values (%s,%s)"
     with connection.cursor() as cursor:
-        cursor.execute(insert_into_hires, (user,support))
-        cursor.execute(insert_into_maintains, (property,support))
+        cursor.execute(hired_retrieve, [user])
+        hired_data = tuple(cursor.fetchall())
+        if (property, support,) in hired_data:
+            messages.warning(request, 'Cannot add property')
+        else:
+           cursor.execute(insert_into_hires, (user,support))
+           cursor.execute(insert_into_maintains, (property,support))
+           messages.success(request, 'Added successfully!')
 
     return redirect('support')
+
 
 def remove_support(request):
     info = sessionInfo()
@@ -736,19 +754,43 @@ def remove_support(request):
     info = sessionInfo()
     login_info = info[1]
     user = info[0]
-    
-    support = request.POST['support_id']
-    property = request.POST['property_id']
-    print(user,support)
 
-    remove_from_hires = "delete from website_hires where user_id=%s and support_id=%s"
-    remove_from_maintains = "delete from website_maintains where property_id_id=%s and support_id_id=%s"
 
-    with connection.cursor() as cursor:
-        cursor.execute(remove_from_hires, (user,support))
-        cursor.execute(remove_from_maintains, (property,support))
+    if request.method=='POST':
+        support = request.POST['support_id']
+        property = request.POST['property_id']
+        insert_pass = request.POST['confirm_password']
+        retrieve_pass='select password from website_user where user_id=%s'
+        hired_retrieve = "select property_id_id, support_id_id from website_hires where user_id_id=%s"
+        hired_data = None
+        
+        psw=''
+        remove_from_hires = "delete from website_hires where property_id_id=%s and support_id_id=%s"
+        remove_from_maintains = "delete from website_maintains where property_id_id=%s and support_id_id=%s"
+        
+        with connection.cursor() as cursor:
+            cursor.execute(retrieve_pass, [info[0]])
+            psw = tuple(cursor.fetchall())[0][0]
+            if insert_pass==psw:
+                cursor.execute(hired_retrieve, [user])
+                hired_data = tuple(cursor.fetchall())
+                if (property, support,) in hired_data:
+                    # cursor.execute(add_auction_to_user, [info[0]])
+                    cursor.execute(remove_from_hires, (property,support))
+                    cursor.execute(remove_from_maintains, (property,support))
+                    messages.success(request, 'Succesfully Removed Support')
+                else: 
+                    messages.warning(request, "Property Not Added")
+            else:
+                messages.warning(request,'Incorrect Password')
 
-    return redirect('support')
+
+        return redirect('dashboard')
+
+        
+
+
+
 
     
 def user_edit_profile(request):

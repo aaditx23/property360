@@ -112,6 +112,16 @@
             
             <td>
               {% if 'user' in user_id %}
+
+
+
+              {% comment %} <form action="/propertyId_submit" method="post">
+                {% csrf_token %}
+                
+                <button type="submit" class="btn btn-outline-success" name="agent_id" id="agent_id" value={{item.0}}   >Add</button>
+              </form> {% endcomment %}
+
+
                 {% if item.7 == "Not_Hired" %}
                 <form action="/propertyId_submit" method="post">
                   {% csrf_token %}
@@ -125,6 +135,9 @@
                   <button type="submit" class="btn btn-outline-danger" name="agent_id" id="agent_id" value={{item.0}}   >REMOVE</button>
                 </form>
                 {% endif %}
+
+
+
               {% elif 'adm' in user_id %}
               {% if item.6 == 0 %}
                 <form action="/make_supervisor" method="post">
