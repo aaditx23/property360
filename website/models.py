@@ -57,8 +57,9 @@ class Auction(models.Model):
     
 
 class Auction_Property(models.Model):
-    auction_id = models.ForeignKey(Auction, on_delete=models.CASCADE, to_field='auction_id', db_index=True)
-    property_id = models.ForeignKey(Property, on_delete = models.CASCADE, to_field = 'property_id', primary_key=True)
+    id = models.AutoField(default=0,primary_key=True)
+    auction_id = models.ForeignKey(Auction, on_delete=models.CASCADE, to_field='auction_id')
+    property_id = models.ForeignKey(Property, on_delete = models.CASCADE, to_field = 'property_id')
     owner_id = models.ForeignKey(User, on_delete=models.CASCADE, to_field='user_id')
     starting_price = models.FloatField(default = 1000)
     increment = models.DecimalField(max_digits=5, decimal_places=2, default=0.25)

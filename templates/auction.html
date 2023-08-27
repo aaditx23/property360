@@ -7,7 +7,7 @@
             {% if current_running != 0 %}
                 
                 {% if user_status == "not_joined" %}
-                    <h3>Auction {{current_running.0}} will start on {{current_running.3}} </h3>
+                    <h3>Auction {{current_running.0}} will start on {{current_running.4}} </h3>
                     <p class="d-inline-flex gap-1">
                         <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#joinAuctionForm" aria-expanded="false" aria-controls="collapseExample">
                         Join Auction
@@ -15,7 +15,7 @@
                     </p>
                 {% elif user_status == "joined"%}
                     {% if current_running.2 != 1 %}
-                    <h3>Auction {{current_running.0}} will start on {{current_running.3}} </h3>
+                    <h3>Auction {{current_running.0}} will start on {{current_running.4}} </h3>
                         <p class="d-inline-flex gap-1">
                             <h6>Congratulations! You have already joined this auction!</h6>
                             <h6>Please wait till the auction starts. Thank you.</h6>
@@ -40,6 +40,7 @@
                                 <div class="mb-3">
                                     <label for="confirm_password" class="form-label">Confirm Password: </label>
                                     <div class="col-sm-3">
+                                        <input type="hidden" name="auct_id" value = {{auct_id}}>
                                         <input type="password" class="form-control" id="confirm_password" name="confirm_password">
                                     </div>
                                 </div>
@@ -60,6 +61,7 @@
                                 <div class="mb-3">
                                     <label for="confirm_password" class="form-label">Confirm Password: </label>
                                     <div class="col-sm-3">
+                                        <input type="hidden" name="auct_id" value = {{auct_id}}>
                                         <input type="password" class="form-control" id="confirm_password" name="confirm_password">
                                     </div>
                                 </div>
@@ -234,9 +236,9 @@
                         <h5 class="card-text">Current Auction:</h5>
                         <p> ID: {{auct_id}}</p>
                         <p> Total Properties: {{prop_count}}</p>
-                        <p>Start Time: {{current_running.3}} </p>
+                        <p>Start Time: {{current_running.4}} </p>
                         <p>
-                            {% if current_date == current_running.3 %}
+                            {% if current_date == current_running.4 %}
                                 {% if current_running.2 == 0%}
                                     <form method="post" action="/start_auction">
                                         {% csrf_token %}
@@ -251,7 +253,7 @@
                                     </form>
                                 {% endif %}
                             {% else %}
-                            <h5>No actions to perform until {{current_running.3}} </h5>
+                            <h5>No actions to perform until {{current_running.4}} </h5>
                             {% endif %}
 
 
@@ -267,13 +269,14 @@
         <div class="container my-3">
             <h4>Auction History:</h4>
             {% for auct in all_auction %}
-            {% if auct.4 == 1 %}
+            {% if auct.3 == 1 %}
             <div class="row">
               <div class="col-md-4">
                 <div class="card mb-4 shadow-sm">
                   <div class="card-body">
                     <h5 class="card-text">{{auct.0}}</h5>
                     <p>Total Properties: {{auct.5}}</p>
+                    <p>Date: {{auct.4}}</p>
                   </div>
                 </div>
               </div>
