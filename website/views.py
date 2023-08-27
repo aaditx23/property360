@@ -246,7 +246,7 @@ def dashboard(request):
         elif 'user' in info[0]:
             user = info[0]
             get_user = 'select user_id, username, email, address,user_img from website_user where user_id=%s'
-            get_prop = 'select property_id,status,location,name,size,type,price,property_img,user_id_id,agent_id_id from website_property where user_id_id=%s'
+            get_prop = 'select property_id,status,location,name,size,type,price,property_img,user_id_id,agent_id_id from website_property where user_id_id=%s order by property_id '
             user_temp = ''
             user_prop = ''
             # starting work on activity
@@ -254,6 +254,9 @@ def dashboard(request):
             prop_status = ''
             get_property_and_agent = "select property_id, agent_id_id from website_property where user_id_id =%s and agent_id_id != 'agent_0000'"
             prop_agent = ''
+            get_auction_property_and_price = "select property_id_id, starting_price, selling_price from website_auction_property where owner_id_id = %s "
+            auction_prop_price = ''
+            
             with connection.cursor() as cursor:
                 cursor.execute(get_user, [user])
                 user_temp = tuple(cursor.fetchall())[0]
@@ -264,6 +267,9 @@ def dashboard(request):
                 prop_status = tuple(cursor.fetchall())
                 cursor.execute(get_property_and_agent,[user])
                 prop_agent = tuple(cursor.fetchall())
+                cursor.execute(get_auction_property_and_price,[user])
+                auction_prop_price = tuple(cursor.fetchall())
+
             user_data ={
                 'user_id':info[0],
                 'username':user_temp[1],
@@ -430,7 +436,7 @@ def property(request):
     info = sessionInfo()
     login_info = info[1]
     user = info[0]
-    property_retrieve =  " select property_id,status,location,name,size,type,price,property_img,user_id_id,agent_id_id from website_property where status = 'For Sale' "
+    property_retrieve =  " select property_id,status,location,name,size,type,price,property_img,user_id_id,agent_id_id from website_property where status = 'For Sale' order by property_id"
     # property_retrieve = "select property_id, name,agent_id_id, location, size, type, price, status from website_property where status = 'For Sale'"
     property_data =  None
     with connection.cursor() as cursor:
@@ -492,7 +498,8 @@ def support(request):
     login_info = info[1]
     user = info[0]
     print(user)
-    support_retrieve = "select name, type, phone, hiring_price, support_id from website_support s, website_employee e where e.employee_id = s.support_id"
+    # support_retrieve = "select name, type, phone, hiring_price, support_id from website_support s, website_employee e where e.employee_id = s.support_id"
+    support_retrieve = "select name, type, phone, hiring_price, support_id_id from website_support s, website_employee e where e.employee_id = s.support_id_id"
     support_data =  None
     hire_retrieve = "select support_id_id from website_hires where user_id_id=%s"
     hired = []
