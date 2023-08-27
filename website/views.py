@@ -333,7 +333,6 @@ def home(request):
     
 
 def agents(request):
-    
     info = sessionInfo()
     login_info=info[1]
    #EXCLUDED AGENT_0000
