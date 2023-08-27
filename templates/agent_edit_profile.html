@@ -21,9 +21,43 @@
       </div>
     
       <div class="mb-3">
-        <label for="password" class="form-label">Edit Password:</label>
-        <input type="text" class="form-control" id="password" name = "password" >
+        <label for="email" class="form-label">Edit Email:</label>
+        <input type="email" class="form-control" id="email" name = "email">
       </div>
+      
+                <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+                <script>
+                $(document).ready(function() {
+                    $('#confirm_password').on('input', function() {
+                        let newPassword = $('#new_password').val();
+                        let confirmPassword = $(this).val();
+                        
+                        if (newPassword !== confirmPassword) {
+                            $(this).addClass('border border-danger');
+                        } else {
+                            $(this).removeClass('border border-danger');
+                        }
+                    });
+                
+                    $('#current_password').on('input', function() {
+                        let currentPassword = $(this).val();
+                        
+                        if (!currentPassword) {
+                            $('#confirm_password').removeClass('border border-danger');
+                        }
+                    });
+                });
+                </script>
+
+
+      <div class="mb-3">
+        <label for="password" class="form-label">Edit Password:</label>
+        <input type="password" class="form-control" id="current_password" name = "current_password" placeholder="Current Password" >
+        <input type="password" class="form-control" id="new_password" name = "new_password" placeholder="New Password" >
+        <input type="password" class="form-control" id="confirm_password" name = "confirm_password" placeholder="Confirm new Password" >
+      </div>
+      
       <div class="mb-3">
         <label for="address" class="form-label">Edit Address:</label>
         <input type="text" class="form-control" id="address" name = "address" >

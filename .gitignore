@@ -3,3 +3,8 @@
 /property/__pycache__/*
 /media/*
 property/settings.py
+
+test.html
+website/models.py
+property/settings.py
+

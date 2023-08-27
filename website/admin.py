@@ -1,8 +1,8 @@
-from django.contrib import admin
+# from django.contrib import admin
 
-# Register your models here.
+# # Register your models here.
 
-# from .models import User, Employee, Agent, Property, Auction, Auction_Property, Admin, Buyer, Buys_From, Bids_In, Support, Maintains, Property_Features, Organizes, Agents_Clients, Hires, Seller, Dependent, Session
+# from .models import User, Employee, Agent, Property, Auction, Auction_Property, Admin, Buyer, Buys_From, Bids_In, Support, Maintains, Property_Features, Agents_Clients, Hires, Seller, Dependent, Session
 
 # admin.site.register(User)
 # admin.site.register(Employee)
@@ -17,7 +17,6 @@ from django.contrib import admin
 # admin.site.register(Support)
 # admin.site.register(Maintains)
 # admin.site.register(Property_Features)
-# admin.site.register(Organizes)
 # admin.site.register(Agents_Clients)
 # admin.site.register(Hires)
 # admin.site.register(Seller)
