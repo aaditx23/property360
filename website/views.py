@@ -2,7 +2,7 @@ from django.shortcuts import render,redirect
 from django.http import HttpResponse
 from django.http import JsonResponse
 from django.contrib import messages
-from datetime import datetime
+from datetime import datetime, timedelta
 # from website.models import User
 from django.db import connection
 # Create your views here.
@@ -375,7 +375,7 @@ def make_supervisor(request):
         if adm_pass==password:
 
             c.execute(make_sup,(1, agent))
-            messages.warning(request, f"Agent {agent} promoted to Supervisor")
+            messages.success(request, f"Agent {agent} promoted to Supervisor")
         else:
             messages.warning(request,'Plese Enter correct password')
 
@@ -406,7 +406,7 @@ def remove_supervisor(request):
     return redirect('agents')
 
 def set_supervisor(request):
-    nfo = sessionInfo()
+    info = sessionInfo()
     if request.method=="POST":
         supervisor_id = request.POST['supv_id']
         agent_id = request.POST['agent_id']
@@ -969,8 +969,12 @@ def auction(request):
         property_data = ''
         user_status = ''
         auction_running_status = ''
+        count_prop = ''
+        all_auction=''
+        property_count = "select count(*) from website_auction_property where auction_id_id=%s"
+
         find_user_status = 'select auction_status from website_user where user_id=%s'
-        find_auction = "select auction_id, auction_running from website_auction where auction_status='active'"
+        find_auction = "select * from website_auction where auction_status='active'"
         find_property = """ 
                         select p.property_id, p.location, p.name, p.size, p.type, ap.starting_price
                         from website_auction as a
@@ -983,9 +987,10 @@ def auction(request):
             with connection.cursor() as cursor:
                 cursor.execute(find_auction)
                 temp = tuple(cursor.fetchall())
+                print(temp,'----------')
                 if len(temp)>0:
-                    auction_id = temp[0]
-                    auction_running_status = temp[1]
+                    auction_id = temp[0][0]
+                    auction_running_status = temp[0][1]
                 else:
                     auction_id = 0
                     auction_running_status= 0
@@ -1003,30 +1008,47 @@ def auction(request):
                     }
             return render(request, 'auction.html', dic )
         elif 'adm' in info[0]:
-
+            find_all_auction = 'select * from website_auction'
+            current_running=''
             with connection.cursor() as cursor:
                 cursor.execute(find_auction)
                 temp = tuple(cursor.fetchall())
+                
                 print(temp)
                 if len(temp)>0:
                     auction_id = temp[0][0]
-                    auction_running_status = temp[0][1]
+                    auction_running_status = temp[0][2]
+                    current_running = temp[0]
                 else:
                     auction_id = 0
                     auction_running_status= 0
+                    current_running=0
+                cursor.execute(find_all_auction)
+                all_auction = tuple(cursor.fetchall())
+                if len(all_auction)<1:
+                    all_auction = 0
+                cursor.execute(property_count,[auction_id])
+                count_prop = tuple(cursor.fetchall())[0][0]
                 print(auction_running_status,'---------------------')
                 cursor.execute(find_property)
                 property_data = tuple(cursor.fetchall())
-
+                current_date = datetime.now().date()
+                current_date = current_date+timedelta(days=1)
             dic = {
                     'user_id':info[0], 
                     'auct_id':auction_id,
                     'data': property_data,
-                    'running_status': auction_running_status
-                }
+                    'running_status': auction_running_status,
+                    'prop_count': count_prop,
+                    'all_auction':all_auction,
+                    'current_running': current_running,
+                    'current_date': current_date
+            }
+            print(dic)
             return render(request, 'auction.html',dic)
     else:
-        return render(request, 'auction.html',{'user_id':info[0]})
+        # user na thakleo aucction_properties theke property data ene dekhaite hobe
+        return render(request, 'auction.html',)
 
 def join_auction(request):
     info = sessionInfo()
@@ -1093,13 +1115,15 @@ def auction_property_removal(request):
     if info[1]=="True":
         if request.method=='POST':
             property_list = ''
+            auct_id = request.POST['auc_id']
             find_property = 'select property_id_id from website_auction_property where owner_id_id=%s '
             with connection.cursor() as cursor:
                 cursor.execute(find_property,[info[0]])
                 property_list = tuple(cursor.fetchall())
             dic = {
                 'user_id':info[0],
-                'properties':property_list
+                'properties':property_list,
+                'auc_id':auct_id
                 }
             return render(request, 'remove_auction_property.html', dic )
     else:
@@ -1116,7 +1140,7 @@ def add_auction_property(request):
             insert_pass = request.POST['confirm_password']
             auction_id = request.POST['auct_id']
             retrieve_pass='select password from website_user where user_id=%s'
-            update_user = "update website_user set auction_status='joined'"
+            update_auction_property = "UPDATE website_auction SET total_properties = total_properties + 1 WHERE auction_id = %s"
             insert_property = 'insert into website_auction_property (auction_id_id, owner_id_id, property_id_id, starting_price,selling_price,number_of_bids,increment) values (%s, %s,%s,%s,%s, %s, %s)'
             check_password=''
             user=''
@@ -1125,6 +1149,7 @@ def add_auction_property(request):
                 check_password = tuple(cursor.fetchall())[0][0]
                 if insert_pass==check_password:
                     cursor.execute(insert_property, (auction_id, info[0], insert_prop, insert_starting_price,'0','0','0'))
+                    cursor.execute(update_auction_property, [ auction_id])
                     messages.success(request, 'Property Added to Auction')
     return redirect('auction')
 
@@ -1137,9 +1162,11 @@ def remove_auction_property(request):
         if request.method=='POST':
             delete_prop = request.POST['prop_id']
             insert_pass = request.POST['confirm_password']
+            auction_id = request.POST['auct_id']
             retrieve_pass='select password from website_user where user_id=%s'
             update_user = "update website_user set auction_status='joined'"
             delete_property = 'delete from website_auction_property where property_id_id = %s'
+            update_auction_property = "UPDATE website_auction SET total_properties = total_properties - 1 WHERE auction_id = %s"
             psw=''
             user=''
             with connection.cursor() as cursor:
@@ -1147,6 +1174,7 @@ def remove_auction_property(request):
                 psw = tuple(cursor.fetchall())[0][0]
                 if insert_pass==psw:
                     cursor.execute(delete_property, [delete_prop])
+                    cursor.execute(update_auction_property, [ auction_id])
                     messages.warning(request, 'Property Removed from Auction')
     return redirect('auction')
 
@@ -1154,7 +1182,7 @@ def create_auction(request):
     info = sessionInfo()
     fetch_auction = 'select auction_id from website_auction'
     get_password = 'select password from website_admin where admin_id = %s'
-    create_auction = 'insert into website_auction (auction_id, auction_status, auction_running, start_time) values (%s, %s, %s, %s)'
+    create_auction = 'insert into website_auction (auction_id, auction_status, auction_running, start_time,auction_ended,total_properties) values (%s, %s, %s, %s,%b,%b)'
     auct_id = ''
     auction_status = 'active'
     auction_running = False
@@ -1170,7 +1198,7 @@ def create_auction(request):
             temp = tuple(cursor.fetchall())
             entries = len(temp)
             auct_id = createAuct(entries+1)
-            cursor.execute(create_auction,(auct_id, auction_status, auction_running, time))
+            cursor.execute(create_auction,(auct_id, auction_status, auction_running, time,0,0))
             messages.success(request, "Auction created")
         else:
             messages.warning(request, "Password not correct")
@@ -1182,6 +1210,7 @@ def cancel_auction(request):
     info = sessionInfo()
     get_password = 'select password from website_admin where admin_id = %s'
     remove_auction = 'delete from website_auction where auction_id=%s'
+    remove_property = 'delete from website_auction_property where auction_id_id=%s'
     auct_id = request.POST['auc_id']
     psswd = request.POST['confirm_password']
     get_pass = ''
@@ -1189,6 +1218,7 @@ def cancel_auction(request):
         cursor.execute(get_password,[info[0]])
         get_pass = tuple(cursor.fetchall())[0][0]
         if get_pass==psswd:
+            cursor.execute(remove_property, [auct_id])
             cursor.execute(remove_auction, [auct_id])
             
             messages.success(request, "Auction Removed from database")
@@ -1196,6 +1226,23 @@ def cancel_auction(request):
             messages.warning(request, "Password not correct")
     return redirect('auction')
 
+def start_auction(request):
+    if request.method=="POST":
+        auct_id = request.POST['auc_id']
+        set_running = 'update website_auction set auction_running = 1 where auction_id = %s'
+        with connection.cursor() as c:
+            c.execute(set_running, [auct_id])
+            messages.success(request, f"Auction {auct_id} has started!")
+    return redirect('auction')
+
+def end_auction(request):
+    if request.method=="POST":
+        auct_id = request.POST['auc_id']
+        set_ended = "update website_auction set auction_running = 0, auction_status='inacive', auction_ended=1 where auction_id = %s"
+        with connection.cursor() as c:
+            c.execute(set_ended, [auct_id])
+            messages.success(request, f"Auction {auct_id} has Ended.")
+    return redirect('auction')
 
 def agent_img(request):
     info = sessionInfo()
