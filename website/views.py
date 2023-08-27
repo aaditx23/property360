@@ -1022,7 +1022,7 @@ def auction(request):
         property_count = "select count(*) from website_auction_property where auction_id_id=%s"
 
         find_user_status = 'select auction_status from website_user where user_id=%s'
-        find_auction = "select * from website_auction where auction_status='active'"
+        find_auction = "select auction_id, auction_status, auction_running, auction_ended, start_time, total_properties from website_auction where auction_status='active'"
         find_property = """ 
                         select p.property_id, p.location, p.name, p.size, p.type, ap.starting_price, ap.increment, ap.selling_price, ap.number_of_bids, ap.owner_id_id
                         from website_auction as a
@@ -1060,7 +1060,7 @@ def auction(request):
                 print(dic)
             return render(request, 'auction.html', dic )
         elif 'adm' in info[0]:
-            find_all_auction = 'select * from website_auction'
+            find_all_auction = 'select auction_id, auction_status, auction_running, auction_ended, start_time, total_properties from website_auction'
             
             with connection.cursor() as cursor:
                 cursor.execute(find_auction)
@@ -1101,7 +1101,7 @@ def auction(request):
     else:
         prop_list = 0
         current_auction = 0
-        find_auction = "select * from website_auction where auction_status='active'"
+        find_auction = "select auction_id, auction_status, auction_running, auction_ended, start_time, total_properties from website_auction where auction_status='active'"
         find_property = """ 
                         select p.property_id, p.location, p.name, p.size, p.type, ap.starting_price
                         from website_auction as a
