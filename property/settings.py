@@ -78,9 +78,9 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
         "NAME": "property360",
-        "USER": "root",
-        "PASSWORD": "",
-        "HOST": "localhost",
+        "USER": "django",
+        "PASSWORD": "django",
+        "HOST": "127.0.0.1",
         "PORT": "3306",
     }
 }
