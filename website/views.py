@@ -505,7 +505,7 @@ def support(request):
         cursor.execute(property_retrieve,[user])
         property_list = tuple(cursor.fetchall())
     if info[1]=="True":
-        return render(request, 'support.html', {'data': support_data, 'hired': hired, 'user_id':info[0]})
+        return render(request, 'support.html', {'data': support_data, 'user_id':info[0]})
         
     else:
         return render(request, 'support.html', {'data': support_data})
