@@ -14,7 +14,21 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
   </head>
-  <body>
+  <body style=
+  {% if request.path == '/agents' %}
+  "background-color: #f0f0f0;"
+  {% elif request.path == '/dashboard' %}
+  "background-color: #f0f0f0;"
+  {% elif request.path == '/property' %}
+  "background-color: #f0f0f0;"
+  {% elif request.path == '/auction' %}
+  "background-color: #f0f0f0;"
+  {% elif request.path == '/support' %}
+  "background-color: #f0f0f0;"
+  {% elif request.path == '' %}
+  "background-color: #f0f0f0;"
+  {% endif %}
+  >
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark ">
         <div class="container-fluid">
           <a class="navbar-brand" href="/">Property360</a>
@@ -26,9 +40,6 @@
               {% if 'user' in user_id %}
                 <li class="nav-item">
                   <a class="nav-link {% if request.path == '/user' or request.path == '/dashboard' or request.path == '/agent_dashboard' or request.path == '/user_edit_profile' or request.path == '/agent_edit_profile' %}active{% endif %}" href="/dashboard">Dashboard</a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link {% if request.path == '/home' %}active{% endif %}" href="/home">Home</a>
                 </li>
                 <li class="nav-item">
                   <a class="nav-link {% if request.path == '/agents' %}active{% endif %}" href="/agents">Agents</a>
@@ -58,9 +69,6 @@
               <li class="nav-item">
                 <a class="nav-link {% if request.path == '/user' or request.path == '/dashboard' or request.path == '/agent_dashboard' %}active{% endif %}" href="/dashboard">Dashboard</a>
               </li>
-              <li class="nav-item">
-                <a class="nav-link {% if request.path == '/home' %}active{% endif %}" href="/home">Home</a>
-              </li>
               
               <li class="nav-item">
                 <a class="nav-link {% if request.path == '/property' %}active{% endif %}" href="/property">Properties</a>
@@ -76,9 +84,6 @@
               {% elif 'adm' in user_id %}
               <li class="nav-item">
                 <a class="nav-link {% if request.path == '/user' or request.path == '/dashboard' or request.path == '/admin_dashboard' %}active{% endif %}" href="/dashboard">Dashboard</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link {% if request.path == '/home' %}active{% endif %}" href="/home">Home</a>
               </li>
               <li class="nav-item">
                 <a class="nav-link {% if request.path == '/agents' %}active{% endif %}" href="/agents">Agents</a>
@@ -105,9 +110,6 @@
 
               {% else %}
               
-              <li class="nav-item">
-                <a class="nav-link {% if request.path == '/home' %}active{% endif %}" href="/home">Home</a>
-              </li>
               <li class="nav-item">
                 <a class="nav-link {% if request.path == '/agents' %}active{% endif %}" href="/agents">Agents</a>
               </li>
