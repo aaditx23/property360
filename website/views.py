@@ -122,7 +122,7 @@ def user(request):
         }
         find_agent = "select employee_id from website_employee where employee_id like 'agent%'"
         find_user = "select user_id from website_user where user_id like 'user%'"
-        insert_user = 'insert into website_user (user_id, username, email, password, address,auction_status) values (%s, %s, %s, %s, %s,%s)'
+        insert_user = 'insert into website_user (user_id, username, email, password, address,auction_status,phone) values (%s, %s, %s, %s, %s,%s)'
         insert_emp = 'insert into website_employee (employee_id, name, phone, email, password, address,supervisor) values (%s, %s, %s, %s, %s, %s, %b) '
         with connection.cursor() as cursor:
             uid = ""
@@ -132,7 +132,7 @@ def user(request):
                 # print(user_list)
                 entries = len(user_list)
                 uid = createUser((entries+1))
-                cursor.execute(insert_user, (uid, name, email, psswd, addrss,'not_joined'))
+                cursor.execute(insert_user, (uid, name, email, psswd, addrss,'not_joined', phone))
             else:
                 cursor.execute(find_agent)
                 agent_list = tuple(cursor.fetchall())
@@ -284,6 +284,7 @@ def dashboard(request):
                 'prop':user_prop,
                 'prop_status': prop_status, 
                 'prop_agent' : prop_agent,
+                'auction_prop_price' : auction_prop_price
             }
             print(user_data)
             return render(request, 'user.html', user_data)
@@ -497,7 +498,7 @@ def support(request):
     print(user)
     property_retrieve = "select property_id from website_property where user_id_id=%s"
     property_list = None
-    support_retrieve = "select name, type, phone, hiring_price, support_id_id from website_support s, website_employee e where e.employee_id = s.support_id_id"
+    support_retrieve = "select name, type, phone, hiring_price, support_id from website_support s, website_employee e where e.employee_id = s.support_id"
     support_data =  None
     with connection.cursor() as cursor:
         cursor.execute(support_retrieve)
