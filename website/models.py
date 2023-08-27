@@ -142,10 +142,12 @@ class Agents_Clients(models.Model):
 class Hires(models.Model):
     id = models.AutoField(primary_key=True)
     user_id=models.ForeignKey(User, on_delete = models.CASCADE, to_field = 'user_id')
-    support_id=models.ForeignKey(Employee, on_delete = models.CASCADE, to_field = 'employee_id')
+    support_id=models.ForeignKey(Support, on_delete = models.CASCADE, to_field = 'support_id')
+    property_id=models.ForeignKey(Property, on_delete = models.CASCADE, to_field = 'property_id')
+
 
     class Meta:
-        unique_together=("support_id","user_id")
+        unique_together=("support_id","property_id")
 
 
 
