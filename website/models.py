@@ -34,7 +34,9 @@ class Property(models.Model):
     property_id = models.CharField(max_length = 20, primary_key = True)
 
     user_id = models.ForeignKey(User, on_delete = models.CASCADE, to_field = 'user_id')
-    agent_id = models.ForeignKey(Agent, on_delete = models.CASCADE, to_field = 'agent_id')
+    # agent_id = models.ForeignKey(Agent, on_delete = models.CASCADE, to_field = 'agent_id')
+    agent_id = models.ForeignKey(Employee, on_delete = models.CASCADE, to_field = 'employee_id')
+
 
     status = models.CharField(max_length = 20, default = 'Not For Sale')
     location = models.CharField(max_length = 50)
