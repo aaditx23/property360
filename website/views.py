@@ -62,6 +62,9 @@ def setLogin(user):
 
 def fetch_property(request):
     info = sessionInfo()
+    if '0000' in info[0]:
+        messages.warning(request,'Login To Continue')
+        return redirect('login')
     user = info[0]
     if 'user' in user:
         if request.method == "POST":
@@ -106,6 +109,7 @@ def user(request):
             psswd = password1
         else:
             messages.warning(request, "Please retype the password properly")
+            return redirect('login')
         if '@property360.agent.com' in email:
             usertype = "agent"
             print("USER AGENT")
@@ -141,6 +145,7 @@ def user(request):
         data.update({'user_id': sessionInfo()[0]})
         messages.success(request, 'Signup Successful')
         return render(request, 'user.html', data)
+    
     return render(request, 'user.html')
     # return render(request, 'user.html', {'user_id': info[0]})
 
@@ -274,9 +279,6 @@ def home(request):
     
 
 def agents(request):
-    
-    
-    
     info = sessionInfo()
     login_info=info[1]
    #EXCLUDED AGENT_0000
@@ -358,7 +360,6 @@ def remove_supervisor(request):
     return redirect('agents')
 
 def set_supervisor(request):
-    nfo = sessionInfo()
     if request.method=="POST":
         supervisor_id = request.POST['supv_id']
         agent_id = request.POST['agent_id']
@@ -402,7 +403,7 @@ def support(request):
     print(user)
     support_retrieve = "select name, type, phone, hiring_price, support_id from website_support s, website_employee e where e.employee_id = s.support_id"
     support_data =  None
-    hire_retrieve = "select support_id_id from website_hires where user_id_id=%s"
+    hire_retrieve = "select support_id from website_hires where user_id=%s"
     hired = []
     with connection.cursor() as cursor:
         cursor.execute(support_retrieve)
@@ -420,25 +421,7 @@ def support(request):
     else:
         return render(request, 'support.html', {'data': support_data})
     
-def hire_support(request):
-    
-    info = sessionInfo()
-    if '0000' in info[0]:
-        return redirect('login')
-    
-    login_info = info[1]
-    user = info[0]
 
-    support = request.POST['support_id']
-    property = request.POST['property_id']
-    print(user,support,property)
-    
-    insert_into_hires = "insert into website_hires (user_id_id, support_id_id) values (%s,%s)"
-    insert_into_maintains = "insert into website_maintains (property_id_id,support_id_id) values (%s,%s)"
-    with connection.cursor() as cursor:
-        cursor.execute(insert_into_hires, (user,support))
-
-    return redirect('support')
 
 def property_registration(request):
     info = sessionInfo()
@@ -481,6 +464,9 @@ def propertyId_submit(request):
     
 def hire_agent(request):
     info=sessionInfo()
+    if '0000' in info[0]:
+        messages.warning(request,'Login to continue')
+        return redirect('login')
     login_info=info[1]
     user=info[0]
     if request.method=='POST':
@@ -501,12 +487,17 @@ def hire_agent(request):
             if password==password1 and user==user_id:
                 cursor.execute(update_agent, (agent_id,property_id))
                 cursor.execute(insert_seller,(user,'0000',agent_id))
-                messages.success(request, "Agent_Id Updated")
+                messages.success(request, "Agent Hired Successfully")
+            else:
+                messages.warning(request, "Incorrect Password")
             
     return redirect('agents')
 
 def agent_remove(request):
-    info=sessionInfo()
+    info = sessionInfo()
+    if '0000' in info[0]:
+        messages.warning(request,'Login to continue')
+        return redirect('login')
     login_info=info[1]
     user=info[0]
     if request.method=='POST':
@@ -524,7 +515,9 @@ def agent_remove(request):
             if password==password1 :
                 cursor.execute(update_agent, [property_id])
                 cursor.execute(delete_seller,[agent_id])
-                messages.success(request, "Agent_Id Remove")
+                messages.success(request, "Agent Removed ")
+            else:
+                messages.warning(request,'Incorrect Password')
     return redirect('agents')
    
 
@@ -612,12 +605,14 @@ def property_list(request):
     # else:
     #     return render(request, 'user.html', {'data': property_data})
 
+
  
 
 def hire_support(request):
     
     info = sessionInfo()
     if '0000' in info[0]:
+        messages.warning(request, "Login to continue")
         return redirect('login')
     
     login_info = info[1]
@@ -632,12 +627,14 @@ def hire_support(request):
     with connection.cursor() as cursor:
         cursor.execute(insert_into_hires, (user,support))
         cursor.execute(insert_into_maintains, (property,support))
+        messages.success(request,"Suppoet Hired")
 
     return redirect('support')
 
 def remove_support(request):
     info = sessionInfo()
     if '0000' in info[0]:
+        messages.warning(request, "Login to continue")
         return redirect('login')
     
     info = sessionInfo()
@@ -654,6 +651,7 @@ def remove_support(request):
     with connection.cursor() as cursor:
         cursor.execute(remove_from_hires, (user,support))
         cursor.execute(remove_from_maintains, (property,support))
+        messages.warning(request, "Support Removed")
 
     return redirect('support')
 
@@ -900,6 +898,8 @@ def join_auction(request):
                 if insert_pass==psw:
                     cursor.execute(add_auction_to_user, [info[0]])
                     messages.success(request, 'Succesfully joined Auction')
+                else:
+                    messages.warning(request,'Incorrect Password')
     return redirect('auction')
 
 def leave_auction(request):
@@ -918,6 +918,8 @@ def leave_auction(request):
                 if insert_pass==psw:
                     cursor.execute(remove_auction_from_user, [info[0]])
                     messages.warning(request, 'Left Auction')
+                else:
+                    messages.warning(request,'Incorrect Password')
     return redirect('auction')
     
 def auction_property_submission(request):
@@ -963,6 +965,9 @@ def auction_property_removal(request):
 
 def add_auction_property(request):
     info = sessionInfo()
+    if '0000' in info[0]:
+        messages.warning(request,'Login to countinue')
+        return redirect('login')
     login_info = info[1]
     user = info[0]
     if info[1]=="True":
@@ -982,6 +987,8 @@ def add_auction_property(request):
                 if insert_pass==check_password:
                     cursor.execute(insert_property, (auction_id, info[0], insert_prop, insert_starting_price,'0','0','0'))
                     messages.success(request, 'Property Added to Auction')
+                else:
+                    messages.warning(request,' Incorrect Password ')
     return redirect('auction')
 
 
@@ -1004,6 +1011,8 @@ def remove_auction_property(request):
                 if insert_pass==psw:
                     cursor.execute(delete_property, [delete_prop])
                     messages.warning(request, 'Property Removed from Auction')
+                else:
+                    messages.warning(request,'Incorrect Password ')
     return redirect('auction')
 
 def create_auction(request):
