@@ -76,7 +76,7 @@ def fetch_property(request):
                 cursor.execute(update_status, [property_id])
                 messages.success (request, 'Property Added To Market')
             request.session['property_id'] = property_id
-        return redirect('property')
+        return redirect('dashboard')
 
 def setLogout():
     setlogout = "update website_session set user='user_0000', login = 'False' where login='True'"
@@ -252,7 +252,7 @@ def dashboard(request):
             # starting work on activity
             get_property_and_status = 'select property_id, status from website_property where user_id_id = %s'
             prop_status = ''
-            get_property_and_agent = "select property_id, agent_id_id from website_property where user_id_id =%s"
+            get_property_and_agent = "select property_id, agent_id_id from website_property where user_id_id =%s and agent_id_id != 'agent_0000'"
             prop_agent = ''
             with connection.cursor() as cursor:
                 cursor.execute(get_user, [user])
@@ -472,7 +472,7 @@ def buy_property(request):
 
 
             if password == confirm_password:
-                update_owner = "update website_property set user_id_id = %s, status = 'Not For Sale' where property_id = %s"
+                update_owner = "update website_property set user_id_id = %s, status = 'Not For Sale', agent_id_id = 'agent_0000' where property_id = %s"
                 with connection.cursor() as cursor:
                     cursor.execute(update_owner, (user,property_id))
                     messages.success(request, "Successfully Bought Property")      
@@ -595,7 +595,8 @@ def hire_agent(request):
                 cursor.execute(insert_seller,(user,'0000',agent_id))
                 messages.success(request, "Agent_Id Updated")
             
-    return redirect('agents')
+    # return redirect('agents')
+    return redirect('dashboard')
 
 def agent_remove(request):
     info=sessionInfo()
@@ -616,8 +617,9 @@ def agent_remove(request):
             if password==password1 :
                 cursor.execute(update_agent, [property_id])
                 cursor.execute(delete_seller,[agent_id])
-                messages.success(request, "Agent_Id Remove")
-    return redirect('agents')
+                messages.success(request, "Agent Removed")
+    # return redirect('agents')
+    return redirect('dashboard')
    
 
 
