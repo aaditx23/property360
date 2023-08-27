@@ -14,7 +14,10 @@
               >
               {% comment %} onerror="this.src='path of the default image'"> {% endcomment %}
               <h5 class="my-3">{{data.agentname}}</h5>
-              <p class="text-muted mb-1">Supervisor - {{data.supervisor_id}}</p>
+              <p class="text-muted mb-1">Supervisor - {% if data.supervisor_id ==  'agent_0000' %}Not Set 
+                {% else %}{{data.supervisor_id}}
+                {% endif %}
+              </p>
               <p class="text-muted mb-1">{{data.email}}</p>
               <p class="text-muted mb-1">{{data.phone}}</p>
               <p class="text-muted mb-4">{{data.address}}</p>
@@ -61,25 +64,25 @@
                     >
                     {% comment %} onerror="this.src='path of the default image'"> {% endcomment %}
                     <div class="px-5">
-                      <p class="small text-muted mb-1">[Size]</p>
+                      <p class="small text-muted mb-1">Size</p>
                       <p class="mb-0">{{p.4}}</p>
                     </div>
                     <div class="px-5">
-                      <p class="small text-muted mb-1">[type]</p>
+                      <p class="small text-muted mb-1">type</p>
                       <p class="mb-0">{{p.5}}</p>
                     </div>
                     <div class="px-5">
-                      <p class="small text-muted mb-1">[Price]</p>
+                      <p class="small text-muted mb-1">Price</p>
                       <p class="mb-0">{{p.6}}</p>
                     </div>
                     <div class="px-5">
-                      <p class="small text-muted mb-1">[Owner]</p>
+                      <p class="small text-muted mb-1">Owner</p>
                       <a href="">
                           <p class="mb-0">{{p.8}}</p>
                       </a>
                     </div>
                     <div class="px-5">
-                      <p class="small text-muted mb-1">[Status]</p>
+                      <p class="small text-muted mb-1">Status</p>
                       <p class="mb-0">{{p.1}}</p>
                     </div>
                   </div>
@@ -117,7 +120,7 @@
                       <div class="modal-dialog" role="document">
                         <div class="modal-content">
                           <div class="modal-header">
-                            <h5 class="modal-title" id="exampleModalLabel{{p.0}}">Enter Password {{p.0}}</h5>
+                            <h5 class="modal-title" id="exampleModalLabel{{p.0}}">Enter Password</h5>
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                               <span aria-hidden="true">&times;</span>
                             </button>

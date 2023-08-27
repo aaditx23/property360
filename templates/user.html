@@ -141,17 +141,19 @@
                                   <div class="modal-dialog" role="document">
                                     <div class="modal-content">
                                       <div class="modal-header">
-                                        <h5 class="modal-title" id="exampleModal{{pa.0}}Label">Confirm Password:</h5>
+                                        <h5 class="modal-title" id="exampleModalLabel">Confirm Password:</h5>
                                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                           <span aria-hidden="true">&times;</span>
                                         </button>
                                       </div>
                                       <div class="modal-body">
-                                        <form action="/remove_agent" method="post">
+                                        <form action="/agent_remove" method="POST">
                                           {% csrf_token %}
                                           <div class="form group">
                                             <input type="hidden" name = 'agent_id' value={{pa.1}}>
-                                            <input type="hidden" name = 'property_id' value={{pa.0}}>
+                                            <input type="hidden" name = 'prop_id' value={{pa.0}}>
+                                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                                            
                                             {% comment %} <input type="text" class="form-control" id="property_id" name="property_id" required> {% endcomment %}
                                           </div>
                                       </div>
@@ -286,7 +288,7 @@
                           <p class="mb-0">{{p.9}}</p>
                       </div>
                       <div class="px-5">
-                        <p class="small text-muted mb-1">[Status]</p>
+                        <p class="small text-muted mb-1">Status</p>
                         <p class="mb-0">{{p.1}}</p>
                       </div>
                     </div>
@@ -299,10 +301,10 @@
                             <button type="submit" class="btn btn-outline-primary me-1 flex-grow-1">Edit info</button>
                         </form>
                         
-                        <button type="button" class="btn btn-outline-danger me-1 flex-grow-1" data-toggle="modal" data-target="#exampleModal{{p.0}}" data-whatever="@mdo">Remove Property</button>
+                        <button type="button" class="btn btn-outline-danger me-1 flex-grow-1" data-toggle="modal" data-target="#{{p.0}}exampleModal" data-whatever="@mdo">Remove Property</button>
                         
                         
-                        <div class="modal fade" id="exampleModal{{p.0}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel{{p.0}}" aria-hidden="true">
+                        <div class="modal fade" id="{{p.0}}exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel{{p.0}}" aria-hidden="true">
                           <div class="modal-dialog" role="document">
                             <div class="modal-content">
                               <div class="modal-header">
@@ -312,18 +314,18 @@
                                 </button>
                               </div>
                               <div class="modal-body">
-                                <form action="/delete_property" method="post">
+                                <form action="/delete_property" method="POST">
                                   {% csrf_token %}
                                   <div class="form group">
                                     <input type="hidden" name = 'property_id' value={{p.0}}>
                                     <input type="password" class="form-control" id="password" name="password" required>
                                   </div>
+                                </div>
+                                <div class="modal-footer">
+                                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                  <button type="submit" class="btn btn-danger">Delete</button>
+                                </div>
                               </div>
-                              <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                                <button type="submit" class="btn btn-danger">Delete</button>
-                              </div>
-                            </div>
                             </div>
                           </div>
                         </div>

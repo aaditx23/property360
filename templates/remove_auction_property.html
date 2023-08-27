@@ -3,8 +3,8 @@
 {% block body %}
 
 <div class = 'container my-3'>
-  <h3>Add property to Auction:  {{auct_id}}</h3>
-  <form action = "/remove_auction_property" method ="post" enctype="multipart/form-data" >
+  <h3>Remove Property from Auction:  {{auc_id}}</h3>
+  <form action = "/remove_auction_property" method ="post" >
     {%csrf_token%}
         
     <div class="mb-3">
@@ -20,12 +20,13 @@
     <div class="mb-3">
       <label for="confirm_password" class="form-label">Confirm Password: </label>
       <div class="col-sm-3">
+        
           <input type="password" class="form-control" id="confirm_password" name="confirm_password">
       </div>
     </div>
       
     <div class="mb-3">
-      <button type="submit" class="btn btn-danger">Remove</button>   
+      <button type="submit" id = 'auct_id' name = 'auct_id' value={{auc_id}} class="btn btn-danger">Remove</button>
     </div>
   </form>
 </div>
