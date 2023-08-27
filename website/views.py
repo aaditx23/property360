@@ -251,7 +251,7 @@ def dashboard(request):
         elif 'user' in info[0]:
             user = info[0]
             get_user = 'select user_id, username, email, address,user_img from website_user where user_id=%s'
-            get_prop = 'select property_id,status,location,name,size,type,price,property_img,user_id_id,agent_id_id from website_property where user_id_id=%s'
+            get_prop = 'select property_id,status,location,name,size,type,price,property_img,user_id_id,agent_id_id from website_property where user_id_id=%s order by property_id '
             user_temp = ''
             user_prop = ''
             # starting work on activity
@@ -259,6 +259,9 @@ def dashboard(request):
             prop_status = ''
             get_property_and_agent = "select property_id, agent_id_id from website_property where user_id_id =%s and agent_id_id != 'agent_0000'"
             prop_agent = ''
+            get_auction_property_and_price = "select property_id_id, starting_price, selling_price from website_auction_property where owner_id_id = %s "
+            auction_prop_price = ''
+            
             with connection.cursor() as cursor:
                 cursor.execute(get_user, [user])
                 user_temp = tuple(cursor.fetchall())[0]
@@ -269,6 +272,9 @@ def dashboard(request):
                 prop_status = tuple(cursor.fetchall())
                 cursor.execute(get_property_and_agent,[user])
                 prop_agent = tuple(cursor.fetchall())
+                cursor.execute(get_auction_property_and_price,[user])
+                auction_prop_price = tuple(cursor.fetchall())
+
             user_data ={
                 'user_id':info[0],
                 'username':user_temp[1],
@@ -427,7 +433,7 @@ def property(request):
     info = sessionInfo()
     login_info = info[1]
     user = info[0]
-    property_retrieve =  " select property_id,status,location,name,size,type,price,property_img,user_id_id,agent_id_id from website_property where status = 'For Sale' "
+    property_retrieve =  " select property_id,status,location,name,size,type,price,property_img,user_id_id,agent_id_id from website_property where status = 'For Sale' order by property_id"
     # property_retrieve = "select property_id, name,agent_id_id, location, size, type, price, status from website_property where status = 'For Sale'"
     property_data =  None
     with connection.cursor() as cursor:
@@ -489,22 +495,17 @@ def support(request):
     login_info = info[1]
     user = info[0]
     print(user)
-    support_retrieve = "select name, type, phone, hiring_price, support_id from website_support s, website_employee e where e.employee_id = s.support_id"
+    property_retrieve = "select property_id from website_property where user_id_id=%s"
+    property_list = None
+    support_retrieve = "select name, type, phone, hiring_price, support_id_id from website_support s, website_employee e where e.employee_id = s.support_id_id"
     support_data =  None
-    hire_retrieve = "select support_id from website_hires where user_id=%s"
-    hired = []
     with connection.cursor() as cursor:
         cursor.execute(support_retrieve)
         support_data = tuple(cursor.fetchall())
-        cursor.execute(hire_retrieve,[user])
-        hire_data = tuple(cursor.fetchall())
-        for id in hire_data:
-            hired.append((id[0]))
-    hired = tuple(hired)
-    print(hire_data)
+        cursor.execute(property_retrieve,[user])
+        property_list = tuple(cursor.fetchall())
     if info[1]=="True":
-        print(support_data)
-        return render(request, 'support.html', {'data': support_data,'user_id':info[0]})
+        return render(request, 'support.html', {'data': support_data, 'user_id':info[0]})
         
     else:
         return render(request, 'support.html', {'data': support_data})
@@ -707,14 +708,16 @@ def hire_support(request):
 
     support = request.POST['support_id']
     property = request.POST['property_id']
-    # print(user,support,property)
-    
-    insert_into_hires = "insert into website_hires (user_id_id, support_id_id) values (%s,%s)"
+
+
+    print(user,support,property)
+    hired_retrieve = "select property_id_id, support_id_id from website_hires where user_id_id=%s"
+    hired_data = None
+    insert_into_hires = "insert into website_hires (property_id_id, user_id_id, support_id_id) values (%s,%s,%s)"
     insert_into_maintains = "insert into website_maintains (property_id_id,support_id_id) values (%s,%s)"
     with connection.cursor() as cursor:
         cursor.execute(insert_into_hires, (user,support))
         cursor.execute(insert_into_maintains, (property,support))
-        messages.success(request,"Suppoet Hired")
 
     return redirect('support')
 
@@ -727,18 +730,17 @@ def remove_support(request):
     info = sessionInfo()
     login_info = info[1]
     user = info[0]
-
+    
     support = request.POST['support_id']
     property = request.POST['property_id']
     print(user,support)
 
-    remove_from_hires = "delete from website_hires where user_id_id=%s and support_id_id=%s"
+    remove_from_hires = "delete from website_hires where user_id=%s and support_id=%s"
     remove_from_maintains = "delete from website_maintains where property_id_id=%s and support_id_id=%s"
 
     with connection.cursor() as cursor:
         cursor.execute(remove_from_hires, (user,support))
         cursor.execute(remove_from_maintains, (property,support))
-        messages.warning(request, "Support Removed")
 
     return redirect('support')
 

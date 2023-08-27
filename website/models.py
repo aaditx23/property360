@@ -7,7 +7,7 @@ class User(models.Model):
     password = models.CharField(max_length=50)
     address = models.CharField(max_length=50)
     user_img = models.CharField(max_length=50, null=True)
-    auction_status = models.CharField(max_length=15, null=True)
+    auction_status = models.CharField(default = 'not joined',max_length=15, null=True)
 
 
 class Employee(models.Model):
@@ -57,7 +57,7 @@ class Auction(models.Model):
     
 
 class Auction_Property(models.Model):
-    id = models.AutoField(default=0,primary_key=True)
+    id = models.AutoField(primary_key=True)
     auction_id = models.ForeignKey(Auction, on_delete=models.CASCADE, to_field='auction_id')
     property_id = models.ForeignKey(Property, on_delete = models.CASCADE, to_field = 'property_id')
     owner_id = models.ForeignKey(User, on_delete=models.CASCADE, to_field='user_id')
@@ -142,10 +142,12 @@ class Agents_Clients(models.Model):
 class Hires(models.Model):
     id = models.AutoField(primary_key=True)
     user_id=models.ForeignKey(User, on_delete = models.CASCADE, to_field = 'user_id')
-    support_id=models.ForeignKey(Employee, on_delete = models.CASCADE, to_field = 'employee_id')
+    support_id=models.ForeignKey(Support, on_delete = models.CASCADE, to_field = 'support_id')
+    property_id=models.ForeignKey(Property, on_delete = models.CASCADE, to_field = 'property_id')
+
 
     class Meta:
-        unique_together=("support_id","user_id")
+        unique_together=("support_id","property_id")
 
 
 

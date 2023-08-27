@@ -219,7 +219,40 @@
                   <div class="card card-body">
                     <div class = 'container my-3'>
                       <div class="mb-3">
-                        hello
+                        
+                        
+
+                        <table class="table">
+                          <thead>
+                            <tr align="center">
+                              <th scope="col">Offered Property</th>
+                              <th scope="col">Starting Price</th>
+                              <th scope="col">Current Price</th>
+                              
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {% for app in auction_prop_price %}
+                            
+                            <tr align="center">
+                              <td>{{app.0}}</td>
+                              <td>{{app.1}}</td>
+                              <td>{{app.2}}</td>
+
+                            </tr>
+                            {% endfor %}
+                            
+                          </tbody>
+                        </table> 
+                                             
+
+
+
+
+
+
+
+
                       </div>
                     </div>
                   </div>
