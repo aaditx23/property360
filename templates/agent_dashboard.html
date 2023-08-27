@@ -14,7 +14,10 @@
               >
               {% comment %} onerror="this.src='path of the default image'"> {% endcomment %}
               <h5 class="my-3">{{data.agentname}}</h5>
-              <p class="text-muted mb-1">Supervisor - {{data.supervisor_id}}</p>
+              <p class="text-muted mb-1">Supervisor - {% if data.supervisor_id ==  'agent_0000' %}Not Set 
+                {% else %}{{data.supervisor_id}}
+                {% endif %}
+              </p>
               <p class="text-muted mb-1">{{data.email}}</p>
               <p class="text-muted mb-1">{{data.phone}}</p>
               <p class="text-muted mb-4">{{data.address}}</p>

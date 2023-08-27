@@ -210,7 +210,7 @@ def dashboard(request):
             a_status = ''
             
             admin=info[0]
-            with connection .cursor() as cursor:
+            with connection.cursor() as cursor:
                 cursor.execute(get_admin,[admin])
                 admin_temp=tuple(cursor.fetchall())[0]
                 # cursor.execute(get_prop,[admin])
@@ -492,7 +492,7 @@ def support(request):
     login_info = info[1]
     user = info[0]
     print(user)
-    support_retrieve = "select name, type, phone, hiring_price, support_id_id from website_support s, website_employee e where e.employee_id = s.support_id_id"
+    support_retrieve = "select name, type, phone, hiring_price, support_id from website_support s, website_employee e where e.employee_id = s.support_id"
     support_data =  None
     hire_retrieve = "select support_id_id from website_hires where user_id_id=%s"
     hired = []
@@ -762,6 +762,7 @@ def user_edit_profile(request):
             
             retrieve_user_info = "select username, address, email, password,user_img from website_user where user_id = %s"
             user_data = None
+            image = ''
             with connection.cursor() as cursor:
                 cursor.execute(retrieve_user_info, [user])
                 user_data = tuple(cursor.fetchall())[0]
@@ -772,23 +773,44 @@ def user_edit_profile(request):
                 'password' : user_data[3],
                 'user_img': user_data[4]
             }
-            image  = request.FILES['user_image']
-            with open("media/" + image.name, 'wb') as f:
+            if 'user_image' in request.FILES:
+                image = request.FILES['user_image']
+                with open("media/" + image.name, 'wb') as f:
             
-                for chunk in image.chunks():
-                    f.write(chunk)
+                    for chunk in image.chunks():
+                        f.write(chunk)
+            else:
+                image = ()
+            password_changed = ''
+            
+            if 'current_password' in request.POST:
+                current_pass = request.POST['current_password']
+                if old_dict['password']==current_pass:
+                    if 'new_password' in request.POST and 'confirm_password' in request.POST:
+                        new_pass=request.POST['new_password']
+                        confirm_pass=request.POST['confirm_password']
+                        if new_pass==confirm_pass:
+                            password_changed=new_pass
+                        else:
+                            password_changed = 0
+                            messages.warning(request, 'Please retype new passwords properly')
+                            return redirect('user_edit_profile')
+                    
+
             
             new_dict = {
                 'username' : request.POST['username'],
                 'address' : request.POST['address'],
                 'email' : request.POST['email'],
-                'password' : request.POST['password'],
-                'user_img':image.name
+                'password' : password_changed,
+                'user_img':image.name if image!= () else image
             }
             dict={}
+            flag = False
             for keys in new_dict.keys():
                 if len(new_dict[keys]) != 0:
                     dict[keys] = new_dict[keys]
+                    flag=True
                 else:
                     dict[keys] = old_dict[keys]
             # print(dict,old_dict,new_dict)
@@ -797,7 +819,10 @@ def user_edit_profile(request):
             update_user = 'update website_user set username = %s, email= %s,address = %s,password =%s, user_img=%s where user_id = %s '
             with connection.cursor() as cursor:
                 cursor.execute(update_user, (dict['username'],dict['email'], dict['address'],dict['password'],dict['user_img'],user))
-                messages.success(request, "Profile Updated")
+                if flag:
+                    messages.success(request, "Profile Updated")
+                else:
+                    messages.info(request, 'Nothing to change in profile')
             return redirect('dashboard')
 
         return render(request, 'user_edit_profile.html', {'user_id': user})
@@ -818,24 +843,43 @@ def user_edit_profile(request):
                 'phone' : agent_data[4],
                 'agent_img': agent_data[5]
             }
-            image  = request.FILES['agent_image']
-            with open("media/" + image.name, 'wb') as f:
+            if 'agent_image' in request.FILES:
+                image = request.FILES['agent_image']
+                with open("media/" + image.name, 'wb') as f:
             
-                for chunk in image.chunks():
-                    f.write(chunk)
+                    for chunk in image.chunks():
+                        f.write(chunk)
+            else:
+                image = ()
+            password_changed = ''
+            
+            if 'current_password' in request.POST:
+                current_pass = request.POST['current_password']
+                if old_dict['password']==current_pass:
+                    if 'new_password' in request.POST and 'confirm_password' in request.POST:
+                        new_pass=request.POST['new_password']
+                        confirm_pass=request.POST['confirm_password']
+                        if new_pass==confirm_pass:
+                            password_changed=new_pass
+                        else:
+                            password_changed = 0
+                            messages.warning(request, 'Please retype new passwords properly')
+                            return redirect('user_edit_profile')
             
             new_dict = {
                 'agentname' : request.POST['agentname'],
                 'email' : request.POST['email'],
                 'address' : request.POST['address'],
-                'password' : request.POST['password'],
+                'password' : password_changed,
                 'phone' : request.POST['phone'],
-                'agent_img':image.name
+                'agent_img':image.name if image!= () else image
             }
+            flag = False
             dict={}
             for keys in new_dict.keys():
                 if len(new_dict[keys]) != 0:
                     dict[keys] = new_dict[keys]
+                    falg=True
                 else:
                     dict[keys] = old_dict[keys]
             # print(dict,old_dict,new_dict)
@@ -845,7 +889,10 @@ def user_edit_profile(request):
             update_agent = 'UPDATE website_employee AS emp JOIN website_agent AS agent ON emp.employee_id = agent.agent_id_id SET emp.name = %s, emp.email = %s, emp.address = %s, emp.password = %s, emp.phone = %s, agent.agent_img = %s WHERE emp.employee_id = %s'
             with connection.cursor() as cursor:
                 cursor.execute(update_agent, (dict['agentname'],dict['email'], dict['address'],dict['password'],dict['phone'],dict['agent_img'],user))
-                messages.success(request, "Profile Updated")
+                if flag:
+                    messages.success(request, "Profile Updated")
+                else:
+                    messages.info(request, 'Nothing to change in profile')
             return redirect('dashboard')
 
         return render(request, 'agent_edit_profile.html', {'user_id': user})
@@ -971,12 +1018,13 @@ def auction(request):
         auction_running_status = ''
         count_prop = ''
         all_auction=''
+        current_running=''
         property_count = "select count(*) from website_auction_property where auction_id_id=%s"
 
         find_user_status = 'select auction_status from website_user where user_id=%s'
         find_auction = "select * from website_auction where auction_status='active'"
         find_property = """ 
-                        select p.property_id, p.location, p.name, p.size, p.type, ap.starting_price
+                        select p.property_id, p.location, p.name, p.size, p.type, ap.starting_price, ap.increment, ap.selling_price, ap.number_of_bids, ap.owner_id_id
                         from website_auction as a
                         inner join website_auction_property as ap on a.auction_id = ap.auction_id_id
                         inner join website_property as p on ap.property_id_id = p.property_id
@@ -990,10 +1038,12 @@ def auction(request):
                 print(temp,'----------')
                 if len(temp)>0:
                     auction_id = temp[0][0]
-                    auction_running_status = temp[0][1]
+                    auction_running_status = temp[0][2]
+                    current_running = temp[0]
                 else:
                     auction_id = 0
                     auction_running_status= 0
+                    current_running=0
                 print(auction_running_status,'---------------------')
                 cursor.execute(find_property)
                 property_data = tuple(cursor.fetchall())
@@ -1004,12 +1054,14 @@ def auction(request):
                     'auct_id':auction_id,
                     'data': property_data,
                     'user_status' : user_status,
-                    'running_status': auction_running_status
+                    'running_status': auction_running_status,
+                    'current_running':current_running
                     }
+                print(dic)
             return render(request, 'auction.html', dic )
         elif 'adm' in info[0]:
             find_all_auction = 'select * from website_auction'
-            current_running=''
+            
             with connection.cursor() as cursor:
                 cursor.execute(find_auction)
                 temp = tuple(cursor.fetchall())
@@ -1033,7 +1085,7 @@ def auction(request):
                 cursor.execute(find_property)
                 property_data = tuple(cursor.fetchall())
                 current_date = datetime.now().date()
-                current_date = current_date+timedelta(days=1)
+                #current_date = current_date+timedelta(days=1)
             dic = {
                     'user_id':info[0], 
                     'auct_id':auction_id,
@@ -1044,11 +1096,37 @@ def auction(request):
                     'current_running': current_running,
                     'current_date': current_date
             }
-            print(dic)
+            print(dic,'admin-dic')
             return render(request, 'auction.html',dic)
     else:
-        # user na thakleo aucction_properties theke property data ene dekhaite hobe
-        return render(request, 'auction.html',)
+        prop_list = 0
+        current_auction = 0
+        find_auction = "select * from website_auction where auction_status='active'"
+        find_property = """ 
+                        select p.property_id, p.location, p.name, p.size, p.type, ap.starting_price
+                        from website_auction as a
+                        inner join website_auction_property as ap on a.auction_id = ap.auction_id_id
+                        inner join website_property as p on ap.property_id_id = p.property_id
+                        where a.auction_status = 'active' 
+                        """
+        with connection.cursor() as c:
+            c.execute(find_auction)
+            current_auction = tuple(c.fetchall())
+            if len(current_auction)==0: 
+                current_auction =  0
+            else:
+                current_auction = current_auction[0]
+            c.execute(find_property)
+            prop_list = tuple(c.fetchall())  
+            if len(prop_list)==0:
+                prop_list = 0
+            else:
+                prop_list = prop_list 
+            dic = {
+                'data':prop_list,
+                'current_auction':current_auction
+            }    
+        return render(request, 'auction.html', dic)
 
 def join_auction(request):
     info = sessionInfo()
@@ -1074,14 +1152,24 @@ def leave_auction(request):
     user = info[0]
     if info[1]=="True":
         if request.method=='POST':
+            auction_id = request.POST['auct_id']
+            print(auction_id)
             insert_pass = request.POST['confirm_password']
             retrieve_pass='select password from website_user where user_id=%s'
+            user_prop_count = "select count(*) from website_auction_property where owner_id_id = %s and auction_id_id=%s"
+            update_auction_prop_count = "update website_auction set total_properties = total_properties-%s"
             remove_auction_from_user = "update website_user set auction_status='not_joined' where user_id=%s"
+            remove_auction_property =  "delete from website_auction_property where owner_id_id = %s"
             psw=''
+            prop_count = ''
             with connection.cursor() as cursor:
                 cursor.execute(retrieve_pass, [info[0]])
                 psw = tuple(cursor.fetchall())[0][0]
                 if insert_pass==psw:
+                    cursor.execute(user_prop_count, (info[0], auction_id))
+                    prop_count = tuple(cursor.fetchall())[0][0]
+                    cursor.execute(update_auction_prop_count,[prop_count])
+                    cursor.execute(remove_auction_property, [info[0]])
                     cursor.execute(remove_auction_from_user, [info[0]])
                     messages.warning(request, 'Left Auction')
     return redirect('auction')
@@ -1094,9 +1182,9 @@ def auction_property_submission(request):
         if request.method=='POST':
             auct_id = request.POST['auc_id']
             property_list = ''
-            find_property = 'select property_id, name from website_property where user_id_id=%s and property_id not in (select property_id_id from website_auction_property)'
+            find_property = 'select property_id, name from website_property where user_id_id=%s and property_id not in (select property_id_id from website_auction_property where auction_id_id = %s)'
             with connection.cursor() as cursor:
-                cursor.execute(find_property,[info[0]])
+                cursor.execute(find_property,(info[0], auct_id))
                 property_list = tuple(cursor.fetchall())
             print(property_list)
             dic = {
@@ -1136,19 +1224,20 @@ def add_auction_property(request):
     if info[1]=="True":
         if request.method=='POST':
             insert_prop = request.POST['prop_id']
-            insert_starting_price = request.POST['starting_price']
+            insert_starting_price = float(request.POST['starting_price'])
+            print(type(insert_starting_price))
             insert_pass = request.POST['confirm_password']
             auction_id = request.POST['auct_id']
             retrieve_pass='select password from website_user where user_id=%s'
             update_auction_property = "UPDATE website_auction SET total_properties = total_properties + 1 WHERE auction_id = %s"
-            insert_property = 'insert into website_auction_property (auction_id_id, owner_id_id, property_id_id, starting_price,selling_price,number_of_bids,increment) values (%s, %s,%s,%s,%s, %s, %s)'
+            insert_property = 'insert into website_auction_property (auction_id_id, owner_id_id, property_id_id, starting_price,selling_price,number_of_bids,increment,bidder_id_id) values (%s, %s,%s,%s, %s, %s, %s,%s)'
             check_password=''
             user=''
             with connection.cursor() as cursor:
                 cursor.execute(retrieve_pass, [info[0]])
                 check_password = tuple(cursor.fetchall())[0][0]
                 if insert_pass==check_password:
-                    cursor.execute(insert_property, (auction_id, info[0], insert_prop, insert_starting_price,'0','0','0'))
+                    cursor.execute(insert_property, (auction_id, info[0], insert_prop, insert_starting_price,insert_starting_price,0,0.25,'user_0001'))
                     cursor.execute(update_auction_property, [ auction_id])
                     messages.success(request, 'Property Added to Auction')
     return redirect('auction')
@@ -1189,7 +1278,7 @@ def create_auction(request):
     time = request.POST['auction_time']
     psswd = request.POST['confirm_password']
     get_pass = ''
-    time = datetime.strptime(time, '%Y-%m-%d').date()
+    print(time,'time bro time')
     with connection.cursor() as cursor:
         cursor.execute(get_password,[info[0]])
         get_pass = tuple(cursor.fetchall())[0][0]
@@ -1239,9 +1328,36 @@ def end_auction(request):
     if request.method=="POST":
         auct_id = request.POST['auc_id']
         set_ended = "update website_auction set auction_running = 0, auction_status='inacive', auction_ended=1 where auction_id = %s"
+        set_ownership = 'update website_auction_property set owner_id_id = bidder_id_id where auction_id_id = %s'
+        set_property = '''
+            UPDATE website_property AS wp
+            JOIN website_auction_property AS wap ON wp.property_id = wap.property_id_id
+            SET 
+                wp.price = wap.selling_price,
+                wp.user_id_id = wap.owner_id_id,
+                wp.status = 'sold' 
+                WHERE wap.auction_id_id = %s
+         '''
+         #update user_id_id, price and status in website_property from website_auction_property
         with connection.cursor() as c:
             c.execute(set_ended, [auct_id])
+            c.execute(set_ownership, [auct_id])
+            c.execute(set_property, [auct_id])
             messages.success(request, f"Auction {auct_id} has Ended.")
+    return redirect('auction')
+
+def bid(request):
+    info = sessionInfo()
+    if request.method=="POST":
+        prop_id = request.POST['auction_prop']
+        set_bid  = '''update website_auction_property 
+                    set increment = increment+0.05, 
+                    selling_price = selling_price+selling_price*increment, 
+                    number_of_bids=number_of_bids+1,
+                    bidder_id_id = %s where property_id_id = %s'''
+        with connection.cursor() as c:
+            c.execute(set_bid,(info[0], prop_id))
+            messages.success(request, f"Bid to {prop_id} successful")
     return redirect('auction')
 
 def agent_img(request):
