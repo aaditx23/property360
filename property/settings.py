@@ -78,9 +78,9 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
         "NAME": "property360",
-        "USER": "root",
-        "PASSWORD": "",
-        "HOST": "localhost",
+        "USER": "django",
+        "PASSWORD": "django",
+        "HOST": "127.0.0.1",
         "PORT": "3306",
     }
 }
@@ -120,7 +120,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/assets/'
 STATICFILES_DIRS = [
  
     BASE_DIR / "static"

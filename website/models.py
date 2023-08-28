@@ -4,10 +4,11 @@ class User(models.Model):
     user_id = models.CharField(max_length=12, primary_key=True)
     username = models.CharField(max_length=50)
     email = models.CharField(max_length=50)
+    phone = models.CharField(max_length=15)
     password = models.CharField(max_length=50)
     address = models.CharField(max_length=50)
     user_img = models.CharField(max_length=50, null=True)
-    auction_status = models.CharField(default = 'not joined',max_length=15, null=True)
+    auction_status = models.CharField(default = 'not_joined',max_length=15)
 
 
 class Employee(models.Model):
@@ -41,14 +42,14 @@ class Property(models.Model):
     status = models.CharField(max_length = 20, default = 'Not For Sale')
     location = models.CharField(max_length = 50)
     name = models.CharField(max_length = 20)
-    size = models.CharField(max_length=10)
+    size = models.IntegerField()
     type = models.CharField(max_length =20)
-    price = models.CharField(max_length=15)
+    price = models.DecimalField(max_digits=8, decimal_places=2)
     property_img = models.CharField(max_length=50, null=True)
 
 class Auction(models.Model):
-    auction_id = models.CharField(max_length = 20, primary_key = True)
-    auction_status = models.CharField(max_length=50, default='inactive')
+    auction_id = models.CharField(max_length = 9, primary_key = True)
+    auction_status = models.CharField(max_length=8, default='inactive')
     auction_running = models.BooleanField(default=0)
     auction_ended = models.BooleanField(default=0)
     start_time = models.DateField(auto_now=False, auto_now_add=False)
@@ -77,17 +78,17 @@ class Admin(models.Model):
     password = models.CharField(max_length = 20)
     
 
-class Buyer(models.Model):
-    buyer_id = models.ForeignKey(User, on_delete=models.CASCADE, to_field='user_id', primary_key = True) 
+# class Buyer(models.Model):
+#     buyer_id = models.ForeignKey(User, on_delete=models.CASCADE, to_field='user_id', primary_key = True) 
 
-class Buys_From(models.Model):
-    buyer_id = models.ForeignKey(Buyer, on_delete = models.CASCADE, to_field = 'buyer_id')
-    agent_id = models.ForeignKey(Agent, on_delete = models.CASCADE, to_field = 'agent_id')
+# class Buys_From(models.Model):
+#     buyer_id = models.ForeignKey(Buyer, on_delete = models.CASCADE, to_field = 'buyer_id')
+#     agent_id = models.ForeignKey(Agent, on_delete = models.CASCADE, to_field = 'agent_id')
     
-    commission = models.DecimalField(max_digits = 10, decimal_places = 2)
+#     commission = models.DecimalField(max_digits = 10, decimal_places = 2)
 
-    class Meta:
-        unique_together = ('buyer_id', 'agent_id')
+#     class Meta:
+#         unique_together = ('buyer_id', 'agent_id')
         
 
 # class Bids_In(models.Model):
@@ -101,11 +102,12 @@ class Buys_From(models.Model):
 #         unique_together = ('buyer_id', 'auction_id')
 
 class Support(models.Model):
-    support_id= models.ForeignKey(Employee, on_delete = models.CASCADE, to_field = 'employee_id',default='support_01',primary_key=True)
+    support_id= models.ForeignKey(Employee, on_delete = models.CASCADE, to_field = 'employee_id',primary_key=True)
     type=models.CharField(max_length=20)
     hiring_price=models.CharField(max_length=10, default = 1000)
 
 class Maintains(models.Model):
+    id = models.AutoField(primary_key=True)
     property_id = models.ForeignKey(Property, on_delete = models.CASCADE, to_field = 'property_id')
     support_id = models.ForeignKey(Support, on_delete = models.CASCADE, to_field = 'support_id')
     
@@ -113,12 +115,12 @@ class Maintains(models.Model):
         unique_together = ('property_id', 'support_id')
         
 
-class Property_Features(models.Model):
-    property_id = models.ForeignKey(Property, on_delete = models.CASCADE, to_field = 'property_id')
-    features=models.CharField(max_length=20)
+# class Property_Features(models.Model):
+#     property_id = models.ForeignKey(Property, on_delete = models.CASCADE, to_field = 'property_id')
+#     features=models.CharField(max_length=20)
    
-    class Meta:
-        unique_together= ("property_id","features")
+#     class Meta:
+#         unique_together= ("property_id","features")
 
 
 # class Organizes(models.Model):
@@ -129,14 +131,14 @@ class Property_Features(models.Model):
 #         unique_together=("admin_id","auction_id")
 
 
-class Agents_Clients(models.Model):
+# class Agents_Clients(models.Model):
     
 
-    agent_id = models.ForeignKey(Agent, on_delete = models.CASCADE, to_field = 'agent_id')
-    client=models.CharField(max_length=20)
+#     agent_id = models.ForeignKey(Agent, on_delete = models.CASCADE, to_field = 'agent_id')
+#     client=models.CharField(max_length=20)
 
-    class Meta:
-        unique_together=("agent_id","client")
+#     class Meta:
+#         unique_together=("agent_id","client")
 
 
 class Hires(models.Model):
@@ -152,8 +154,9 @@ class Hires(models.Model):
 
 
 class Seller(models.Model):
-    seller_id = models.ForeignKey(User, on_delete=models.CASCADE, to_field='user_id', null=True) 
-    agent_id = models.ForeignKey(Agent, on_delete=models.CASCADE, to_field='agent_id', null=True) 
+    id = models.AutoField(primary_key=True)
+    seller_id = models.ForeignKey(User, on_delete=models.CASCADE, to_field='user_id') 
+    agent_id = models.ForeignKey(Agent, on_delete=models.CASCADE, to_field='agent_id') 
 
     hiring_price = models.CharField(max_length=50)
 

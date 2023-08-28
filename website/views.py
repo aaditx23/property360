@@ -92,7 +92,7 @@ def login(request):
 
 def logout(request):
     setLogout()
-    return render(request, 'home.html')
+    return redirect('/')
 
 
 def user(request):
@@ -122,7 +122,7 @@ def user(request):
         }
         find_agent = "select employee_id from website_employee where employee_id like 'agent%'"
         find_user = "select user_id from website_user where user_id like 'user%'"
-        insert_user = 'insert into website_user (user_id, username, email, password, address) values (%s, %s, %s, %s, %s)'
+        insert_user = 'insert into website_user (user_id, username, email, password, address,auction_status,phone) values (%s, %s, %s, %s, %s,%s)'
         insert_emp = 'insert into website_employee (employee_id, name, phone, email, password, address,supervisor) values (%s, %s, %s, %s, %s, %s, %b) '
         with connection.cursor() as cursor:
             uid = ""
@@ -132,7 +132,7 @@ def user(request):
                 # print(user_list)
                 entries = len(user_list)
                 uid = createUser((entries+1))
-                cursor.execute(insert_user, (uid, name, email, psswd, addrss))
+                cursor.execute(insert_user, (uid, name, email, psswd, addrss,'not_joined', phone))
             else:
                 cursor.execute(find_agent)
                 agent_list = tuple(cursor.fetchall())
@@ -305,7 +305,7 @@ def dashboard(request):
 
 
 
-def home(request):
+def login_user(request):
     user = None
     password = None
     if request.method=="POST":
@@ -333,19 +333,13 @@ def home(request):
             setLogin(user)
             info = sessionInfo()
             arg = {'user_id':info[0], 'user_name': name_data}
-            return render(request, 'home.html', arg)
-    else:
-        info = sessionInfo()
-        # print(info)
-        if info[1]=="True":
-            return render(request, 'home.html', {'user_id':info[0]})
-        return render(request, 'home.html')
+    return redirect('dashboard')
+        
     
 
     
 
 def agents(request):
-    
     info = sessionInfo()
     login_info=info[1]
    #EXCLUDED AGENT_0000
