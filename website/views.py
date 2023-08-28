@@ -223,9 +223,9 @@ def dashboard(request):
                 cursor.execute(total_employee)
                 t_emp = tuple(cursor.fetchall())[0]
                 cursor.execute(total_property)
-                t_user = tuple(cursor.fetchall())[0]
-                cursor.execute(total_user)
                 t_property = tuple(cursor.fetchall())[0]
+                cursor.execute(total_user)
+                t_user = tuple(cursor.fetchall())[0]
                 
 
                 cursor.execute(auction_status)
@@ -343,7 +343,7 @@ def agents(request):
     info = sessionInfo()
     login_info=info[1]
    #EXCLUDED AGENT_0000
-    agent_retrieve="select agent_id_id, supervisor_id ,name, email ,phone, address, supervisor from website_agent,website_employee where agent_id_id =employee_id and agent_id_id like 'agent%' and agent_id_id <> 'agent_0000'"
+    agent_retrieve="select agent_id_id, supervisor_id ,name, email ,phone, address, supervisor from website_agent,website_employee where agent_id_id =employee_id and agent_id_id like 'agent%' and agent_id_id <> 'agent_0000' order by agent_id_id"
     agent_data=None
     seller_retrieve = 'select agent_id_id from  website_seller where seller_id_id=%s'
     supervisor_data="select employee_id from website_employee where employee_id like 'agent%' and employee_id <> 'agent_0000' and supervisor=1"
