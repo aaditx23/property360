@@ -164,11 +164,11 @@ class Seller(models.Model):
         unique_together = ('seller_id','agent_id')
 
 
-class Dependent(models.Model):
-    agent_id = models.ForeignKey(Agent, on_delete=models.CASCADE, to_field='agent_id', primary_key = True) 
+# class Dependent(models.Model):
+#     agent_id = models.ForeignKey(Agent, on_delete=models.CASCADE, to_field='agent_id', primary_key = True) 
     
-    name = models.CharField(max_length=50)
-    relation = models.CharField(max_length=50)
+#     name = models.CharField(max_length=50)
+#     relation = models.CharField(max_length=50)
 
 class Session(models.Model):
     user = models.CharField(max_length = 12, primary_key=True)
