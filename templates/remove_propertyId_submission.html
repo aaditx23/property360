@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block body %}
+remove
+
+<div class = 'container my-3'>
+
+    <form action = "/agent_remove" method ="post" enctype="multipart/form-data" >
+      {%csrf_token%}
+
+      <div class="mb-3">
+        <label for='hired_agent' class="form-label"><b>Select Property ID</b></label>
+        <select class="form-select" aria-label="Property" id = 'prop_id' name='prop_id'  required>
+          {% for property in properties %}
+          <option value={{property.0}} > ID: {{property.0}}  </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="mb-3">
+          <label for="confirm_password" class="form-label"><b>Confirm Password: </b></label>
+          <div class="col-sm-3">
+              <input type="password" class="form-control" id="confirm_password" name="confirm_password">
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <button type="submit" class="btn btn-primary" name="agent_id" id="agent_id" value={{agent_id}}  >Submit</button>
+
+        </div>
+
+    </form>
+  </div>
+{% endblock  %}

@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+<div class = 'container my-3'>
+
+    <form action = "/property_edit_info" method ="post" enctype="multipart/form-data" >
+      {%csrf_token%}
+      
+      <div class="mb-3">
+          <label for="p_name" class="form-label">Edit Property Name:</label>
+          <input type="text" class="form-control" id="p_name" name="p_name" >
+        </div>
+        
+        
+        <div class="mb-3">
+            <label for="location" class="form-label">Edit Location:</label>
+            <input type="location" class="form-control" id="location" name = "location">
+        </div>
+        
+        <div class="mb-3">
+            <label for="size" class="form-label">Edit Size:</label>
+            <input type="text" class="form-control" id="size" name = "size" >
+        </div>
+        
+        <div class="mb-3">
+            <label for="type" class="form-label">Edit Type:</label>
+            <input type="text" class="form-control" id="type" name= "type" >
+        </div>
+        
+        <div class="mb-3">
+            <label for="price" class="form-label">Edit Price:</label>
+        <input type="text" class="form-control" id="price" name= "price" >
+      </div>
+      
+      <input type="hidden" name = "property_id" value = {{request.session.property_id}}>
+      
+      <div class="mb-3">
+          <label for="property_image" class="form-label">Edit Property Picture:</label>
+          <div class="col-sm-3">
+            <input type="hidden" name="if_file" id='if_file' value=1>
+              <input type="file" class="form-control" id="property_image" accept=".jpg,.png,.jpeg" name="property_image">
+            </div>
+        </div>
+      
+        <div class="mb-3">
+            <button type="submit" class="btn btn-primary">Save</button>
+            
+        </div>
+      
+    </form>
+  </div>
+
+
+{% endblock  %}
