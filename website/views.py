@@ -9,13 +9,53 @@ from django.db import connection
 
 def createUser(n):
     if len(str(n))<4:
-        return ("user_"+("0"*(4-len(str(n)))) + str(n))
+        # return ("user_"+("0"*(4-len(str(n)))) + str(n))
+        s = ("user_"+("0"*(4-len(str(n)))) + str(n))
+        
+        existing_user = 'select user_id from website_user order by user_id asc'
+        user_tuple = ''
+        with connection.cursor() as cursor:
+            cursor.execute(existing_user)
+            user_tuple = list(cursor.fetchall())
+        # print('-------/////////////////--------------',user_tuple,s)
+        if (s,) in user_tuple:
+            s = createUser(n+1)
+
+
+
+        return s
+
+
+
+
+
     else:
         return "user_"+str(n)
 
 def createAgent(n):
     if len(str(n))<4:
-        return ("agent_"+("0"*(4-len(str(n)))) + str(n))
+        # return ("agent_"+("0"*(4-len(str(n)))) + str(n))
+        s = ("agent_"+("0"*(4-len(str(n)))) + str(n))
+        
+        existing_agent = 'select agent_id from website_agent order by agent_id asc'
+        agent_tuple = ''
+        with connection.cursor() as cursor:
+            cursor.execute(existing_agent)
+            agent_tuple = list(cursor.fetchall())
+        # print('-------/////////////////--------------',agent_tuple,s)
+        if (s,) in agent_tuple:
+            s = createAgent(n+1)
+
+
+
+        return s
+
+
+
+
+
+
+
     else:
         return "agent_"+str(n)
 
@@ -41,9 +81,34 @@ def createProp(n):
     else:
         return "prop_"+str(n)
 
-def createAuct(n):
+def createAuct1(n):
     if len(str(n))<4:
         return ("auct_"+("0"*(4-len(str(n)))) + str(n))
+    else:
+        return "auct_"+str(n)  
+
+
+
+
+
+def createAuct(n):
+    s = ''
+    # print("/////////////////////createprop///////////////////")
+    if len(str(n))<4:
+        s = ("auct_"+("0"*(4-len(str(n)))) + str(n))
+        
+        existing_auct = 'select auction_id from website_auction order by auction_id asc'
+        auct_tuple = ''
+        with connection.cursor() as cursor:
+            cursor.execute(existing_auct)
+            auct_tuple = list(cursor.fetchall())
+        # print('-------/////////////////--------------',auct_tuple,s)
+        if (s,) in auct_tuple:
+            s = createAuct(n+1)
+
+
+
+        return s
     else:
         return "auct_"+str(n)  
 
@@ -104,6 +169,7 @@ def user(request):
         password1 = request.POST['pswd1']
         password2 = request.POST['pswd2']
         phone = request.POST['phone']
+        print(phone)
         psswd = None
         if password1==password2:
             psswd = password1
@@ -122,7 +188,7 @@ def user(request):
         }
         find_agent = "select employee_id from website_employee where employee_id like 'agent%'"
         find_user = "select user_id from website_user where user_id like 'user%'"
-        insert_user = 'insert into website_user (user_id, username, email, password, address,auction_status,phone) values (%s, %s, %s, %s, %s,%s)'
+        insert_user = 'insert into website_user (user_id, username, email, password, address,auction_status,phone) values (%s, %s, %s, %s, %s,%s,%s)'
         insert_emp = 'insert into website_employee (employee_id, name, phone, email, password, address,supervisor) values (%s, %s, %s, %s, %s, %s, %b) '
         with connection.cursor() as cursor:
             uid = ""
@@ -732,7 +798,7 @@ def hire_support(request):
         if (property, support,) in hired_data:
             messages.warning(request, 'Cannot add property')
         else:
-           cursor.execute(insert_into_hires, (user,support))
+           cursor.execute(insert_into_hires, (property,user,support))
            cursor.execute(insert_into_maintains, (property,support))
            messages.success(request, 'Added successfully!')
 
@@ -1462,23 +1528,29 @@ def delete_property(request):
     user = info[0]
 
     if request.method == "POST":
+        property_id = request.POST['property_id']
         password = request.POST['password']
         retrieve_password = 'select password from website_user where user_id = %s'
         confirm_password = ''
+        retrieve_hired = 'select property_id_id, support_id_id from website_hires where user_id_id = %s and property_id_id =%s'
+        check_hired = ''
         with connection.cursor() as cursor:
             cursor.execute(retrieve_password,[user])
             confirm_password = tuple(cursor)[0][0]
+            cursor.execute(retrieve_hired,(user,property_id))
+            check_hired = tuple(cursor.fetchall())
 
         print("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",confirm_password, password)
-
+        print(check_hired, len(check_hired))
         if password == confirm_password:
 
-            property_id = request.POST['property_id']
             delete_property = 'delete from website_property where property_id = %s'
             with connection.cursor() as cursor:
-                cursor.execute(delete_property,[property_id])
-                messages.success(request, 'Property Removed Successfully')
-        
+                if len(check_hired) == 0:
+                    cursor.execute(delete_property,[property_id])
+                    messages.success(request, 'Property Removed Successfully')
+                else:
+                    messages.warning(request, 'Remove Support Before Deleting')
         else:
             messages.error(request, 'Incorrect Password')
 
