@@ -19,7 +19,7 @@
               {% comment %} <p class="text-muted mb-1">{{data.phone}}</p> {% endcomment %}
               {% comment %} <p class="text-muted mb-4">{{data.address}}</p> {% endcomment %}
               <div class="d-flex justify-content-center mb-2">
-                  <form action="/admin_edit_profile" method= 'POST'>
+                  <form action="/admin_edit_profile">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-outline-primary me-1 flex-grow-1">edit profile</button>
                   </form>
