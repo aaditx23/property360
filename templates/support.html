@@ -87,7 +87,10 @@
                       <form action="/remove_support" method="post">
                         {% csrf_token %}
                         <div class="form group">
+                          <label> Confirm password: </label>
                           <input type="hidden" name = 'support_id' value={{item.4}}>
+                          <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+
                           <select name="property_id" class="form-control" id="property_id" required>
                             <option disabled selected>Click to select property</option>
                             {% for prop in property_list %}
