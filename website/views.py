@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.http import JsonResponse
 from django.contrib import messages
@@ -1486,11 +1487,11 @@ def delete_property(request):
         with connection.cursor() as cursor:
             cursor.execute(retrieve_password, [user])
             confirm_password = tuple(cursor)[0][0]
-            cursor.execute(retrieve_hired, (user, property_id))
+            cursor.execute(retrieve_hired,(user,property_id))
             check_hired = tuple(cursor.fetchall())
+            
 
-        print("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-              confirm_password, password)
+        print("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",confirm_password, password)
         print(check_hired, len(check_hired))
         if password == confirm_password:
 
